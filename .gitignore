@@ -1,0 +1,14 @@
+# Backend build
+backend/api.exe
+backend/api
+backend/*.exe
+
+# Go
+*.test
+*.out
+
+# IDE / OS
+.vscode/
+.idea/
+*.tmp
+~$*
