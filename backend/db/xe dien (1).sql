@@ -73,10 +73,10 @@ CREATE TABLE "bookings" (
   "user_id" int,
   "vehicle_id" int,
   "rental_plan_id" int,
-  "start_time" datetime,
-  "end_time" datetime,
-  "actual_start_time" datetime,
-  "actual_end_time" datetime,
+  "start_time" timestamptz,
+  "end_time" timestamptz,
+  "actual_start_time" timestamptz,
+  "actual_end_time" timestamptz,
   "planned_km" int,
   "actual_km" int,
   "deposit_amount" decimal,
@@ -84,7 +84,7 @@ CREATE TABLE "bookings" (
   "over_km_fee" decimal,
   "total_price" decimal,
   "status" varchar,
-  "created_at" datetime
+  "created_at" timestamptz
 );
 
 CREATE TABLE "payments" (
@@ -93,7 +93,7 @@ CREATE TABLE "payments" (
   "amount" decimal,
   "payment_method" varchar,
   "payment_status" varchar,
-  "paid_at" datetime
+  "paid_at" timestamptz
 );
 
 CREATE TABLE "reviews" (
@@ -103,7 +103,7 @@ CREATE TABLE "reviews" (
   "booking_id" int UNIQUE,
   "rating" int,
   "comment" text,
-  "created_at" timestamp
+  "created_at" timestamptz
 );
 
 CREATE TABLE "vehicle_features" (
