@@ -33,3 +33,19 @@ type CreateBookingRequest struct {
 	DepositAmount float64 `json:"deposit_amount"`
 	TotalPrice    float64 `json:"total_price"`
 }
+
+// UpdateBookingRequest is the request payload to update a booking.
+type UpdateBookingRequest struct {
+	UserID        int     `json:"user_id"`
+	VehicleID     int     `json:"vehicle_id"`
+	RentalPlanID  int     `json:"rental_plan_id"`
+	StartTime     string  `json:"start_time"` // ISO8601 (RFC3339)
+	EndTime       string  `json:"end_time"`   // ISO8601 (RFC3339)
+	PlannedKM     int     `json:"planned_km"`
+	ActualKM      int     `json:"actual_km"`
+	DepositAmount float64 `json:"deposit_amount"`
+	OvertimeFee   float64 `json:"overtime_fee"`
+	OverKMFee     float64 `json:"over_km_fee"`
+	TotalPrice    float64 `json:"total_price"`
+	Status        string  `json:"status"`
+}

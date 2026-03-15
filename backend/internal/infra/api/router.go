@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"greencar/internal/infra/api/handlers"
+	"greencar/internal/infra/api/routes"
 	"greencar/internal/service"
 	"greencar/pkg/logger"
 
@@ -17,16 +18,15 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 	r.Get("/health", handlers.HealthHandler())
 
 	r.Route("/users", func(r chi.Router) {
-		r.Get("/{id}", handlers.GetUserHandler(userSvc, log))
+		routes.RegisterUserRoutes(r, userSvc, log)
 	})
 
 	r.Route("/vehicles", func(r chi.Router) {
-		r.Get("/{id}", handlers.GetVehicleHandler(vehicleSvc, log))
+		routes.RegisterVehicleRoutes(r, vehicleSvc, log)
 	})
 
 	r.Route("/bookings", func(r chi.Router) {
-		r.Get("/{id}", handlers.GetBookingHandler(bookingSvc, log))
-		r.Post("/", handlers.CreateBookingHandler(bookingSvc, log))
+		routes.RegisterBookingRoutes(r, bookingSvc, log)
 	})
 
 	return r

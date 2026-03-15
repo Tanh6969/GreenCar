@@ -81,3 +81,35 @@ func ToBookingCreateParams(req *dto.CreateBookingRequest) (entities.Booking, err
 		TotalPrice:    req.TotalPrice,
 	}, nil
 }
+
+func ToBookingUpdateParams(id int, req *dto.UpdateBookingRequest) (entities.Booking, error) {
+	if req == nil {
+		return entities.Booking{BookingID: id}, nil
+	}
+
+	startTime, err := time.Parse(time.RFC3339, req.StartTime)
+	if err != nil {
+		return entities.Booking{}, err
+	}
+
+	endTime, err := time.Parse(time.RFC3339, req.EndTime)
+	if err != nil {
+		return entities.Booking{}, err
+	}
+
+	return entities.Booking{
+		BookingID:     id,
+		UserID:        req.UserID,
+		VehicleID:     req.VehicleID,
+		RentalPlanID:  req.RentalPlanID,
+		StartTime:     &startTime,
+		EndTime:       &endTime,
+		PlannedKM:     req.PlannedKM,
+		ActualKM:      req.ActualKM,
+		DepositAmount: req.DepositAmount,
+		OvertimeFee:   req.OvertimeFee,
+		OverKMFee:     req.OverKMFee,
+		TotalPrice:    req.TotalPrice,
+		Status:        req.Status,
+	}, nil
+}
