@@ -21,7 +21,7 @@ func NewVehicleImageRepository(db *database.DB) VehicleImageRepository {
 }
 
 func (r *vehicleImageRepository) GetByID(id int) (*entities.VehicleImage, error) {
-	var img domain.VehicleImage
+	var img entities.VehicleImage
 	err := r.db.QueryRow(`SELECT image_id, vehicle_model_id, image_url FROM vehicle_images WHERE image_id = $1`, id).
 		Scan(&img.ImageID, &img.VehicleModelID, &img.ImageURL)
 	if err != nil {

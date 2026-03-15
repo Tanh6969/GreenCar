@@ -21,7 +21,7 @@ func NewLocationRepository(db *database.DB) LocationRepository {
 }
 
 func (r *locationRepository) GetByID(id int) (*entities.Location, error) {
-	var l domain.Location
+	var l entities.Location
 	err := r.db.QueryRow(`SELECT location_id, name, address, city, latitude, longitude FROM locations WHERE location_id = $1`, id).
 		Scan(&l.LocationID, &l.Name, &l.Address, &l.City, &l.Latitude, &l.Longitude)
 	if err != nil {

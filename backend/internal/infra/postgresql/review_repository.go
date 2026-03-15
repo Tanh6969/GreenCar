@@ -21,7 +21,7 @@ func NewReviewRepository(db *database.DB) ReviewRepository {
 }
 
 func (r *reviewRepository) GetByID(id int) (*entities.Review, error) {
-	var row domain.Review
+	var row entities.Review
 	err := r.db.QueryRow(`SELECT review_id, user_id, vehicle_model_id, booking_id, rating, comment, created_at FROM reviews WHERE review_id = $1`, id).
 		Scan(&row.ReviewID, &row.UserID, &row.VehicleModelID, &row.BookingID, &row.Rating, &row.Comment, &row.CreatedAt)
 	if err != nil {

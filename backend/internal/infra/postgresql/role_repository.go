@@ -21,7 +21,7 @@ func NewRoleRepository(db *database.DB) RoleRepository {
 }
 
 func (r *roleRepository) GetByID(id int) (*entities.Role, error) {
-	var row domain.Role
+	var row entities.Role
 	err := r.db.QueryRow(`SELECT role_id, role_name FROM roles WHERE role_id = $1`, id).
 		Scan(&row.RoleID, &row.RoleName)
 	if err != nil {

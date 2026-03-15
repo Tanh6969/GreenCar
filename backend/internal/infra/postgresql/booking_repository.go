@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
 	"greencar/pkg/database"
@@ -82,4 +84,16 @@ func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, error)
 		bookings = append(bookings, &b)
 	}
 	return bookings, nil
+}
+
+func (r *bookingRepository) ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error) {
+	// Overlap logic: startA < endB && endA > startB
+	query := `SELECT EXISTS(
+		SELECT 1 FROM bookings
+		WHERE vehicle_id = $1
+		AND NOT (end_time <= $2 OR start_time >= $3)
+	)`
+	var exists bool
+	err := r.db.QueryRow(query, vehicleID, start, end).Scan(&exists)
+	return exists, err
 }

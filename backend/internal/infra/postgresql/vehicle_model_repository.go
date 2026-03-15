@@ -21,7 +21,7 @@ func NewVehicleModelRepository(db *database.DB) VehicleModelRepository {
 }
 
 func (r *vehicleModelRepository) GetByID(id int) (*entities.VehicleModel, error) {
-	var m domain.VehicleModel
+	var m entities.VehicleModel
 	query := `SELECT vehicle_model_id, name, brand, seats, horsepower, range_km, trunk_capacity, airbags, vehicle_type, transmission 
 		FROM vehicle_models WHERE vehicle_model_id = $1`
 	err := r.db.QueryRow(query, id).Scan(

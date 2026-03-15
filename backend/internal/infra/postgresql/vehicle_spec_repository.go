@@ -21,7 +21,7 @@ func NewVehicleSpecRepository(db *database.DB) VehicleSpecRepository {
 }
 
 func (r *vehicleSpecRepository) GetByID(id int) (*entities.VehicleSpec, error) {
-	var s domain.VehicleSpec
+	var s entities.VehicleSpec
 	err := r.db.QueryRow(`SELECT spec_id, vehicle_model_id, spec_name, spec_value FROM vehicle_specs WHERE spec_id = $1`, id).
 		Scan(&s.SpecID, &s.VehicleModelID, &s.SpecName, &s.SpecValue)
 	if err != nil {

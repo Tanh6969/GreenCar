@@ -8,8 +8,8 @@ import (
 // VehicleModelFeatureRepository defines operations on vehicle_model_features (junction table).
 type VehicleModelFeatureRepository interface {
 	Create(mf *entities.VehicleModelFeature) error
-	ListByVehicleModelID(vehicleModelID int) ([]domain.VehicleModelFeature, error)
-	ListByFeatureID(featureID int) ([]domain.VehicleModelFeature, error)
+	ListByVehicleModelID(vehicleModelID int) ([]entities.VehicleModelFeature, error)
+	ListByFeatureID(featureID int) ([]entities.VehicleModelFeature, error)
 	Delete(vehicleModelID, featureID int) error
 }
 
@@ -27,15 +27,15 @@ func (r *vehicleModelFeatureRepository) Create(mf *entities.VehicleModelFeature)
 	return err
 }
 
-func (r *vehicleModelFeatureRepository) ListByVehicleModelID(vehicleModelID int) ([]domain.VehicleModelFeature, error) {
+func (r *vehicleModelFeatureRepository) ListByVehicleModelID(vehicleModelID int) ([]entities.VehicleModelFeature, error) {
 	rows, err := r.db.Query(`SELECT vehicle_model_id, feature_id FROM vehicle_model_features WHERE vehicle_model_id = $1`, vehicleModelID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var list []domain.VehicleModelFeature
+	var list []entities.VehicleModelFeature
 	for rows.Next() {
-		var mf domain.VehicleModelFeature
+		var mf entities.VehicleModelFeature
 		if err := rows.Scan(&mf.VehicleModelID, &mf.FeatureID); err != nil {
 			return nil, err
 		}
@@ -44,15 +44,15 @@ func (r *vehicleModelFeatureRepository) ListByVehicleModelID(vehicleModelID int)
 	return list, rows.Err()
 }
 
-func (r *vehicleModelFeatureRepository) ListByFeatureID(featureID int) ([]domain.VehicleModelFeature, error) {
+func (r *vehicleModelFeatureRepository) ListByFeatureID(featureID int) ([]entities.VehicleModelFeature, error) {
 	rows, err := r.db.Query(`SELECT vehicle_model_id, feature_id FROM vehicle_model_features WHERE feature_id = $1`, featureID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var list []domain.VehicleModelFeature
+	var list []entities.VehicleModelFeature
 	for rows.Next() {
-		var mf domain.VehicleModelFeature
+		var mf entities.VehicleModelFeature
 		if err := rows.Scan(&mf.VehicleModelID, &mf.FeatureID); err != nil {
 			return nil, err
 		}

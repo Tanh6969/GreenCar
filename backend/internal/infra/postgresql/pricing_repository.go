@@ -21,7 +21,7 @@ func NewPricingRepository(db *database.DB) PricingRepository {
 }
 
 func (r *pricingRepository) GetByID(id int) (*entities.Pricing, error) {
-	var p domain.Pricing
+	var p entities.Pricing
 	err := r.db.QueryRow(`SELECT pricing_id, vehicle_model_id, rental_plan_id, price FROM pricing WHERE pricing_id = $1`, id).
 		Scan(&p.PricingID, &p.VehicleModelID, &p.RentalPlanID, &p.Price)
 	if err != nil {

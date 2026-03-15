@@ -1,6 +1,10 @@
 package adapters
 
-import "greencar/internal/domain/entities"
+import (
+	"time"
+
+	"greencar/internal/domain/entities"
+)
 
 // BookingRepository defines the storage interface for Booking.
 // Concrete implementations (Postgres, in-memory, ...) should implement this interface.
@@ -10,5 +14,7 @@ type BookingRepository interface {
 	Update(b *entities.Booking) error
 	Delete(id int) error
 	List(limit, offset int) ([]*entities.Booking, error)
-	// Additional methods can be added: List, Update, Delete...
+	// ExistsOverlapping returns true if there is an existing booking for the same vehicle
+	// that overlaps the given time range.
+	ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error)
 }

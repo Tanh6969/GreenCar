@@ -21,7 +21,7 @@ func NewPaymentRepository(db *database.DB) PaymentRepository {
 }
 
 func (r *paymentRepository) GetByID(id int) (*entities.Payment, error) {
-	var p domain.Payment
+	var p entities.Payment
 	err := r.db.QueryRow(`SELECT payment_id, booking_id, amount, payment_method, payment_status, paid_at FROM payments WHERE payment_id = $1`, id).
 		Scan(&p.PaymentID, &p.BookingID, &p.Amount, &p.PaymentMethod, &p.PaymentStatus, &p.PaidAt)
 	if err != nil {
