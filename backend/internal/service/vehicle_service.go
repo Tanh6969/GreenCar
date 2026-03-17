@@ -7,12 +7,13 @@ import (
 
 // VehicleService contains business logic for vehicles.
 type VehicleService struct {
-	repo adapters.VehicleRepository
+	repo       adapters.VehicleRepository
+	detailRepo adapters.VehicleDetailRepository
 }
 
 // NewVehicleService creates a new vehicle service.
-func NewVehicleService(repo adapters.VehicleRepository) *VehicleService {
-	return &VehicleService{repo: repo}
+func NewVehicleService(repo adapters.VehicleRepository, detailRepo adapters.VehicleDetailRepository) *VehicleService {
+	return &VehicleService{repo: repo, detailRepo: detailRepo}
 }
 
 // GetVehicle returns a vehicle by ID.
@@ -38,4 +39,9 @@ func (s *VehicleService) UpdateVehicle(v *entities.Vehicle) error {
 // DeleteVehicle deletes a vehicle by ID.
 func (s *VehicleService) DeleteVehicle(id int) error {
 	return s.repo.Delete(id)
+}
+
+// GetVehicleDetail returns enriched vehicle detail including model, pricing, reviews, and location.
+func (s *VehicleService) GetVehicleDetail(id int) (*entities.VehicleDetail, error) {
+	return s.detailRepo.GetByVehicleID(id)
 }

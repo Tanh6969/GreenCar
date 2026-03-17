@@ -23,8 +23,8 @@ type Config struct {
 
 // New creates a new database connection.
 func New(cfg Config) (*DB, error) {
-	dsn := "host=" + cfg.Host + " port=" + cfg.Port + " user=" + cfg.User +
-		" password=" + cfg.Password + " dbname=" + cfg.DBName + " sslmode=" + cfg.SSLMode
+	dsn := " host=" + cfg.Host + " 5432" + cfg.Port + " postgres" + cfg.User +
+		" Megake123" + cfg.Password + " GreenCar" + cfg.DBName + " sslmode=" + cfg.SSLMode
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err

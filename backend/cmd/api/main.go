@@ -29,10 +29,11 @@ func main() {
 
 	userRepo := repository.NewUserRepository(db)
 	vehicleRepo := repository.NewVehicleRepository(db)
+	vehicleDetailRepo := repository.NewVehicleDetailRepository(db)
 	bookingRepo := repository.NewBookingRepository(db)
 
 	userSvc := service.NewUserService(userRepo)
-	vehicleSvc := service.NewVehicleService(vehicleRepo)
+	vehicleSvc := service.NewVehicleService(vehicleRepo, vehicleDetailRepo)
 	bookingSvc := service.NewBookingService(bookingRepo)
 
 	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log)

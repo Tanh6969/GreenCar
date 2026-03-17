@@ -33,6 +33,25 @@ func GetVehicleHandler(vehicleSvc *service.VehicleService, log *logger.Logger) h
 	}
 }
 
+// GetVehicleDetailHandler returns a handler for retrieving a vehicle's detail view.
+func GetVehicleDetailHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
+			return
+		}
+		v, err := vehicleSvc.GetVehicleDetail(id)
+		if err != nil {
+			log.Warn("get vehicle detail %d: %v", id, err)
+			response.WriteError(w, http.StatusNotFound, "vehicle not found")
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, mappers.ToVehicleDetailResponse(v))
+	}
+}
+
 // ListVehiclesHandler returns a handler for listing vehicles with pagination.
 func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
