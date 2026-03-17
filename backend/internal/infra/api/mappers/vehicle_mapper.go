@@ -73,6 +73,18 @@ func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailR
 		Specs:    toVehicleSpecResponses(detail.Specs),
 		Pricing:  toVehiclePricingResponses(detail.Pricing),
 		Reviews:  toReviewResponses(detail.Reviews),
+		Meta:     toVehicleMetaResponse(detail.Meta),
+	}
+}
+
+func toVehicleMetaResponse(m *entities.VehicleMeta) *dto.VehicleMetaResponse {
+	if m == nil {
+		return nil
+	}
+	return &dto.VehicleMetaResponse{
+		AvgRating:   m.AvgRating,
+		ReviewCount: m.ReviewCount,
+		Available:   m.Available,
 	}
 }
 

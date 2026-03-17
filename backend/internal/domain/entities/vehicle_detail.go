@@ -9,6 +9,14 @@ type VehicleDetail struct {
 	Specs    []*VehicleSpec    `json:"specs"`
 	Pricing  []*VehiclePricing `json:"pricing"`
 	Reviews  []*Review         `json:"reviews"`
+	Meta     *VehicleMeta      `json:"meta"`
+}
+
+// VehicleMeta contains computed metadata for the vehicle detail page.
+type VehicleMeta struct {
+	AvgRating   float64 `json:"avg_rating"`
+	ReviewCount int     `json:"review_count"`
+	Available   bool    `json:"available"`
 }
 
 // VehiclePricing is pricing detail for a vehicle model, including rental plan information.

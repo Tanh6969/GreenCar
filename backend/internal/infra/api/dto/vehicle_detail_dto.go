@@ -9,6 +9,14 @@ type VehicleDetailResponse struct {
 	Specs    []*VehicleSpecResponse    `json:"specs"`
 	Pricing  []*VehiclePricingResponse `json:"pricing"`
 	Reviews  []*ReviewResponse         `json:"reviews"`
+	Meta     *VehicleMetaResponse      `json:"meta"`
+}
+
+// VehicleMetaResponse contains computed metadata for a vehicle detail page.
+type VehicleMetaResponse struct {
+	AvgRating   float64 `json:"avg_rating"`
+	ReviewCount int     `json:"review_count"`
+	Available   bool    `json:"available"`
 }
 
 // VehicleModelResponse represents a vehicle model.

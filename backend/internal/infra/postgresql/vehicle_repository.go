@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
 	"greencar/pkg/database"
@@ -75,6 +77,38 @@ func (r *vehicleRepository) ListByLocation(locationID int, limit, offset int) ([
 	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id 
 		FROM vehicles WHERE location_id = $1 ORDER BY vehicle_id LIMIT $2 OFFSET $3`
 	rows, err := r.db.Query(query, locationID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var vehicles []*entities.Vehicle
+	for rows.Next() {
+		var v entities.Vehicle
+		err := rows.Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID)
+		if err != nil {
+			return nil, err
+		}
+		vehicles = append(vehicles, &v)
+	}
+	return vehicles, nil
+}
+
+func (r *vehicleRepository) ListAvailable(start, end *time.Time, locationID, modelID *int, limit, offset int) ([]*entities.Vehicle, error) {
+	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id
+		FROM vehicles v
+		WHERE ($1::timestamptz IS NULL OR NOT EXISTS (
+			SELECT 1 FROM bookings b
+			WHERE b.vehicle_id = v.vehicle_id
+			  AND b.status != 'cancelled'
+			  AND b.start_time < $2
+			  AND b.end_time > $1
+		))
+		  AND ($3 IS NULL OR v.location_id = $3)
+		  AND ($4 IS NULL OR v.vehicle_model_id = $4)
+		ORDER BY vehicle_id LIMIT $5 OFFSET $6`
+
+	rows, err := r.db.Query(query, start, end, locationID, modelID, limit, offset)
 	if err != nil {
 		return nil, err
 	}

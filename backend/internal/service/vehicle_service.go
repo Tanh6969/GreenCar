@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
 )
@@ -29,6 +31,12 @@ func (s *VehicleService) CreateVehicle(v *entities.Vehicle) error {
 // ListVehicles returns a list of vehicles with pagination.
 func (s *VehicleService) ListVehicles(limit, offset int) ([]*entities.Vehicle, error) {
 	return s.repo.List(limit, offset)
+}
+
+// ListAvailableVehicles returns vehicles that are free in the given time window.
+// If start or end is nil, no availability filtering is applied.
+func (s *VehicleService) ListAvailableVehicles(start, end *time.Time, locationID, modelID *int, limit, offset int) ([]*entities.Vehicle, error) {
+	return s.repo.ListAvailable(start, end, locationID, modelID, limit, offset)
 }
 
 // UpdateVehicle updates an existing vehicle.

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
 	"greencar/pkg/database"
@@ -113,6 +115,34 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		reviews = append(reviews, &rview)
 	}
 
+	// Compute meta
+	reviewCount := len(reviews)
+	avgRating := 0.0
+	if reviewCount > 0 {
+		total := 0
+		for _, r := range reviews {
+			total += r.Rating
+		}
+		avgRating = float64(total) / float64(reviewCount)
+	}
+
+	// Determine availability for the current time (vehicle is unavailable if there's an overlapping active booking)
+	now := time.Now().UTC()
+	var available bool
+	if err := r.db.QueryRow(
+		`SELECT NOT EXISTS (
+			SELECT 1
+			FROM bookings
+			WHERE vehicle_id = $1
+			  AND status != 'cancelled'
+			  AND start_time < $2
+			  AND end_time > $2
+		)`,
+		v.VehicleID, now,
+	).Scan(&available); err != nil {
+		return nil, err
+	}
+
 	return &entities.VehicleDetail{
 		Vehicle:  &v,
 		Model:    &m,
@@ -121,5 +151,10 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		Specs:    specs,
 		Pricing:  pricing,
 		Reviews:  reviews,
+		Meta: &entities.VehicleMeta{
+			AvgRating:   avgRating,
+			ReviewCount: reviewCount,
+			Available:   available,
+		},
 	}, nil
 }
