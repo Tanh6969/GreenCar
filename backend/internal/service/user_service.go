@@ -1,6 +1,8 @@
 package service
 
 import (
+	"golang.org/x/crypto/bcrypt"
+
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
 )
@@ -22,6 +24,16 @@ func (s *UserService) GetUser(id int) (*entities.User, error) {
 
 // CreateUser creates a new user.
 func (s *UserService) CreateUser(u *entities.User) error {
+	if u == nil {
+		return nil
+	}
+	if u.Password != "" {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		u.Password = string(hashed)
+	}
 	return s.repo.Create(u)
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"greencar/internal/infra/api/dto"
 	"greencar/internal/infra/api/mappers"
+	"greencar/internal/infra/api/middlewares"
 	"greencar/internal/infra/api/response"
 	"greencar/internal/service"
 	"greencar/pkg/logger"
@@ -86,6 +87,39 @@ func ListBookingsHandler(bookingSvc *service.BookingService, log *logger.Logger)
 		bookings, err := bookingSvc.ListBookings(limit, offset)
 		if err != nil {
 			log.Warn("list bookings: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to list bookings")
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponses(bookings))
+	}
+}
+
+// GetMyBookingsHandler returns bookings of the authenticated user.
+func GetMyBookingsHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "not authenticated")
+			return
+		}
+
+		q := r.URL.Query()
+		limit := 20
+		offset := 0
+		if l := q.Get("limit"); l != "" {
+			if v, err := strconv.Atoi(l); err == nil && v > 0 {
+				limit = v
+			}
+		}
+		if o := q.Get("offset"); o != "" {
+			if v, err := strconv.Atoi(o); err == nil && v >= 0 {
+				offset = v
+			}
+		}
+
+		bookings, err := bookingSvc.ListBookingsByUser(int(payload.UserId), limit, offset)
+		if err != nil {
+			log.Warn("list my bookings: %v", err)
 			response.WriteError(w, http.StatusInternalServerError, "failed to list bookings")
 			return
 		}

@@ -86,6 +86,31 @@ func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, error)
 	return bookings, nil
 }
 
+func (r *bookingRepository) ListByUser(userID int, limit, offset int) ([]*entities.Booking, error) {
+	query := `SELECT booking_id, user_id, vehicle_id, rental_plan_id, start_time, end_time,
+		actual_start_time, actual_end_time, planned_km, actual_km, deposit_amount, overtime_fee, over_km_fee,
+		total_price, status, created_at FROM bookings WHERE user_id = $1 ORDER BY booking_id LIMIT $2 OFFSET $3`
+	rows, err := r.db.Query(query, userID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var bookings []*entities.Booking
+	for rows.Next() {
+		var b entities.Booking
+		err := rows.Scan(&b.BookingID, &b.UserID, &b.VehicleID, &b.RentalPlanID,
+			&b.StartTime, &b.EndTime, &b.ActualStartTime, &b.ActualEndTime,
+			&b.PlannedKM, &b.ActualKM, &b.DepositAmount, &b.OvertimeFee, &b.OverKMFee,
+			&b.TotalPrice, &b.Status, &b.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		bookings = append(bookings, &b)
+	}
+	return bookings, nil
+}
+
 func (r *bookingRepository) ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error) {
 	// Overlap logic: startA < endB && endA > startB
 	query := `SELECT EXISTS(

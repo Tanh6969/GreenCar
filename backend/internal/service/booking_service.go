@@ -50,6 +50,11 @@ func (s *BookingService) ListBookings(limit, offset int) ([]*entities.Booking, e
 	return s.repo.List(limit, offset)
 }
 
+// ListBookingsByUser returns bookings for a specific user.
+func (s *BookingService) ListBookingsByUser(userID, limit, offset int) ([]*entities.Booking, error) {
+	return s.repo.ListByUser(userID, limit, offset)
+}
+
 // UpdateBooking updates an existing booking.
 func (s *BookingService) UpdateBooking(b *entities.Booking) error {
 	return s.repo.Update(b)
