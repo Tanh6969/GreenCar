@@ -1,13 +1,14 @@
-// Package main is the entry point of the GreenCar API.
 package main
 
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"greencar/internal/infra/api"
 	repository "greencar/internal/infra/postgresql"
 	"greencar/internal/service"
+	"greencar/internal/token"
 	"greencar/pkg/database"
 	"greencar/pkg/logger"
 )
@@ -27,7 +28,19 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize token maker (JWT)
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	if secretKey == "" {
+		secretKey = "your-secret-key-min-32-characters-long-please-change-in-production!" // Change for production
+	}
+	maker, err := token.NewJWTMaker(secretKey)
+	if err != nil {
+		log.Error("token maker: %v", err)
+		os.Exit(1)
+	}
+
 	userRepo := repository.NewUserRepository(db)
+	roleRepo := repository.NewRoleRepository(db)
 	vehicleRepo := repository.NewVehicleRepository(db)
 	vehicleDetailRepo := repository.NewVehicleDetailRepository(db)
 	bookingRepo := repository.NewBookingRepository(db)
@@ -35,8 +48,9 @@ func main() {
 	userSvc := service.NewUserService(userRepo)
 	vehicleSvc := service.NewVehicleService(vehicleRepo, vehicleDetailRepo)
 	bookingSvc := service.NewBookingService(bookingRepo)
+	authSvc := service.NewAuthService(userRepo, roleRepo, maker, 15*time.Minute, 24*time.Hour)
 
-	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log)
+	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {
