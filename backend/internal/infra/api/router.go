@@ -8,14 +8,19 @@ import (
 	"greencar/internal/infra/api/routes"
 	"greencar/internal/service"
 	"greencar/internal/token"
+	"greencar/pkg/database"
 	"greencar/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 )
 
 // NewRouter creates an HTTP handler with all API routes wired.
-func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker) http.Handler {
+func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, db *database.DB) http.Handler {
 	r := chi.NewRouter()
+
+	// Global middleware
+	r.Use(middlewares.LoggingMiddleware(log))
+	r.Use(middlewares.RateLimitMiddleware(100)) // 100 requests per minute per IP
 
 	r.Get("/health", handlers.HealthHandler())
 
@@ -39,6 +44,9 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 	r.Route("/admin", func(r chi.Router) {
 		r.Use(auth)
 		r.Use(admin)
+
+		// Admin statistics
+		r.Get("/stats", handlers.NewStatsHandler(db.DB).GetStats)
 
 		// Admin user management
 		r.Route("/users", func(r chi.Router) {
@@ -70,6 +78,16 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 				r.Put("/", handlers.UpdateBookingHandler(bookingSvc, log))
 				r.Delete("/", handlers.DeleteBookingHandler(bookingSvc, log))
 			})
+		})
+
+		// Admin posts management
+		postHandler := handlers.NewPostHandler(postSvc)
+		r.Route("/posts", func(r chi.Router) {
+			r.Get("/", postHandler.ListPosts)
+			r.Post("/", postHandler.CreatePost)
+			r.Get("/{id}", postHandler.GetPost)
+			r.Put("/{id}", postHandler.UpdatePost)
+			r.Delete("/{id}", postHandler.DeletePost)
 		})
 	})
 
