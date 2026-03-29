@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import logo from './logo.svg';
 import './App.css';
 
@@ -20,6 +21,12 @@ function App() {
       </header>
     </div>
   );
+=======
+import React from "react";
+import Ahihi from "./components/Ahihi";
+function App() {
+  return <Ahihi />;
+>>>>>>> 98cb272ca3ea35643d9a7015507003ef46bf97de
 }
 
 export default App;
