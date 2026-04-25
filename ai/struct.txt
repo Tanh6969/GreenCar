@@ -1,0 +1,80 @@
+src/
+├── assets/                 # Nơi lưu trữ tài nguyên tĩnh
+│   ├── images/             # Hình ảnh placeholder, banner, logo
+│   └── icons/              # Các icon SVG
+│
+├── components/             # Các UI component có thể tái sử dụng
+│   ├── common/             # Component cơ bản: Button, Input, Modal, Table, Spinner, ReviewStars
+│   ├── layout/             # Component bố cục: Header, Footer, Sidebar, Navigation
+│   └── specific/           # Component nghiệp vụ: 
+│       ├── CarCard/        # Thẻ hiển thị thông tin xe (dùng trên danh sách)
+│       ├── SearchForm/     # Form tìm kiếm (LocationSelector, DateRangePicker)
+│       └── BrandFilter/    # Component lọc hãng xe, loại xe
+│
+├── config/                 # Các file cấu hình chung của hệ thống
+│   ├── constants.ts        # Các hằng số (Status đặt xe, loại gói thuê...)
+│   └── env.ts              # Biến môi trường
+│
+├── context/                # (Hoặc store/ nếu dùng Redux/Zustand) Quản lý state toàn cục
+│   ├── AuthContext.tsx     # Trạng thái đăng nhập, thông tin User & Role
+│   └── BookingContext.tsx  # Lưu tạm thông tin đang tìm kiếm: Địa điểm, Ngày nhận/trả
+│
+├── hooks/                  # Custom hooks tái sử dụng logic
+│   ├── useAuth.ts          # Xử lý logic đăng nhập, phân quyền
+│   ├── useVehicles.ts      # Logic gọi danh sách xe, filter xe trống
+│   └── usePricing.ts       # Hook tính toán giá dựa vào rental_plan_id và số ngày thuê
+│
+├── layouts/                # Các bộ khung trang web
+│   ├── MainLayout.tsx      # Khung cho User (Gồm Header tĩnh, Footer)
+│   ├── AuthLayout.tsx      # Khung cho trang Đăng nhập/Đăng ký (Tối giản)
+│   └── AdminLayout.tsx     # Khung cho Quản trị viên (Có Sidebar navigation)
+│
+├── pages/                  # Các trang (Page Component) chính
+│   ├── Public/
+│   │   ├── Home/           # Trang chủ (Banner, Form tìm kiếm, Xe nổi bật, Địa điểm)
+│   │   ├── CarList/        # Danh sách kết quả tìm kiếm & Bộ lọc
+│   │   └── CarDetail/      # Chi tiết xe (Ảnh từ vehicle_images, Specs, Features, Reviews, Giá)
+│   ├── Customer/
+│   │   ├── Checkout/       # Quy trình đặt xe (Chọn rental_plans, tính deposit_amount)
+│   │   ├── Payment/        # Xử lý thanh toán (Tạo payment, callback trạng thái)
+│   │   ├── Profile/        # Quản lý tài khoản User
+│   │   └── MyBookings/     # Lịch sử Bookings của khách hàng và trạng thái
+│   ├── Auth/
+│   │   ├── Login.tsx
+│   │   └── Register.tsx
+│   └── Admin/              # Phân hệ quản trị (Kiểm tra dựa trên role_id)
+│       ├── Dashboard/      # Thống kê tổng quan
+│       ├── VehicleManage/  # Quản lý vehicles, vehicle_models, specs, features
+│       ├── BookingManage/  # Quản lý Bookings (duyệt, cập nhật actual_start_time, actual_km)
+│       └── UserManage/     # Quản lý Users
+│
+├── routes/                 # Định tuyến ứng dụng
+│   ├── AppRouter.tsx       # Định nghĩa toàn bộ Route
+│   ├── ProtectedRoute.tsx  # Middleware chặn user chưa đăng nhập
+│   └── AdminRoute.tsx      # Middleware chặn user không có role Admin
+│
+├── services/               # Lớp giao tiếp với Backend (Tương đương các Use Case/Repository)
+│   ├── api.ts              # Cấu hình Axios instance (kèm interceptor cho token)
+│   ├── auth.service.ts     # Gọi API liên quan bảng users, roles
+│   ├── vehicle.service.ts  # Gọi API lấy data bảng vehicles, models, images, features, locations
+│   ├── booking.service.ts  # Gọi API tạo và lấy bookings, rental_plans, pricing
+│   ├── payment.service.ts  # Gọi API bảng payments
+│   └── review.service.ts   # Gọi API bảng reviews
+│
+├── types/                  # Chứa các Type/Interface phản chiếu trực tiếp DB Schema
+│   ├── user.type.ts        # Type cho users, roles
+│   ├── vehicle.type.ts     # Type cho vehicles, vehicle_models, locations, images, specs, features
+│   ├── booking.type.ts     # Type cho bookings, rental_plans, pricing
+│   └── payment.type.ts     # Type cho payments, reviews
+│
+└── utils/                  # Các hàm tiện ích dùng chung
+    ├── formatters.ts       # Format tiền tệ (VND), viết hoa chữ cái đầu...
+    ├── calculators.ts      # Logic tính `total_price` = (price từ plan) + `overtime_fee` + `over_km_fee`
+    └── date.ts             # Các hàm xử lý start_time, end_time (nên dùng thư viện như date-fns)
+
+Một số lưu ý quan trọng để khớp hoàn toàn với Backend:
+Khớp Pricing và Rental Plans: Ở trang CarDetail và Checkout, bạn sẽ cần kết hợp dữ liệu bảng pricing và rental_plans để cho phép khách chọn thuê theo giờ, ngày hoặc theo mốc km (duration_type, max_km). Thư mục utils/calculators.ts sẽ chịu trách nhiệm tính toán dự kiến con số này trước khi gửi payload tạo booking.
+
+Khớp bảng Locations: Form Search ngoài trang Home sẽ pull dữ liệu từ locations để user chọn điểm xuất phát. Khi có kết quả, CarList sẽ mapping trường location_id ở bảng vehicles để lọc ra những chiếc xe đang rảnh tại bãi đó.
+
+Quản lý trạng thái: Hệ thống của bạn có bảng bookings với các trường thực tế như actual_start_time, actual_km và overtime_fee. Tại page Admin/BookingManage, bạn cần xây dựng các component để update các trạng thái thực tế này khi khách hoàn trả xe điện để tính hóa đơn cuối cùng.
