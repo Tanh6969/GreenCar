@@ -17,136 +17,219 @@ export const roles: Role[] = [
 ];
 
 export const users: User[] = [
-  {
-    user_id: 1,
-    name: "Admin GreenCar",
-    email: "admin@greencar.vn",
-    phone: "0900000001",
-    license_no: "B2-ADMIN",
-    role_id: 1,
-    created_at: "2026-01-01T08:00:00Z"
-  },
-  {
-    user_id: 2,
-    name: "Nguyen Van A",
-    email: "nguyenvana@gmail.com",
-    phone: "0900000002",
-    license_no: "B2-02345",
-    role_id: 2,
-    created_at: "2026-01-10T10:00:00Z"
-  }
+  { user_id: 1, name: "Admin GreenCar", email: "admin@greencar.vn", phone: "0900000001", license_no: "B2-ADMIN", role_id: 1, created_at: "2026-01-01T08:00:00Z" },
+  { user_id: 2, name: "Nguyen Van A", email: "nguyenvana@gmail.com", phone: "0900000002", license_no: "B2-02345", role_id: 2, created_at: "2026-01-10T10:00:00Z" },
+  { user_id: 3, name: "Tran Thi B", email: "tranthib@gmail.com", phone: "0900000003", license_no: "B2-03456", role_id: 2, created_at: "2026-02-01T09:00:00Z" }
 ];
 
 export const locations: Location[] = [
-  { location_id: 1, name: "Ba Dinh", address: "Ba Dinh", city: "Ha Noi", latitude: 21.033, longitude: 105.814 },
-  { location_id: 2, name: "Dong Da", address: "Dong Da", city: "Ha Noi", latitude: 21.018, longitude: 105.829 },
-  { location_id: 3, name: "Cau Giay", address: "Cau Giay", city: "Ha Noi", latitude: 21.036, longitude: 105.79 }
+  { location_id: 1, name: "Ba Đình",     address: "Quận Ba Đình",     city: "Hà Nội", latitude: 21.033, longitude: 105.814 },
+  { location_id: 2, name: "Đống Đa",     address: "Quận Đống Đa",     city: "Hà Nội", latitude: 21.018, longitude: 105.829 },
+  { location_id: 3, name: "Cầu Giấy",    address: "Quận Cầu Giấy",    city: "Hà Nội", latitude: 21.036, longitude: 105.790 },
+  { location_id: 4, name: "Tây Hồ",      address: "Quận Tây Hồ",      city: "Hà Nội", latitude: 21.058, longitude: 105.823 },
+  { location_id: 5, name: "Thanh Xuân",  address: "Quận Thanh Xuân",  city: "Hà Nội", latitude: 20.995, longitude: 105.815 },
+  { location_id: 6, name: "Hoàng Mai",   address: "Quận Hoàng Mai",   city: "Hà Nội", latitude: 20.978, longitude: 105.842 },
+  { location_id: 7, name: "Long Biên",   address: "Quận Long Biên",   city: "Hà Nội", latitude: 21.040, longitude: 105.882 }
 ];
 
 export const vehicleModels: VehicleModel[] = [
-  {
-    vehicle_model_id: 1,
-    name: "VF e34",
-    brand: "VinFast",
-    seats: 5,
-    horsepower: 147,
-    range_km: 300,
-    trunk_capacity: 290,
-    airbags: 6,
-    vehicle_type: "SUV",
-    transmission: "So tu dong"
-  },
-  {
-    vehicle_model_id: 2,
-    name: "Accent",
-    brand: "Hyundai",
-    seats: 5,
-    horsepower: 115,
-    range_km: 500,
-    trunk_capacity: 387,
-    airbags: 2,
-    vehicle_type: "Sedan",
-    transmission: "So tu dong"
-  },
-  {
-    vehicle_model_id: 3,
-    name: "CX5",
-    brand: "Mazda",
-    seats: 5,
-    horsepower: 188,
-    range_km: 550,
-    trunk_capacity: 442,
-    airbags: 6,
-    vehicle_type: "SUV",
-    transmission: "So tu dong"
-  }
+  // ── Hạng phổ thông ──
+  { vehicle_model_id: 1,  name: "VF e34",     brand: "VinFast",  seats: 5, horsepower: 147, range_km: 300,  trunk_capacity: 290, airbags: 6, vehicle_type: "SUV",     transmission: "Số tự động" },
+  { vehicle_model_id: 2,  name: "Accent EV",  brand: "Hyundai",  seats: 5, horsepower: 115, range_km: 420,  trunk_capacity: 387, airbags: 4, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  { vehicle_model_id: 3,  name: "ID.4",       brand: "VW",       seats: 5, horsepower: 204, range_km: 520,  trunk_capacity: 543, airbags: 9, vehicle_type: "SUV",     transmission: "Số tự động" },
+  { vehicle_model_id: 4,  name: "Mach-E",     brand: "Ford",     seats: 5, horsepower: 269, range_km: 480,  trunk_capacity: 402, airbags: 7, vehicle_type: "SUV",     transmission: "Số tự động" },
+  { vehicle_model_id: 5,  name: "IONIQ 5",    brand: "Hyundai",  seats: 5, horsepower: 225, range_km: 451,  trunk_capacity: 527, airbags: 6, vehicle_type: "Crossover", transmission: "Số tự động" },
+  { vehicle_model_id: 6,  name: "IONIQ 6",    brand: "Hyundai",  seats: 5, horsepower: 239, range_km: 614,  trunk_capacity: 401, airbags: 7, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  { vehicle_model_id: 7,  name: "VF 8",       brand: "VinFast",  seats: 7, horsepower: 402, range_km: 400,  trunk_capacity: 376, airbags: 8, vehicle_type: "SUV",     transmission: "Số tự động" },
+  { vehicle_model_id: 8,  name: "Model 3",    brand: "Tesla",    seats: 5, horsepower: 283, range_km: 491,  trunk_capacity: 561, airbags: 8, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  // ── Hạng sang ──
+  { vehicle_model_id: 9,  name: "Model S",    brand: "Tesla",    seats: 5, horsepower: 670, range_km: 652,  trunk_capacity: 793, airbags: 8, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  { vehicle_model_id: 10, name: "Model X",    brand: "Tesla",    seats: 7, horsepower: 670, range_km: 576,  trunk_capacity: 1022, airbags: 8, vehicle_type: "SUV",    transmission: "Số tự động" },
+  { vehicle_model_id: 11, name: "Polestar 2", brand: "Polestar", seats: 5, horsepower: 476, range_km: 540,  trunk_capacity: 405, airbags: 8, vehicle_type: "Fastback", transmission: "Số tự động" },
+  { vehicle_model_id: 12, name: "e-tron GT",  brand: "Audi",     seats: 5, horsepower: 530, range_km: 488,  trunk_capacity: 405, airbags: 9, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  { vehicle_model_id: 13, name: "Air Pure",   brand: "Lucid",    seats: 5, horsepower: 430, range_km: 660,  trunk_capacity: 739, airbags: 8, vehicle_type: "Sedan",   transmission: "Số tự động" },
+  { vehicle_model_id: 14, name: "R1S",        brand: "Rivian",   seats: 7, horsepower: 835, range_km: 505,  trunk_capacity: 495, airbags: 8, vehicle_type: "SUV",     transmission: "Số tự động" },
+  { vehicle_model_id: 15, name: "VF 9",       brand: "VinFast",  seats: 7, horsepower: 402, range_km: 438,  trunk_capacity: 585, airbags: 8, vehicle_type: "SUV",     transmission: "Số tự động" }
 ];
 
 export const vehicles: Vehicle[] = [
-  { vehicle_id: 1, vehicle_model_id: 1, license_plate: "30H-99999", status: "available", battery_level: 86, battery_health: 95, location_id: 1 },
-  { vehicle_id: 2, vehicle_model_id: 2, license_plate: "30A-12345", status: "available", battery_level: 100, battery_health: 100, location_id: 1 },
-  { vehicle_id: 3, vehicle_model_id: 3, license_plate: "30G-67890", status: "booked", battery_level: 100, battery_health: 100, location_id: 2 }
+  // VF e34
+  { vehicle_id: 1,  vehicle_model_id: 1,  license_plate: "30H-99901", status: "available", battery_level: 86,  battery_health: 95,  location_id: 1 },
+  { vehicle_id: 2,  vehicle_model_id: 1,  license_plate: "30H-99902", status: "available", battery_level: 92,  battery_health: 98,  location_id: 3 },
+  // Hyundai Accent EV
+  { vehicle_id: 3,  vehicle_model_id: 2,  license_plate: "30A-12301", status: "available", battery_level: 100, battery_health: 100, location_id: 1 },
+  { vehicle_id: 4,  vehicle_model_id: 2,  license_plate: "30A-12302", status: "available", battery_level: 78,  battery_health: 93,  location_id: 5 },
+  // VW ID.4
+  { vehicle_id: 5,  vehicle_model_id: 3,  license_plate: "30K-11101", status: "available", battery_level: 100, battery_health: 100, location_id: 2 },
+  { vehicle_id: 6,  vehicle_model_id: 3,  license_plate: "30K-11102", status: "available", battery_level: 95,  battery_health: 99,  location_id: 4 },
+  // Ford Mach-E
+  { vehicle_id: 7,  vehicle_model_id: 4,  license_plate: "30F-55501", status: "available", battery_level: 88,  battery_health: 96,  location_id: 3 },
+  { vehicle_id: 8,  vehicle_model_id: 4,  license_plate: "30F-55502", status: "booked",    battery_level: 100, battery_health: 100, location_id: 6 },
+  // Hyundai IONIQ 5
+  { vehicle_id: 9,  vehicle_model_id: 5,  license_plate: "30E-77701", status: "available", battery_level: 100, battery_health: 100, location_id: 2 },
+  { vehicle_id: 10, vehicle_model_id: 5,  license_plate: "30E-77702", status: "available", battery_level: 90,  battery_health: 97,  location_id: 7 },
+  // Hyundai IONIQ 6
+  { vehicle_id: 11, vehicle_model_id: 6,  license_plate: "30E-88801", status: "available", battery_level: 100, battery_health: 100, location_id: 1 },
+  // VinFast VF 8
+  { vehicle_id: 12, vehicle_model_id: 7,  license_plate: "30H-44401", status: "available", battery_level: 95,  battery_health: 99,  location_id: 3 },
+  { vehicle_id: 13, vehicle_model_id: 7,  license_plate: "30H-44402", status: "available", battery_level: 82,  battery_health: 94,  location_id: 5 },
+  // Tesla Model 3
+  { vehicle_id: 14, vehicle_model_id: 8,  license_plate: "30T-33301", status: "available", battery_level: 100, battery_health: 100, location_id: 4 },
+  { vehicle_id: 15, vehicle_model_id: 8,  license_plate: "30T-33302", status: "available", battery_level: 97,  battery_health: 100, location_id: 2 },
+  // Tesla Model S – hạng sang
+  { vehicle_id: 16, vehicle_model_id: 9,  license_plate: "30T-99901", status: "available", battery_level: 100, battery_health: 100, location_id: 1 },
+  // Tesla Model X – hạng sang
+  { vehicle_id: 17, vehicle_model_id: 10, license_plate: "30T-99902", status: "available", battery_level: 100, battery_health: 100, location_id: 4 },
+  // Polestar 2 – hạng sang
+  { vehicle_id: 18, vehicle_model_id: 11, license_plate: "30P-22201", status: "available", battery_level: 96,  battery_health: 100, location_id: 3 },
+  // Audi e-tron GT – hạng sang
+  { vehicle_id: 19, vehicle_model_id: 12, license_plate: "30D-66601", status: "available", battery_level: 100, battery_health: 100, location_id: 1 },
+  // Lucid Air Pure – hạng sang
+  { vehicle_id: 20, vehicle_model_id: 13, license_plate: "30L-11101", status: "available", battery_level: 100, battery_health: 100, location_id: 2 },
+  // Rivian R1S – hạng sang
+  { vehicle_id: 21, vehicle_model_id: 14, license_plate: "30R-55501", status: "available", battery_level: 98,  battery_health: 100, location_id: 7 },
+  // VinFast VF 9
+  { vehicle_id: 22, vehicle_model_id: 15, license_plate: "30H-44501", status: "available", battery_level: 100, battery_health: 100, location_id: 6 }
 ];
 
 export const vehicleImages: VehicleImage[] = [
-  { image_id: 1, vehicle_model_id: 1, image_url: "https://images.unsplash.com/photo-1617531653520-4893f7db7a15?auto=format&fit=crop&w=1200&q=80" },
-  { image_id: 2, vehicle_model_id: 2, image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80" },
-  { image_id: 3, vehicle_model_id: 3, image_url: "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=1200&q=80" }
+  { image_id: 1,  vehicle_model_id: 1,  image_url: "https://images.unsplash.com/photo-1617531653520-4893f7db7a15?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 2,  vehicle_model_id: 2,  image_url: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 3,  vehicle_model_id: 3,  image_url: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 4,  vehicle_model_id: 4,  image_url: "https://images.unsplash.com/photo-1624623278313-a930126a11c3?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 5,  vehicle_model_id: 5,  image_url: "https://images.unsplash.com/photo-1719581597814-b9e88db5ac9d?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 6,  vehicle_model_id: 6,  image_url: "https://images.unsplash.com/photo-1680093661316-5a7e94ccbf37?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 7,  vehicle_model_id: 7,  image_url: "https://images.unsplash.com/photo-1617531653320-4cdb88e42ee9?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 8,  vehicle_model_id: 8,  image_url: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 9,  vehicle_model_id: 9,  image_url: "https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 10, vehicle_model_id: 10, image_url: "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 11, vehicle_model_id: 11, image_url: "https://images.unsplash.com/photo-1646768914119-4ccada7a9f15?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 12, vehicle_model_id: 12, image_url: "https://images.unsplash.com/photo-1614026480418-bd11fdb9fa06?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 13, vehicle_model_id: 13, image_url: "https://images.unsplash.com/photo-1626668011686-8b0cff2ec33f?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 14, vehicle_model_id: 14, image_url: "https://images.unsplash.com/photo-1647531038523-84b9f4d399bf?auto=format&fit=crop&w=900&q=80" },
+  { image_id: 15, vehicle_model_id: 15, image_url: "https://images.unsplash.com/photo-1617531653320-4cdb88e42ee9?auto=format&fit=crop&w=900&q=80" }
 ];
 
 export const vehicleFeatures: VehicleFeature[] = [
-  { feature_id: 1, feature_name: "Camera 360" },
-  { feature_id: 2, feature_name: "Cruise Control" },
-  { feature_id: 3, feature_name: "Man hinh lon" }
+  { feature_id: 1,  feature_name: "Camera 360°" },
+  { feature_id: 2,  feature_name: "Cruise Control" },
+  { feature_id: 3,  feature_name: "Màn hình lớn" },
+  { feature_id: 4,  feature_name: "Autopilot" },
+  { feature_id: 5,  feature_name: "Sạc nhanh DC" },
+  { feature_id: 6,  feature_name: "Cửa sổ trời" },
+  { feature_id: 7,  feature_name: "Ghế sưởi" },
+  { feature_id: 8,  feature_name: "Đỗ xe tự động" },
+  { feature_id: 9,  feature_name: "Hệ thống âm thanh premium" },
+  { feature_id: 10, feature_name: "AWD" }
 ];
 
 export const vehicleModelFeatures: VehicleModelFeature[] = [
-  { vehicle_model_id: 1, feature_id: 1 },
-  { vehicle_model_id: 1, feature_id: 3 },
-  { vehicle_model_id: 2, feature_id: 2 },
-  { vehicle_model_id: 3, feature_id: 1 },
-  { vehicle_model_id: 3, feature_id: 2 }
+  { vehicle_model_id: 1,  feature_id: 1  }, { vehicle_model_id: 1,  feature_id: 3  },
+  { vehicle_model_id: 2,  feature_id: 2  }, { vehicle_model_id: 2,  feature_id: 3  },
+  { vehicle_model_id: 3,  feature_id: 5  }, { vehicle_model_id: 3,  feature_id: 10 },
+  { vehicle_model_id: 4,  feature_id: 1  }, { vehicle_model_id: 4,  feature_id: 6  },
+  { vehicle_model_id: 5,  feature_id: 5  }, { vehicle_model_id: 5,  feature_id: 10 }, { vehicle_model_id: 5, feature_id: 6 },
+  { vehicle_model_id: 6,  feature_id: 5  }, { vehicle_model_id: 6,  feature_id: 3  },
+  { vehicle_model_id: 7,  feature_id: 1  }, { vehicle_model_id: 7,  feature_id: 7  }, { vehicle_model_id: 7, feature_id: 10 },
+  { vehicle_model_id: 8,  feature_id: 4  }, { vehicle_model_id: 8,  feature_id: 5  }, { vehicle_model_id: 8, feature_id: 3 },
+  { vehicle_model_id: 9,  feature_id: 4  }, { vehicle_model_id: 9,  feature_id: 8  }, { vehicle_model_id: 9, feature_id: 9 },
+  { vehicle_model_id: 10, feature_id: 4  }, { vehicle_model_id: 10, feature_id: 8  }, { vehicle_model_id: 10, feature_id: 6 },
+  { vehicle_model_id: 11, feature_id: 10 }, { vehicle_model_id: 11, feature_id: 9  }, { vehicle_model_id: 11, feature_id: 7 },
+  { vehicle_model_id: 12, feature_id: 9  }, { vehicle_model_id: 12, feature_id: 7  }, { vehicle_model_id: 12, feature_id: 8 },
+  { vehicle_model_id: 13, feature_id: 5  }, { vehicle_model_id: 13, feature_id: 9  }, { vehicle_model_id: 13, feature_id: 6 },
+  { vehicle_model_id: 14, feature_id: 10 }, { vehicle_model_id: 14, feature_id: 1  }, { vehicle_model_id: 14, feature_id: 5 },
+  { vehicle_model_id: 15, feature_id: 1  }, { vehicle_model_id: 15, feature_id: 6  }, { vehicle_model_id: 15, feature_id: 10 }
 ];
 
 export const vehicleSpecs: VehicleSpec[] = [
-  { spec_id: 1, vehicle_model_id: 1, spec_name: "Pin", spec_value: "42 kWh" },
-  { spec_id: 2, vehicle_model_id: 1, spec_name: "Tang toc", spec_value: "0-100 km/h trong 9s" },
-  { spec_id: 3, vehicle_model_id: 2, spec_name: "Dong co", spec_value: "1.5L" },
-  { spec_id: 4, vehicle_model_id: 3, spec_name: "Dong co", spec_value: "2.5L" }
+  { spec_id: 1,  vehicle_model_id: 1,  spec_name: "Pin",       spec_value: "42 kWh"          },
+  { spec_id: 2,  vehicle_model_id: 1,  spec_name: "Tăng tốc",  spec_value: "0-100 trong 9s"  },
+  { spec_id: 3,  vehicle_model_id: 2,  spec_name: "Pin",       spec_value: "38 kWh"           },
+  { spec_id: 4,  vehicle_model_id: 3,  spec_name: "Pin",       spec_value: "77 kWh"           },
+  { spec_id: 5,  vehicle_model_id: 4,  spec_name: "Pin",       spec_value: "75.7 kWh"         },
+  { spec_id: 6,  vehicle_model_id: 5,  spec_name: "Pin",       spec_value: "77.4 kWh"         },
+  { spec_id: 7,  vehicle_model_id: 6,  spec_name: "Pin",       spec_value: "77.4 kWh"         },
+  { spec_id: 8,  vehicle_model_id: 7,  spec_name: "Pin",       spec_value: "87.7 kWh"         },
+  { spec_id: 9,  vehicle_model_id: 8,  spec_name: "Pin",       spec_value: "82 kWh"           },
+  { spec_id: 10, vehicle_model_id: 8,  spec_name: "Tăng tốc",  spec_value: "0-100 trong 6.1s" },
+  { spec_id: 11, vehicle_model_id: 9,  spec_name: "Pin",       spec_value: "100 kWh"          },
+  { spec_id: 12, vehicle_model_id: 9,  spec_name: "Tăng tốc",  spec_value: "0-100 trong 2.1s" },
+  { spec_id: 13, vehicle_model_id: 12, spec_name: "Tăng tốc",  spec_value: "0-100 trong 4.1s" },
+  { spec_id: 14, vehicle_model_id: 13, spec_name: "Pin",       spec_value: "112 kWh"          },
+  { spec_id: 15, vehicle_model_id: 13, spec_name: "Tăng tốc",  spec_value: "0-100 trong 3.8s" }
 ];
 
 export const rentalPlans: RentalPlan[] = [
-  { rental_plan_id: 1, name: "Goi 4h", duration_type: "hour", max_km: 250, overtime_price: 150000, over_km_price: 3000 },
-  { rental_plan_id: 2, name: "Goi 8h", duration_type: "hour", max_km: 300, overtime_price: 150000, over_km_price: 3000 },
-  { rental_plan_id: 3, name: "Goi 24h", duration_type: "day", max_km: 400, overtime_price: 150000, over_km_price: 3000 }
+  { rental_plan_id: 1, name: "Gói 4h",  duration_type: "hour", max_km: 150, overtime_price: 150000, over_km_price: 3000 },
+  { rental_plan_id: 2, name: "Gói 8h",  duration_type: "hour", max_km: 250, overtime_price: 150000, over_km_price: 3000 },
+  { rental_plan_id: 3, name: "Gói 24h", duration_type: "day",  max_km: 400, overtime_price: 150000, over_km_price: 3000 }
 ];
 
 export const pricing: Pricing[] = [
-  { pricing_id: 1, vehicle_model_id: 1, rental_plan_id: 1, price: 430000 },
-  { pricing_id: 2, vehicle_model_id: 1, rental_plan_id: 3, price: 860000 },
-  { pricing_id: 3, vehicle_model_id: 2, rental_plan_id: 1, price: 650000 },
-  { pricing_id: 4, vehicle_model_id: 2, rental_plan_id: 3, price: 850000 },
-  { pricing_id: 5, vehicle_model_id: 3, rental_plan_id: 1, price: 1330000 },
-  { pricing_id: 6, vehicle_model_id: 3, rental_plan_id: 3, price: 1530000 }
+  // model_id 1 – VF e34
+  { pricing_id: 1,  vehicle_model_id: 1,  rental_plan_id: 1, price: 430000  },
+  { pricing_id: 2,  vehicle_model_id: 1,  rental_plan_id: 2, price: 650000  },
+  { pricing_id: 3,  vehicle_model_id: 1,  rental_plan_id: 3, price: 860000  },
+  // model_id 2 – Hyundai Accent EV
+  { pricing_id: 4,  vehicle_model_id: 2,  rental_plan_id: 1, price: 380000  },
+  { pricing_id: 5,  vehicle_model_id: 2,  rental_plan_id: 2, price: 600000  },
+  { pricing_id: 6,  vehicle_model_id: 2,  rental_plan_id: 3, price: 780000  },
+  // model_id 3 – VW ID.4
+  { pricing_id: 7,  vehicle_model_id: 3,  rental_plan_id: 1, price: 520000  },
+  { pricing_id: 8,  vehicle_model_id: 3,  rental_plan_id: 2, price: 820000  },
+  { pricing_id: 9,  vehicle_model_id: 3,  rental_plan_id: 3, price: 1050000 },
+  // model_id 4 – Ford Mach-E
+  { pricing_id: 10, vehicle_model_id: 4,  rental_plan_id: 1, price: 580000  },
+  { pricing_id: 11, vehicle_model_id: 4,  rental_plan_id: 2, price: 900000  },
+  { pricing_id: 12, vehicle_model_id: 4,  rental_plan_id: 3, price: 1150000 },
+  // model_id 5 – Hyundai IONIQ 5
+  { pricing_id: 13, vehicle_model_id: 5,  rental_plan_id: 1, price: 550000  },
+  { pricing_id: 14, vehicle_model_id: 5,  rental_plan_id: 2, price: 860000  },
+  { pricing_id: 15, vehicle_model_id: 5,  rental_plan_id: 3, price: 1100000 },
+  // model_id 6 – Hyundai IONIQ 6
+  { pricing_id: 16, vehicle_model_id: 6,  rental_plan_id: 1, price: 600000  },
+  { pricing_id: 17, vehicle_model_id: 6,  rental_plan_id: 2, price: 950000  },
+  { pricing_id: 18, vehicle_model_id: 6,  rental_plan_id: 3, price: 1200000 },
+  // model_id 7 – VinFast VF 8
+  { pricing_id: 19, vehicle_model_id: 7,  rental_plan_id: 1, price: 650000  },
+  { pricing_id: 20, vehicle_model_id: 7,  rental_plan_id: 2, price: 1000000 },
+  { pricing_id: 21, vehicle_model_id: 7,  rental_plan_id: 3, price: 1300000 },
+  // model_id 8 – Tesla Model 3
+  { pricing_id: 22, vehicle_model_id: 8,  rental_plan_id: 1, price: 750000  },
+  { pricing_id: 23, vehicle_model_id: 8,  rental_plan_id: 2, price: 1150000 },
+  { pricing_id: 24, vehicle_model_id: 8,  rental_plan_id: 3, price: 1500000 },
+  // model_id 9 – Tesla Model S (hạng sang)
+  { pricing_id: 25, vehicle_model_id: 9,  rental_plan_id: 1, price: 1400000 },
+  { pricing_id: 26, vehicle_model_id: 9,  rental_plan_id: 2, price: 2100000 },
+  { pricing_id: 27, vehicle_model_id: 9,  rental_plan_id: 3, price: 2800000 },
+  // model_id 10 – Tesla Model X (hạng sang)
+  { pricing_id: 28, vehicle_model_id: 10, rental_plan_id: 1, price: 1600000 },
+  { pricing_id: 29, vehicle_model_id: 10, rental_plan_id: 2, price: 2400000 },
+  { pricing_id: 30, vehicle_model_id: 10, rental_plan_id: 3, price: 3200000 },
+  // model_id 11 – Polestar 2 (hạng sang)
+  { pricing_id: 31, vehicle_model_id: 11, rental_plan_id: 1, price: 1200000 },
+  { pricing_id: 32, vehicle_model_id: 11, rental_plan_id: 2, price: 1800000 },
+  { pricing_id: 33, vehicle_model_id: 11, rental_plan_id: 3, price: 2400000 },
+  // model_id 12 – Audi e-tron GT (hạng sang)
+  { pricing_id: 34, vehicle_model_id: 12, rental_plan_id: 1, price: 1800000 },
+  { pricing_id: 35, vehicle_model_id: 12, rental_plan_id: 2, price: 2700000 },
+  { pricing_id: 36, vehicle_model_id: 12, rental_plan_id: 3, price: 3600000 },
+  // model_id 13 – Lucid Air Pure (hạng sang)
+  { pricing_id: 37, vehicle_model_id: 13, rental_plan_id: 1, price: 1900000 },
+  { pricing_id: 38, vehicle_model_id: 13, rental_plan_id: 2, price: 2900000 },
+  { pricing_id: 39, vehicle_model_id: 13, rental_plan_id: 3, price: 3800000 },
+  // model_id 14 – Rivian R1S (hạng sang)
+  { pricing_id: 40, vehicle_model_id: 14, rental_plan_id: 1, price: 1700000 },
+  { pricing_id: 41, vehicle_model_id: 14, rental_plan_id: 2, price: 2600000 },
+  { pricing_id: 42, vehicle_model_id: 14, rental_plan_id: 3, price: 3400000 },
+  // model_id 15 – VinFast VF 9
+  { pricing_id: 43, vehicle_model_id: 15, rental_plan_id: 1, price: 900000  },
+  { pricing_id: 44, vehicle_model_id: 15, rental_plan_id: 2, price: 1400000 },
+  { pricing_id: 45, vehicle_model_id: 15, rental_plan_id: 3, price: 1800000 }
 ];
 
 export const bookings: Booking[] = [
-  {
-    booking_id: 1,
-    user_id: 2,
-    vehicle_id: 1,
-    rental_plan_id: 3,
-    start_time: "2026-04-26T01:00:00Z",
-    end_time: "2026-04-27T01:00:00Z",
-    planned_km: 120,
-    actual_km: 110,
-    deposit_amount: 500000,
-    overtime_fee: 0,
-    over_km_fee: 0,
-    total_price: 860000,
-    status: "confirmed",
-    created_at: "2026-04-25T12:00:00Z"
-  }
+  { booking_id: 1, user_id: 2, vehicle_id: 1, rental_plan_id: 3, start_time: "2026-04-26T01:00:00Z", end_time: "2026-04-27T01:00:00Z", planned_km: 120, actual_km: 110, deposit_amount: 500000, overtime_fee: 0, over_km_fee: 0, total_price: 860000, status: "confirmed", created_at: "2026-04-25T12:00:00Z" }
 ];
 
 export const payments: Payment[] = [
@@ -154,19 +237,12 @@ export const payments: Payment[] = [
 ];
 
 export const reviews: Review[] = [
-  {
-    review_id: 1,
-    user_id: 2,
-    vehicle_model_id: 1,
-    booking_id: 1,
-    rating: 5,
-    comment: "Xe sach, de lai, dung nhu mo ta.",
-    created_at: "2026-04-25T12:30:00Z"
-  }
+  { review_id: 1, user_id: 2, vehicle_model_id: 1, booking_id: 1, rating: 5, comment: "Xe sạch, dễ lái, đúng như mô tả.", created_at: "2026-04-25T12:30:00Z" },
+  { review_id: 2, user_id: 2, vehicle_model_id: 8, booking_id: 1, rating: 5, comment: "Tesla quá mượt, Autopilot ấn tượng!", created_at: "2026-04-26T10:00:00Z" }
 ];
 
 export const homepageTestimonials = [
-  { id: 1, name: "Anh Hoa", area: "Ba Dinh", message: "Ho tro nhanh, dat xe tien loi." },
-  { id: 2, name: "Chi Linh", area: "Cau Giay", message: "Gia 4h rat hop ly cho viec di noi thanh." },
-  { id: 3, name: "Anh Dat", area: "Dong Da", message: "Xe moi, nhan tra chu dong qua app." }
+  { id: 1, name: "Anh Hoà",  area: "Ba Đình",    message: "Hỗ trợ nhanh, đặt xe tiện lợi. VF8 rộng rãi, cảm giác lái rất êm." },
+  { id: 2, name: "Chị Linh", area: "Cầu Giấy",   message: "Gói 4h rất hợp lý cho việc đi nội thành. Xe giao đúng giờ, pin đầy." },
+  { id: 3, name: "Anh Đạt",  area: "Đống Đa",    message: "Thuê Tesla Model 3 trải nghiệm tuyệt vời. Nhất định sẽ quay lại!" }
 ];
