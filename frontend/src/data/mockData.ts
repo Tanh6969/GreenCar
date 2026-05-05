@@ -1,6 +1,7 @@
 import { Booking, Pricing, RentalPlan } from "../types/booking.type";
 import { Payment, Review } from "../types/payment.type";
 import { Role, User } from "../types/user.type";
+import { BlogCategory, BlogPost } from "../types/blog.type";
 import {
   Location,
   Vehicle,
@@ -245,4 +246,141 @@ export const homepageTestimonials = [
   { id: 1, name: "Anh Hoà",  area: "Ba Đình",    message: "Hỗ trợ nhanh, đặt xe tiện lợi. VF8 rộng rãi, cảm giác lái rất êm." },
   { id: 2, name: "Chị Linh", area: "Cầu Giấy",   message: "Gói 4h rất hợp lý cho việc đi nội thành. Xe giao đúng giờ, pin đầy." },
   { id: 3, name: "Anh Đạt",  area: "Đống Đa",    message: "Thuê Tesla Model 3 trải nghiệm tuyệt vời. Nhất định sẽ quay lại!" }
+];
+
+// ── BLOG ──────────────────────────────────────────────────────────────────────
+
+export const blogCategories: BlogCategory[] = [
+  { category_id: 1, name: "Kinh nghiệm lái xe điện", slug: "kinh-nghiem" },
+  { category_id: 2, name: "Tin tức EV",               slug: "tin-tuc-ev" },
+  { category_id: 3, name: "Hướng dẫn sạc pin",        slug: "sac-pin" },
+  { category_id: 4, name: "Đánh giá xe",               slug: "danh-gia-xe" },
+];
+
+export const blogPosts: BlogPost[] = [
+  {
+    post_id: 1,
+    user_id: 2,
+    category_id: 1,
+    title: "5 điều cần biết trước khi thuê xe điện lần đầu",
+    slug: "5-dieu-can-biet-truoc-khi-thue-xe-dien",
+    excerpt: "Xe điện ngày càng phổ biến, nhưng không phải ai cũng biết cách khai thác tối đa khi thuê. Bài viết này tổng hợp những kinh nghiệm thực tế.",
+    content: `## 1. Kiểm tra mức pin trước khi nhận xe
+
+Khi nhận xe, hãy chắc chắn pin ở mức tối thiểu 80%. GreenCar luôn giao xe với pin trên 80%, nhưng bạn nên xác nhận lại trên màn hình.
+
+## 2. Lên kế hoạch sạc nếu đi xa
+
+Xe điện có phạm vi hoạt động cố định — hãy dùng ứng dụng PlugShare để tìm trạm sạc trên tuyến đường. Với các gói 1 ngày trở lên, GreenCar hỗ trợ 1 lần sạc miễn phí tại trạm đối tác.
+
+## 3. Lái xe êm, tận dụng phanh tái sinh
+
+Chế độ "One-Pedal Driving" trên hầu hết xe điện giúp thu hồi năng lượng khi thả chân ga. Lái mượt = tiết kiệm pin và thoải mái hơn cho hành khách.
+
+## 4. Không tắt điều hòa hoàn toàn khi trời nóng
+
+Điều hòa tiêu thụ ~10-20% pin. Thay vì tắt hẳn, hãy đặt ở 25-26°C để cân bằng tiện nghi và mức tiêu thụ.
+
+## 5. Hoàn trả đúng giờ để tránh phí phụ
+
+GreenCar tính phí trễ 30 phút: 50.000 VNĐ/30 phút. Nếu cần thêm thời gian, hãy liên hệ hotline gia hạn trước ít nhất 1 tiếng.`,
+    cover_image: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=80",
+    status: "published",
+    published_at: "2026-03-15T08:00:00Z",
+    created_at: "2026-03-14T10:00:00Z",
+    updated_at: "2026-03-14T10:00:00Z",
+  },
+  {
+    post_id: 2,
+    user_id: 3,
+    category_id: 4,
+    title: "Đánh giá Hyundai IONIQ 5 sau 3 ngày thuê tại Hà Nội",
+    slug: "danh-gia-hyundai-ioniq-5",
+    excerpt: "IONIQ 5 là cái tên hot nhất phân khúc crossover điện hiện nay. Sau 3 ngày trải nghiệm thực tế trên đường Hà Nội, đây là những gì tôi nghĩ.",
+    content: `## Thiết kế & nội thất
+
+IONIQ 5 gây ấn tượng ngay từ cái nhìn đầu tiên với ngôn ngữ thiết kế Parametric Pixel vuông vức, retro-futuristic. Bên trong, khoảng cabin rộng bất ngờ nhờ sàn xe bằng phẳng (không có hầm truyền động).
+
+## Khả năng vận hành
+
+Phiên bản AWD 225 mã lực tăng tốc 0-100 km/h trong 5,1 giây. Trên đường Hà Nội đông đúc, sức mạnh này có vẻ "dư" nhưng cảm giác nhấn ga tức thì rất thú vị.
+
+## Pin & sạc
+
+Phạm vi thực tế ~370 km (thấp hơn công bố 451 km do điều hòa và kẹt xe). Điểm sáng là hỗ trợ sạc nhanh 800V — từ 10% lên 80% chỉ 18 phút tại trạm tương thích.
+
+## Kết luận
+
+IONIQ 5 là lựa chọn tuyệt vời cho chuyến đi 2-3 ngày. Giá thuê 1.250.000 VNĐ/ngày trên GreenCar là hợp lý cho trải nghiệm này.`,
+    cover_image: "https://images.unsplash.com/photo-1619767886558-efdc259b6e09?w=800&q=80",
+    status: "published",
+    published_at: "2026-04-01T09:00:00Z",
+    created_at: "2026-03-30T14:00:00Z",
+    updated_at: "2026-03-30T14:00:00Z",
+  },
+  {
+    post_id: 3,
+    user_id: 2,
+    category_id: 3,
+    title: "Bản đồ trạm sạc xe điện tại Hà Nội 2026",
+    slug: "ban-do-tram-sac-ha-noi-2026",
+    excerpt: "Danh sách cập nhật các trạm sạc nhanh DC và sạc AC tại Hà Nội, kèm mức phí và giờ hoạt động.",
+    content: `## Trạm sạc nhanh DC (CCS2 / CHAdeMO)
+
+| Địa điểm | Công suất | Phí/kWh |
+|---|---|---|
+| VinFast – Mipec Tower, Long Biên | 120 kW | 3.858 VNĐ |
+| EVgo – Lotte Center, Ba Đình | 100 kW | 4.200 VNĐ |
+| Hyundai – Trường Chinh, Đống Đa | 100 kW | Miễn phí (KH Hyundai) |
+
+## Trạm sạc AC (Type 2)
+
+Hầu hết bãi đậu xe tại Vincom, AEON Mall, Lotte đều có trạm Type 2. Phù hợp cho sạc qua đêm (~7-10 tiếng đầy pin).
+
+## Mẹo sử dụng
+
+- **Giờ thấp điểm**: 22:00 – 06:00 có giá điện thấp hơn ~30% tại một số trạm
+- **Ứng dụng**: PlugShare, EVN Smart Charge để kiểm tra trạm trống theo thời gian thực`,
+    cover_image: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=800&q=80",
+    status: "published",
+    published_at: "2026-04-10T07:00:00Z",
+    created_at: "2026-04-09T16:00:00Z",
+    updated_at: "2026-04-09T16:00:00Z",
+  },
+  {
+    post_id: 4,
+    user_id: 2,
+    category_id: 2,
+    title: "VinFast VF 9 – SUV 7 chỗ điện đầu tiên dành cho gia đình Việt",
+    slug: "vinfast-vf9-suv-7-cho-dien",
+    excerpt: "VF 9 vừa được bổ sung vào đội xe GreenCar. Đây là cái nhìn tổng quan về người khổng lồ 7 chỗ mang thương hiệu Việt.",
+    content: `VinFast VF 9 là chiếc SUV 7 chỗ điện đầu tiên của VinFast nhắm vào phân khúc gia đình cao cấp.
+
+**Thông số nổi bật:**
+- 402 mã lực, AWD
+- Phạm vi 438 km (WLTP)
+- Cốp sau 585 lít
+- 8 túi khí
+
+Trải nghiệm lái rất ổn định nhờ hệ thống treo khí nén tùy chọn. Ghế hàng 3 dễ gập và vào/ra thuận tiện hơn nhiều so với VF 8.`,
+    cover_image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80",
+    status: "pending",
+    published_at: null,
+    created_at: "2026-05-01T11:00:00Z",
+    updated_at: "2026-05-01T11:00:00Z",
+  },
+  {
+    post_id: 5,
+    user_id: 3,
+    category_id: 1,
+    title: "Kinh nghiệm lái xe điện trên cao tốc Hà Nội – Hải Phòng",
+    slug: "kinh-nghiem-lai-xe-dien-cao-toc-ha-noi-hai-phong",
+    excerpt: "Chuyến đi 200 km Hà Nội – Hải Phòng và về bằng Hyundai Accent EV: tiêu hao thực tế, trạm sạc dọc đường, và những bất ngờ.",
+    content: `Nội dung đang được biên soạn...`,
+    cover_image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80",
+    status: "draft",
+    published_at: null,
+    created_at: "2026-05-03T09:00:00Z",
+    updated_at: "2026-05-03T09:00:00Z",
+  },
 ];

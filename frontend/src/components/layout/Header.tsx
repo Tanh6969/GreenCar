@@ -34,6 +34,7 @@ const Header: React.FC = () => {
 
         <nav className="nav">
           <Link to="/cars">Danh sách xe</Link>
+          <Link to="/blog">Blog</Link>
           {user && <Link to="/customer/my-bookings">Đơn của tôi</Link>}
           {isAdmin && <Link to="/admin/dashboard">Admin</Link>}
         </nav>
@@ -78,6 +79,7 @@ const Header: React.FC = () => {
                   {[
                     { to: "/customer/profile", icon: "👤", label: "Tài khoản của tôi" },
                     { to: "/customer/my-bookings", icon: "📋", label: "Đơn thuê xe" },
+                    { to: "/customer/blogs", icon: "✍️", label: "Bài viết của tôi" },
                     ...(isAdmin ? [{ to: "/admin/dashboard", icon: "⚙️", label: "Quản trị" }] : []),
                   ].map(item => (
                     <Link
