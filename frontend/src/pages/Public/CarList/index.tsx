@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useVehicles } from "../../../hooks/useVehicles";
 import { pricing } from "../../../data/mockData";
+import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
 const VEHICLE_TYPES = ["Sedan", "SUV", "Crossover", "Fastback", "Hatchback"];
@@ -198,8 +199,8 @@ const CarListPage: React.FC = () => {
                   <article key={item.vehicle.vehicle_id}
                     className="bg-white rounded-xl overflow-hidden border border-[#BDCAC1] shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
                     <div className="relative">
-                      {item.image?.image_url ? (
-                        <img src={item.image.image_url} alt={item.model.name}
+                      {(MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image?.image_url) ? (
+                        <img src={MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image?.image_url} alt={item.model.name}
                           className="w-full h-48 object-cover" />
                       ) : (
                         <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center text-5xl">🚗</div>

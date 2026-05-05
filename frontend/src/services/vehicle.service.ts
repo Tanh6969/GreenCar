@@ -16,8 +16,10 @@ export const vehicleService = {
 
   async getVehicleDetail(vehicleId: number) {
     await wait();
-    const vehicle = vehicles.find((v) => v.vehicle_id === vehicleId)!;
-    const model = vehicleModels.find((m) => m.vehicle_model_id === vehicle.vehicle_model_id)!;
+    const vehicle = vehicles.find((v) => v.vehicle_id === vehicleId);
+    if (!vehicle) return null;
+    const model = vehicleModels.find((m) => m.vehicle_model_id === vehicle.vehicle_model_id);
+    if (!model) return null;
     return {
       vehicle,
       model,
@@ -26,7 +28,8 @@ export const vehicleService = {
       specs: vehicleSpecs.filter((s) => s.vehicle_model_id === model.vehicle_model_id),
       features: vehicleModelFeatures
         .filter((mf) => mf.vehicle_model_id === model.vehicle_model_id)
-        .map((mf) => vehicleFeatures.find((f) => f.feature_id === mf.feature_id)!),
+        .map((mf) => vehicleFeatures.find((f) => f.feature_id === mf.feature_id))
+        .filter((f): f is NonNullable<typeof f> => f !== undefined),
       pricing: pricing.filter((p) => p.vehicle_model_id === model.vehicle_model_id)
     };
   }

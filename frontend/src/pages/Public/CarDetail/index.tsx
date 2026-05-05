@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { vehicleService } from "../../../services/vehicle.service";
+import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
 interface DetailData {
@@ -71,7 +72,7 @@ const CarDetailPage: React.FC = () => {
   const { vehicle, model, location, images, specs, features, pricing } = data;
   const available = vehicle.status === "available";
   const selectedPrice = pricing.find(p => p.rental_plan_id === selectedPlan)?.price ?? 0;
-  const mainImg = images[imgIdx]?.image_url;
+  const mainImg = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? images[imgIdx]?.image_url;
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
