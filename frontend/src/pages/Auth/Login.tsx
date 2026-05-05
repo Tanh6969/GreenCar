@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const from = (location.state as { from?: string })?.from ?? "/";
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     if (!email.trim()) { setError("Vui lòng nhập email."); return; }
