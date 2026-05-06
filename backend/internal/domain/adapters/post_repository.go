@@ -1,15 +1,22 @@
 package adapters
 
-import (
-	"context"
+import "greencar/internal/domain/entities"
 
-	"greencar/internal/domain/entities"
-)
-
+// PostRepository defines storage operations for blog posts.
 type PostRepository interface {
-	Create(ctx context.Context, post *entities.Post) error
-	GetByID(ctx context.Context, id string) (*entities.Post, error)
-	List(ctx context.Context, limit, offset int) ([]*entities.Post, error)
-	Update(ctx context.Context, post *entities.Post) error
-	Delete(ctx context.Context, id string) error
+	// Public
+	ListPublished(limit, offset int) ([]*entities.BlogPost, error)
+	GetBySlug(slug string) (*entities.BlogPost, error)
+	ListCategories() ([]*entities.BlogCategory, error)
+
+	// User
+	GetByID(id int) (*entities.BlogPost, error)
+	ListByUser(userID, limit, offset int) ([]*entities.BlogPost, error)
+	Create(p *entities.BlogPost) error
+	Update(p *entities.BlogPost) error
+	Delete(id int) error
+
+	// Admin
+	ListAll(limit, offset int) ([]*entities.BlogPost, error)
+	SetStatus(id int, status, rejectReason string) error
 }

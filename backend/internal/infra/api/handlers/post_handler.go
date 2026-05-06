@@ -8,123 +8,310 @@ import (
 	"greencar/internal/domain/entities"
 	"greencar/internal/infra/api/dto"
 	"greencar/internal/infra/api/middlewares"
+	"greencar/internal/infra/api/response"
 	"greencar/internal/service"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type PostHandler struct {
-	postService *service.PostService
+	svc *service.PostService
 }
 
-func NewPostHandler(postService *service.PostService) *PostHandler {
-	return &PostHandler{postService: postService}
+func NewPostHandler(svc *service.PostService) *PostHandler {
+	return &PostHandler{svc: svc}
+}
+
+func toPostResponse(p *entities.BlogPost) *dto.BlogPostResponse {
+	return &dto.BlogPostResponse{
+		PostID:       p.PostID,
+		UserID:       p.UserID,
+		Title:        p.Title,
+		Slug:         p.Slug,
+		Excerpt:      p.Excerpt,
+		Content:      p.Content,
+		CoverImage:   p.CoverImage,
+		Status:       p.Status,
+		RejectReason: p.RejectReason,
+		PublishedAt:  p.PublishedAt,
+		CreatedAt:    p.CreatedAt,
+		UpdatedAt:    p.UpdatedAt,
+	}
+}
+
+func paginationParams(r *http.Request, defaultLimit int) (limit, offset int) {
+	limit = defaultLimit
+	q := r.URL.Query()
+	if l := q.Get("limit"); l != "" {
+		if v, err := strconv.Atoi(l); err == nil && v > 0 {
+			limit = v
+		}
+	}
+	if o := q.Get("offset"); o != "" {
+		if v, err := strconv.Atoi(o); err == nil && v >= 0 {
+			offset = v
+		}
+	}
+	return
+}
+
+// ── Public ────────────────────────────────────────────────────
+
+func (h *PostHandler) ListPublished(w http.ResponseWriter, r *http.Request) {
+	limit, offset := paginationParams(r, 20)
+	posts, err := h.svc.ListPublished(limit, offset)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to fetch posts")
+		return
+	}
+	out := make([]*dto.BlogPostResponse, 0, len(posts))
+	for _, p := range posts {
+		out = append(out, toPostResponse(p))
+	}
+	response.WriteJSON(w, http.StatusOK, out)
+}
+
+func (h *PostHandler) GetBySlug(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+	p, err := h.svc.GetBySlug(slug)
+	if err != nil {
+		response.WriteError(w, http.StatusNotFound, "post not found")
+		return
+	}
+	response.WriteJSON(w, http.StatusOK, toPostResponse(p))
+}
+
+func (h *PostHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
+	cats, err := h.svc.ListCategories()
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to fetch categories")
+		return
+	}
+	out := make([]*dto.BlogCategoryResponse, 0, len(cats))
+	for _, c := range cats {
+		out = append(out, &dto.BlogCategoryResponse{CategoryID: c.CategoryID, Name: c.Name, Slug: c.Slug})
+	}
+	response.WriteJSON(w, http.StatusOK, out)
+}
+
+// ── User (auth required) ──────────────────────────────────────
+
+func (h *PostHandler) ListMyPosts(w http.ResponseWriter, r *http.Request) {
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	limit, offset := paginationParams(r, 50)
+	posts, err := h.svc.ListByUser(int(payload.UserId), limit, offset)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to fetch posts")
+		return
+	}
+	out := make([]*dto.BlogPostResponse, 0, len(posts))
+	for _, p := range posts {
+		out = append(out, toPostResponse(p))
+	}
+	response.WriteJSON(w, http.StatusOK, out)
 }
 
 func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
-	var req dto.CreatePostRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
 	payload := middlewares.GetPayload(r)
 	if payload == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-
-	post, err := h.postService.CreatePost(r.Context(), req.Title, req.Content, payload.UserId)
-	if err != nil {
-		http.Error(w, "Failed to create post", http.StatusInternalServerError)
+	var req dto.CreatePostRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(post)
-}
-
-func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "Missing post ID", http.StatusBadRequest)
+	if req.Title == "" {
+		response.WriteError(w, http.StatusBadRequest, "title is required")
 		return
 	}
-
-	post, err := h.postService.GetPostByID(r.Context(), id)
-	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+	p := &entities.BlogPost{
+		UserID:     int(payload.UserId),
+		CategoryID: req.CategoryID,
+		Title:      req.Title,
+		Slug:       req.Slug,
+		Excerpt:    req.Excerpt,
+		Content:    req.Content,
+		CoverImage: req.CoverImage,
+	}
+	if err := h.svc.CreatePost(p); err != nil {
+		response.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
-}
-
-func (h *PostHandler) ListPosts(w http.ResponseWriter, r *http.Request) {
-	limit := 10
-	offset := 0
-
-	if l := r.URL.Query().Get("limit"); l != "" {
-		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 {
-			limit = parsed
-		}
-	}
-
-	if o := r.URL.Query().Get("offset"); o != "" {
-		if parsed, err := strconv.Atoi(o); err == nil && parsed >= 0 {
-			offset = parsed
-		}
-	}
-
-	posts, err := h.postService.ListPosts(r.Context(), limit, offset)
-	if err != nil {
-		http.Error(w, "Failed to fetch posts", http.StatusInternalServerError)
-		return
-	}
-
-	if posts == nil {
-		posts = make([]*entities.Post, 0)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	response.WriteJSON(w, http.StatusCreated, toPostResponse(p))
 }
 
 func (h *PostHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "Missing post ID", http.StatusBadRequest)
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
+		return
+	}
 	var req dto.UpdatePostRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		response.WriteError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
+	p := &entities.BlogPost{
+		PostID:     id,
+		UserID:     int(payload.UserId),
+		CategoryID: req.CategoryID,
+		Title:      req.Title,
+		Slug:       req.Slug,
+		Excerpt:    req.Excerpt,
+		Content:    req.Content,
+		CoverImage: req.CoverImage,
+	}
+	if err := h.svc.UpdatePost(p); err != nil {
+		code := http.StatusBadRequest
+		if err.Error() == "forbidden" {
+			code = http.StatusForbidden
+		}
+		response.WriteError(w, code, err.Error())
+		return
+	}
+	updated, _ := h.svc.GetByID(id)
+	response.WriteJSON(w, http.StatusOK, toPostResponse(updated))
+}
 
-	post, err := h.postService.UpdatePost(r.Context(), id, req.Title, req.Content)
+func (h *PostHandler) SubmitPost(w http.ResponseWriter, r *http.Request) {
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Failed to update post", http.StatusInternalServerError)
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
 		return
 	}
+	if err := h.svc.SubmitForReview(id, int(payload.UserId)); err != nil {
+		code := http.StatusBadRequest
+		if err.Error() == "forbidden" {
+			code = http.StatusForbidden
+		}
+		response.WriteError(w, code, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
+func (h *PostHandler) WithdrawPost(w http.ResponseWriter, r *http.Request) {
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
+		return
+	}
+	if err := h.svc.WithdrawPost(id, int(payload.UserId)); err != nil {
+		code := http.StatusBadRequest
+		if err.Error() == "forbidden" {
+			code = http.StatusForbidden
+		}
+		response.WriteError(w, code, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "Missing post ID", http.StatusBadRequest)
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-
-	err := h.postService.DeletePost(r.Context(), id)
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		http.Error(w, "Failed to delete post", http.StatusInternalServerError)
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
 		return
 	}
-
+	if err := h.svc.DeletePost(id, int(payload.UserId)); err != nil {
+		code := http.StatusBadRequest
+		if err.Error() == "forbidden" {
+			code = http.StatusForbidden
+		}
+		response.WriteError(w, code, err.Error())
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// ── Admin ─────────────────────────────────────────────────────
+
+func (h *PostHandler) AdminListPosts(w http.ResponseWriter, r *http.Request) {
+	limit, offset := paginationParams(r, 50)
+	posts, err := h.svc.AdminListAll(limit, offset)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "failed to fetch posts")
+		return
+	}
+	out := make([]*dto.BlogPostResponse, 0, len(posts))
+	for _, p := range posts {
+		out = append(out, toPostResponse(p))
+	}
+	response.WriteJSON(w, http.StatusOK, out)
+}
+
+func (h *PostHandler) AdminSetStatus(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
+		return
+	}
+	var req dto.SetStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.Status != "published" && req.Status != "rejected" {
+		response.WriteError(w, http.StatusBadRequest, "status must be published or rejected")
+		return
+	}
+	if err := h.svc.AdminSetStatus(id, req.Status, req.RejectReason); err != nil {
+		response.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *PostHandler) AdminDeletePost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
+		return
+	}
+	if err := h.svc.AdminDeletePost(id); err != nil {
+		response.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetPost is used by admin GET /admin/posts/{id}
+func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "invalid post id")
+		return
+	}
+	p, err := h.svc.GetByID(id)
+	if err != nil {
+		response.WriteError(w, http.StatusNotFound, "post not found")
+		return
+	}
+	response.WriteJSON(w, http.StatusOK, toPostResponse(p))
 }

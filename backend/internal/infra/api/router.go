@@ -19,6 +19,7 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 	r := chi.NewRouter()
 
 	// Global middleware
+	r.Use(middlewares.CORSMiddleware)
 	r.Use(middlewares.LoggingMiddleware(log))
 	r.Use(middlewares.RateLimitMiddleware(100)) // 100 requests per minute per IP
 
@@ -27,6 +28,17 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 	// Public auth routes (no authentication needed)
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", handlers.LoginHandler(authSvc, log))
+		r.Post("/register", handlers.RegisterHandler(authSvc, log))
+	})
+
+	// Blog handler (used by public, user, and admin routes below)
+	postHandler := handlers.NewPostHandler(postSvc)
+
+	// Public blog routes
+	r.Route("/blog", func(r chi.Router) {
+		r.Get("/posts", postHandler.ListPublished)
+		r.Get("/posts/{slug}", postHandler.GetBySlug)
+		r.Get("/categories", postHandler.ListCategories)
 	})
 
 	// Protected routes with authentication middleware
@@ -81,30 +93,43 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 		})
 
 		// Admin posts management
-		postHandler := handlers.NewPostHandler(postSvc)
 		r.Route("/posts", func(r chi.Router) {
-			r.Get("/", postHandler.ListPosts)
-			r.Post("/", postHandler.CreatePost)
+			r.Get("/", postHandler.AdminListPosts)
 			r.Get("/{id}", postHandler.GetPost)
-			r.Put("/{id}", postHandler.UpdatePost)
-			r.Delete("/{id}", postHandler.DeletePost)
+			r.Put("/{id}/status", postHandler.AdminSetStatus)
+			r.Delete("/{id}", postHandler.AdminDeletePost)
 		})
 	})
 
 	// Public vehicle browse
 	r.Route("/vehicles", func(r chi.Router) {
+		r.Get("/cards", handlers.ListVehicleCardsHandler(vehicleSvc, log))
 		routes.RegisterVehicleRoutes(r, vehicleSvc, log)
 	})
 
 	// Authenticated user + booking routes
 	r.Route("/users", func(r chi.Router) {
 		r.Use(auth)
+		r.Get("/me", handlers.GetMeHandler(userSvc, log))
 		routes.RegisterUserRoutes(r, userSvc, log)
 	})
 
 	r.Route("/bookings", func(r chi.Router) {
 		r.Use(auth)
 		routes.RegisterBookingRoutes(r, bookingSvc, log)
+	})
+
+	// Authenticated user blog routes
+	r.Route("/my/posts", func(r chi.Router) {
+		r.Use(auth)
+		r.Get("/", postHandler.ListMyPosts)
+		r.Post("/", postHandler.CreatePost)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Put("/", postHandler.UpdatePost)
+			r.Delete("/", postHandler.DeletePost)
+			r.Post("/submit", postHandler.SubmitPost)
+			r.Post("/withdraw", postHandler.WithdrawPost)
+		})
 	})
 
 	return r

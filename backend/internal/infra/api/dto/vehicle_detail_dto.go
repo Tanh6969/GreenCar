@@ -1,11 +1,26 @@
 package dto
 
+// VehicleCardResponse is the lightweight card view used in list pages and carousels.
+type VehicleCardResponse struct {
+	Vehicle  *VehicleResponse      `json:"vehicle"`
+	Model    *VehicleModelResponse `json:"model"`
+	Location *LocationResponse     `json:"location"`
+	ImageURL string                `json:"image_url"`
+}
+
+// VehicleFeatureResponse represents a feature.
+type VehicleFeatureResponse struct {
+	FeatureID   int    `json:"feature_id"`
+	FeatureName string `json:"feature_name"`
+}
+
 // VehicleDetailResponse is the API response payload for the vehicle detail page.
 type VehicleDetailResponse struct {
 	Vehicle  *VehicleResponse          `json:"vehicle"`
 	Model    *VehicleModelResponse     `json:"model"`
 	Location *LocationResponse         `json:"location"`
 	Images   []*VehicleImageResponse   `json:"images"`
+	Features []*VehicleFeatureResponse `json:"features"`
 	Specs    []*VehicleSpecResponse    `json:"specs"`
 	Pricing  []*VehiclePricingResponse `json:"pricing"`
 	Reviews  []*ReviewResponse         `json:"reviews"`

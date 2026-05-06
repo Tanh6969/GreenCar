@@ -53,3 +53,8 @@ func (s *VehicleService) DeleteVehicle(id int) error {
 func (s *VehicleService) GetVehicleDetail(id int) (*entities.VehicleDetail, error) {
 	return s.detailRepo.GetByVehicleID(id)
 }
+
+// ListVehicleCards returns lightweight vehicle cards with model and location joined.
+func (s *VehicleService) ListVehicleCards(limit, offset int) ([]*entities.VehicleCard, error) {
+	return s.detailRepo.ListCards(limit, offset)
+}

@@ -6,4 +6,5 @@ import "greencar/internal/domain/entities"
 // This is used to build the full detail page response for a vehicle.
 type VehicleDetailRepository interface {
 	GetByVehicleID(id int) (*entities.VehicleDetail, error)
+	ListCards(limit, offset int) ([]*entities.VehicleCard, error)
 }

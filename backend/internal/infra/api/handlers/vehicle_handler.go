@@ -54,6 +54,36 @@ func GetVehicleDetailHandler(vehicleSvc *service.VehicleService, log *logger.Log
 	}
 }
 
+// ListVehicleCardsHandler returns lightweight vehicle cards with model and location joined.
+func ListVehicleCardsHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		limit, offset := 100, 0
+		if l := q.Get("limit"); l != "" {
+			if v, err := strconv.Atoi(l); err == nil && v > 0 {
+				limit = v
+			}
+		}
+		if o := q.Get("offset"); o != "" {
+			if v, err := strconv.Atoi(o); err == nil && v >= 0 {
+				offset = v
+			}
+		}
+
+		cards, err := vehicleSvc.ListVehicleCards(limit, offset)
+		if err != nil {
+			log.Warn("list vehicle cards: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to list vehicles")
+			return
+		}
+		out := make([]*dto.VehicleCardResponse, 0, len(cards))
+		for _, c := range cards {
+			out = append(out, mappers.ToVehicleCardResponse(c))
+		}
+		response.WriteJSON(w, http.StatusOK, out)
+	}
+}
+
 // ListVehiclesHandler returns a handler for listing vehicles with pagination.
 func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

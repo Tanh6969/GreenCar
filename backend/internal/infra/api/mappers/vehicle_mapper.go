@@ -60,6 +60,18 @@ func ToVehicleUpdateParams(id int, req *dto.UpdateVehicleRequest) entities.Vehic
 	}
 }
 
+func ToVehicleCardResponse(c *entities.VehicleCard) *dto.VehicleCardResponse {
+	if c == nil {
+		return nil
+	}
+	return &dto.VehicleCardResponse{
+		Vehicle:  ToVehicleResponse(c.Vehicle),
+		Model:    toVehicleModelResponse(c.Model),
+		Location: toLocationResponse(c.Location),
+		ImageURL: c.ImageURL,
+	}
+}
+
 func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailResponse {
 	if detail == nil {
 		return nil
@@ -70,6 +82,7 @@ func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailR
 		Model:    toVehicleModelResponse(detail.Model),
 		Location: toLocationResponse(detail.Location),
 		Images:   toVehicleImageResponses(detail.Images),
+		Features: toVehicleFeatureResponses(detail.Features),
 		Specs:    toVehicleSpecResponses(detail.Specs),
 		Pricing:  toVehiclePricingResponses(detail.Pricing),
 		Reviews:  toReviewResponses(detail.Reviews),
@@ -118,6 +131,17 @@ func toLocationResponse(l *entities.Location) *dto.LocationResponse {
 		Latitude:  l.Latitude,
 		Longitude: l.Longitude,
 	}
+}
+
+func toVehicleFeatureResponses(features []*entities.VehicleFeature) []*dto.VehicleFeatureResponse {
+	if features == nil {
+		return nil
+	}
+	out := make([]*dto.VehicleFeatureResponse, 0, len(features))
+	for _, f := range features {
+		out = append(out, &dto.VehicleFeatureResponse{FeatureID: f.FeatureID, FeatureName: f.FeatureName})
+	}
+	return out
 }
 
 func toVehicleImageResponses(images []*entities.VehicleImage) []*dto.VehicleImageResponse {

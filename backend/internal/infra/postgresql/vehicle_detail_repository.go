@@ -17,6 +17,49 @@ func NewVehicleDetailRepository(db *database.DB) adapters.VehicleDetailRepositor
 	return &vehicleDetailRepository{db: db}
 }
 
+func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.VehicleCard, error) {
+	query := `
+		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id,
+		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
+		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
+		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url
+		FROM vehicles v
+		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
+		JOIN locations l ON l.location_id = v.location_id
+		ORDER BY v.vehicle_id
+		LIMIT $1 OFFSET $2`
+
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cards []*entities.VehicleCard
+	for rows.Next() {
+		var v entities.Vehicle
+		var m entities.VehicleModel
+		var loc entities.Location
+		var imageURL string
+		err := rows.Scan(
+			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID,
+			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
+			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
+			&imageURL,
+		)
+		if err != nil {
+			return nil, err
+		}
+		cards = append(cards, &entities.VehicleCard{
+			Vehicle:  &v,
+			Model:    &m,
+			Location: &loc,
+			ImageURL: imageURL,
+		})
+	}
+	return cards, rows.Err()
+}
+
 func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetail, error) {
 	// Load vehicle
 	var v entities.Vehicle
@@ -58,6 +101,27 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			return nil, err
 		}
 		images = append(images, &img)
+	}
+
+	// Load features
+	features := make([]*entities.VehicleFeature, 0)
+	featureRows, err := r.db.Query(
+		`SELECT f.feature_id, f.feature_name
+		 FROM vehicle_features f
+		 JOIN vehicle_model_features mf ON mf.feature_id = f.feature_id
+		 WHERE mf.vehicle_model_id = $1 ORDER BY f.feature_id`,
+		v.VehicleModelID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer featureRows.Close()
+	for featureRows.Next() {
+		var f entities.VehicleFeature
+		if err := featureRows.Scan(&f.FeatureID, &f.FeatureName); err != nil {
+			return nil, err
+		}
+		features = append(features, &f)
 	}
 
 	// Load specs
@@ -148,6 +212,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		Model:    &m,
 		Location: &loc,
 		Images:   images,
+		Features: features,
 		Specs:    specs,
 		Pricing:  pricing,
 		Reviews:  reviews,

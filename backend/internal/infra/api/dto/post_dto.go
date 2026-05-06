@@ -1,31 +1,48 @@
 package dto
 
-import (
-	"time"
+import "time"
 
-	"github.com/google/uuid"
-)
+type BlogCategoryResponse struct {
+	CategoryID int    `json:"category_id"`
+	Name       string `json:"name"`
+	Slug       string `json:"slug"`
+}
+
+type BlogPostResponse struct {
+	PostID       int                   `json:"post_id"`
+	UserID       int                   `json:"user_id"`
+	Category     *BlogCategoryResponse `json:"category,omitempty"`
+	Title        string                `json:"title"`
+	Slug         string                `json:"slug"`
+	Excerpt      string                `json:"excerpt"`
+	Content      string                `json:"content"`
+	CoverImage   string                `json:"cover_image"`
+	Status       string                `json:"status"`
+	RejectReason string                `json:"reject_reason,omitempty"`
+	PublishedAt  *time.Time            `json:"published_at"`
+	CreatedAt    time.Time             `json:"created_at"`
+	UpdatedAt    time.Time             `json:"updated_at"`
+}
 
 type CreatePostRequest struct {
-	Title   string `json:"title" required:"true"`
-	Content string `json:"content" required:"true"`
+	CategoryID *int   `json:"category_id"`
+	Title      string `json:"title"`
+	Slug       string `json:"slug"`
+	Excerpt    string `json:"excerpt"`
+	Content    string `json:"content"`
+	CoverImage string `json:"cover_image"`
 }
 
 type UpdatePostRequest struct {
-	Title   string `json:"title" required:"true"`
-	Content string `json:"content" required:"true"`
+	CategoryID *int   `json:"category_id"`
+	Title      string `json:"title"`
+	Slug       string `json:"slug"`
+	Excerpt    string `json:"excerpt"`
+	Content    string `json:"content"`
+	CoverImage string `json:"cover_image"`
 }
 
-type PostResponse struct {
-	ID        uuid.UUID `json:"id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	AuthorID  int64     `json:"author_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type PostListResponse struct {
-	Data  []*PostResponse `json:"data"`
-	Total int             `json:"total"`
+type SetStatusRequest struct {
+	Status       string `json:"status"`
+	RejectReason string `json:"reject_reason"`
 }

@@ -1,37 +1,57 @@
-import { roles, users } from "../data/mockData";
-import { Role, User } from "../types/user.type";
+import { apiClient } from "./api";
+import { User } from "../types/user.type";
 
-const wait = async (ms = 200) => new Promise((r) => setTimeout(r, ms));
+interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_at: string;
+  role: string;
+  user_id: number;
+}
+
+interface UserResponse {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  license_no: string;
+  role_id: number;
+  created_at: string;
+}
+
+function toUser(r: UserResponse): User {
+  return {
+    user_id: r.id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    license_no: r.license_no,
+    role_id: r.role_id,
+    created_at: r.created_at,
+  };
+}
 
 type RegisterPayload = Pick<User, "name" | "email" | "phone" | "license_no"> & { password: string };
 
 export const authService = {
-  async login(email: string, _password: string): Promise<{ token: string; user: User }> {
-    await wait();
-    const user = users.find((u) => u.email === email);
-    if (!user) throw new Error("Email hoặc mật khẩu không đúng.");
-    return { token: `mock-token-${user.user_id}`, user };
+  async login(email: string, password: string): Promise<{ token: string; user: User }> {
+    const res = await apiClient<LoginResponse>("/auth/login", "POST", { email, password });
+    // Store token temporarily so the next call can authenticate
+    localStorage.setItem("gc_token", res.access_token);
+    const userRes = await apiClient<UserResponse>(`/users/me`);
+    return { token: res.access_token, user: toUser(userRes) };
   },
 
   async register(payload: RegisterPayload): Promise<{ token: string; user: User }> {
-    await wait();
-    if (users.some((u) => u.email === payload.email)) {
-      throw new Error("Email này đã được sử dụng.");
-    }
-    const newUser: User = {
-      user_id: users.length + 1,
-      role_id: 2,
-      created_at: new Date().toISOString(),
+    const res = await apiClient<LoginResponse>("/auth/register", "POST", {
       name: payload.name,
       email: payload.email,
+      password: payload.password,
       phone: payload.phone,
       license_no: payload.license_no,
-    };
-    return { token: `mock-token-${newUser.user_id}`, user: newUser };
+    });
+    localStorage.setItem("gc_token", res.access_token);
+    const userRes = await apiClient<UserResponse>(`/users/me`);
+    return { token: res.access_token, user: toUser(userRes) };
   },
-
-  async getRoles(): Promise<Role[]> {
-    await wait();
-    return roles;
-  }
 };
