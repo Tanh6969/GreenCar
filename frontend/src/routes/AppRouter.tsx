@@ -111,31 +111,31 @@ const AppRouter: React.FC = () => {
       <Route
         path="/customer/blogs"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <MainLayout>
               <MyBlogsPage />
             </MainLayout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
         path="/customer/blogs/new"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <MainLayout>
               <EditBlogPage />
             </MainLayout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
         path="/customer/blogs/edit/:id"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <MainLayout>
               <EditBlogPage />
             </MainLayout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
 

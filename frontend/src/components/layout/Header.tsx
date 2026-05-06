@@ -79,8 +79,10 @@ const Header: React.FC = () => {
                   {[
                     { to: "/customer/profile", icon: "👤", label: "Tài khoản của tôi" },
                     { to: "/customer/my-bookings", icon: "📋", label: "Đơn thuê xe" },
-                    { to: "/customer/blogs", icon: "✍️", label: "Bài viết của tôi" },
-                    ...(isAdmin ? [{ to: "/admin/dashboard", icon: "⚙️", label: "Quản trị" }] : []),
+                    ...(isAdmin ? [
+                      { to: "/customer/blogs", icon: "✍️", label: "Bài viết của tôi" },
+                      { to: "/admin/dashboard", icon: "⚙️", label: "Quản trị" },
+                    ] : []),
                   ].map(item => (
                     <Link
                       key={item.to}

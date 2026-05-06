@@ -291,7 +291,7 @@ const HomePage: React.FC = () => {
       ) : (
         <>
           <CarRow id="available" title="Xe Có Ngay" subtitle="Đặt ngay hôm nay" cars={available} />
-          <CarRow title="Xe Sang" subtitle="Premium" cars={luxury} dark />
+          <CarRow title="Xe Sang" subtitle="Premium" cars={luxury} />
           <CarRow title="Có Lẽ Bạn Sẽ Thích" subtitle="Gợi ý" cars={recommended} />
         </>
       )}
@@ -342,26 +342,26 @@ const HomePage: React.FC = () => {
             ].map(car => (
               <div key={car.name}
                 className="bg-[#1E293B] rounded-2xl overflow-hidden border border-[#334155] hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
-                <div className="relative">
-                  <img src={car.img} alt={car.name} className="w-full h-48 object-cover" />
-                  <span className="absolute top-3 right-3 bg-[#006C4C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                <div className="relative overflow-hidden group">
+                  <img src={car.img} alt={car.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <span className="absolute top-3 right-3 bg-[#006C4C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide">
                     PREMIUM
                   </span>
                 </div>
                 <div className="p-5">
                   <p className="text-[#64748B] text-xs mb-0.5">{car.brand}</p>
-                  <p className="text-white font-bold mb-1">{car.name}</p>
+                  <p className="text-white font-bold text-base mb-1">{car.name}</p>
                   <p className="text-[#4FBD91] font-bold text-lg mb-4">
                     {car.price}đ<span className="text-[#64748B] text-xs font-normal">/ngày</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-4 border-t border-[#334155] text-xs">
-                    <div>
-                      <span className="text-[#64748B]">Range: </span>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#334155] text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#4FBD91]">⚡</span>
                       <span className="text-white font-semibold">{car.range}</span>
                     </div>
-                    <div>
-                      <span className="text-[#64748B]">0–100: </span>
-                      <span className="text-white font-semibold">{car.accel}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#4FBD91]">🏎️</span>
+                      <span className="text-white font-semibold">0–100: {car.accel}</span>
                     </div>
                   </div>
                 </div>
@@ -407,30 +407,32 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ──────────────────────────────────────── */}
-      <section className="bg-[#F8F9FB] py-14">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="mb-7">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Đánh giá</p>
-            <h2 className="text-xl font-bold text-[#191C1E]">Khách Hàng Nói Gì</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {homepageTestimonials.map(t => (
-              <div key={t.id} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#BDCAC1] transition-colors">
-                <div className="text-[#4FBD91] text-sm mb-2">★★★★★</div>
-                <p className="text-sm text-[#3E4943] leading-relaxed italic mb-4">"{t.message}"</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#006C4C] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <div className="font-bold text-xs text-[#191C1E]">{t.name}</div>
-                    <div className="text-[10px] text-[#6E7A72]">{t.area}</div>
-                  </div>
+      {/* ── TESTIMONIALS MARQUEE ──────────────────────────────── */}
+      <section className="bg-white py-14 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-6 mb-8">
+          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Đánh giá</p>
+          <h2 className="text-xl font-bold text-[#191C1E]">Khách Hàng Nói Gì</h2>
+        </div>
+
+        {/* Marquee — duplicated for seamless loop */}
+        <div className="marquee-track">
+          {[...homepageTestimonials, ...homepageTestimonials].map((t, i) => (
+            <div key={i} className="flex-shrink-0 w-72 mx-2.5 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-5">
+              <div className="text-[#4FBD91] text-sm mb-2">
+                {"★".repeat(t.rating ?? 5)}
+              </div>
+              <p className="text-sm text-[#3E4943] leading-relaxed italic mb-4 line-clamp-3">"{t.message}"</p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-[#006C4C] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                  {t.name.split(" ").at(-1)![0]}
+                </div>
+                <div>
+                  <div className="font-bold text-xs text-[#191C1E]">{t.name}</div>
+                  <div className="text-[10px] text-[#6E7A72]">{t.area}</div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 

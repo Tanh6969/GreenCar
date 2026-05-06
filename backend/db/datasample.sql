@@ -8,6 +8,9 @@
 --  (bcrypt $2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi)
 -- =============================================================
 
+-- Reset transaction bị lỗi từ lần chạy trước (nếu có)
+ROLLBACK;
+
 BEGIN;
 
 -- Xóa dữ liệu cũ và reset sequence (an toàn, chỉ dùng cho dev/test)
@@ -148,7 +151,7 @@ INSERT INTO vehicles (vehicle_model_id, license_plate, status, battery_level, ba
   (11, '51P-22301', 'available',    99, 100,12),  -- v33  Polestar 2    Phú Nhuận
   (12, '51D-66701', 'available',   100, 100, 8),  -- v34  Audi e-tron   Q1
   (13, '51L-11201', 'available',   100, 100, 9),  -- v35  Lucid Air     Q3
-  (15, '51H-44601', 'available',   100, 100,13);  -- v36  VF 9          Thủ Đức
+  (15, '51H-44901', 'available',   100, 100,13);  -- v36  VF 9          Thủ Đức
 
 -- =============================================================
 -- 6. VEHICLE IMAGES

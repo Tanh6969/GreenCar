@@ -243,9 +243,16 @@ export const reviews: Review[] = [
 ];
 
 export const homepageTestimonials = [
-  { id: 1, name: "Anh Hoà",  area: "Ba Đình",    message: "Hỗ trợ nhanh, đặt xe tiện lợi. VF8 rộng rãi, cảm giác lái rất êm." },
-  { id: 2, name: "Chị Linh", area: "Cầu Giấy",   message: "Gói 4h rất hợp lý cho việc đi nội thành. Xe giao đúng giờ, pin đầy." },
-  { id: 3, name: "Anh Đạt",  area: "Đống Đa",    message: "Thuê Tesla Model 3 trải nghiệm tuyệt vời. Nhất định sẽ quay lại!" }
+  { id: 1,  name: "Anh Hoà",     area: "Ba Đình, Hà Nội",    rating: 5, message: "Hỗ trợ nhanh, đặt xe tiện lợi. VF8 rộng rãi, cảm giác lái rất êm." },
+  { id: 2,  name: "Chị Linh",    area: "Cầu Giấy, Hà Nội",  rating: 5, message: "Gói 4h rất hợp lý cho đi nội thành. Xe giao đúng giờ, pin đầy 100%." },
+  { id: 3,  name: "Anh Đạt",     area: "Đống Đa, Hà Nội",   rating: 5, message: "Thuê Tesla Model 3 trải nghiệm tuyệt vời. Nhất định sẽ quay lại!" },
+  { id: 4,  name: "Chị Trang",   area: "Quận 1, TP.HCM",    rating: 5, message: "IONIQ 5 rộng mà vẫn dễ đỗ. Sạc nhanh DC chỉ 20 phút là đầy. Sẽ giới thiệu bạn bè!" },
+  { id: 5,  name: "Anh Minh",    area: "Tây Hồ, Hà Nội",    rating: 5, message: "Lucid Air Pure êm tuyệt đối. Sang hơn mọi xe tôi từng đi. Đáng đồng tiền bát gạo!" },
+  { id: 6,  name: "Chị Phương",  area: "Quận 3, TP.HCM",    rating: 4, message: "VF e34 phù hợp đường Sài Gòn. Gọn nhẹ, dễ lách. Dịch vụ khách hàng rất nhiệt tình." },
+  { id: 7,  name: "Anh Quân",    area: "Thanh Xuân, Hà Nội", rating: 5, message: "Polestar 2 thiết kế đỉnh, âm thanh Harman Kardon cực ngon. Trải nghiệm châu Âu đích thực." },
+  { id: 8,  name: "Chị Hà",      area: "Bình Thạnh, TP.HCM", rating: 5, message: "Đặt Tesla Model S đón đối tác nước ngoài — ấn tượng ngay từ lần gặp đầu tiên. Xuất sắc!" },
+  { id: 9,  name: "Anh Dương",   area: "Long Biên, Hà Nội",  rating: 5, message: "Rivian R1S cho gia đình 7 người đi Hạ Long. Rộng, mạnh, cabin không ồn. Hài lòng 10/10!" },
+  { id: 10, name: "Chị Ngân",    area: "Phú Nhuận, TP.HCM", rating: 4, message: "Audi e-tron GT sang trọng, hệ thống MMI dễ dùng. Đi dự tiệc cưới ai cũng ngoái nhìn." },
 ];
 
 // ── BLOG ──────────────────────────────────────────────────────────────────────

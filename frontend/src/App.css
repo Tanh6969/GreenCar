@@ -972,6 +972,22 @@ a { text-decoration: none; color: inherit; }
   to { transform: rotate(360deg); }
 }
 
+/* ─── MARQUEE ──────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
 /* ─── ADMIN / AUTH PAGES ──────────────────────────────────── */
 .main-content { padding: 24px 0 48px; }
 

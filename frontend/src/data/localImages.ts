@@ -13,9 +13,12 @@ import lucidDream  from "../assets/images/Lucid Air Dream.png";
 import lucidAir    from "../assets/images/Lucid Air.png";
 
 export const MODEL_LOCAL_IMAGES: Record<number, string> = {
+  1:  electricSuv, // VinFast VF e34    (compact SUV)
+  2:  luxurySed,   // Hyundai Accent EV (sedan)
   3:  vwId4,       // VW ID.4
   4:  fordMache,   // Ford Mach-E
   5:  ioniq5,      // Hyundai IONIQ 5
+  6:  polestar2,   // Hyundai IONIQ 6   (aerodynamic fastback – similar silhouette)
   7:  modernEv,    // VinFast VF 8
   8:  teslaM3,     // Tesla Model 3
   9:  luxurySed,   // Tesla Model S

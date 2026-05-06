@@ -14,11 +14,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="sidebar">
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 4px 16px", borderBottom: "1px solid #e2e8f0", marginBottom: 8 }}>
-        <div className="logo-icon" style={{ width: 30, height: 30, fontSize: 14 }}>G</div>
-        <span style={{ fontWeight: 800, fontSize: 15, color: "var(--green)" }}>GreenCar</span>
-      </div>
-      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", padding: "0 4px", margin: "8px 0 4px" }}>
+      <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", padding: "0 4px", margin: "4px 0 4px" }}>
         Quản trị
       </p>
       {NAV.map(item => {
