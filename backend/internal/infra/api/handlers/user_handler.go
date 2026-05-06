@@ -7,12 +7,31 @@ import (
 
 	"greencar/internal/infra/api/dto"
 	"greencar/internal/infra/api/mappers"
+	"greencar/internal/infra/api/middlewares"
 	"greencar/internal/infra/api/response"
 	"greencar/internal/service"
 	"greencar/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 )
+
+// GetMeHandler returns the profile of the currently authenticated user.
+func GetMeHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		u, err := userSvc.GetUser(int(payload.UserId))
+		if err != nil {
+			log.Warn("get me %d: %v", payload.UserId, err)
+			response.WriteError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, mappers.ToUserResponse(u))
+	}
+}
 
 // GetUserHandler returns a handler for retrieving a user by ID.
 func GetUserHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {

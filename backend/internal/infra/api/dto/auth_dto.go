@@ -14,3 +14,12 @@ type LoginResponse struct {
 	Role         string `json:"role"`
 	UserID       int64  `json:"user_id"`
 }
+
+// RegisterRequest is the request payload for user registration.
+type RegisterRequest struct {
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Phone     string `json:"phone"`
+	LicenseNo string `json:"license_no"`
+}

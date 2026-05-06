@@ -7,6 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"greencar/internal/domain/adapters"
+	"greencar/internal/domain/entities"
 	"greencar/internal/token"
 )
 
@@ -64,6 +65,39 @@ func (s *AuthService) Login(email, password string) (accessToken, refreshToken s
 	}
 
 	return accessToken, refreshToken, payload, nil
+}
+
+// Register creates a new customer account and returns tokens.
+func (s *AuthService) Register(name, email, password, phone, licenseNo string) (accessToken, refreshToken string, payload *token.Payload, userID int64, err error) {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", "", nil, 0, err
+	}
+
+	u := &entities.User{
+		Name:      name,
+		Email:     email,
+		Password:  string(hashed),
+		Phone:     phone,
+		LicenseNo: licenseNo,
+		RoleID:    2, // customer role
+	}
+	if err = s.userRepo.Create(u); err != nil {
+		return "", "", nil, 0, err
+	}
+
+	const customerRoleName = "customer"
+	accessToken, payload, err = s.maker.CreateToken(int64(u.UserID), customerRoleName, s.accessTokenDuration, token.TokenTypeAccessToken)
+	if err != nil {
+		return "", "", nil, 0, err
+	}
+
+	refreshToken, _, err = s.maker.CreateToken(int64(u.UserID), customerRoleName, s.refreshTokenDuration, token.TokenTypeRefreshToken)
+	if err != nil {
+		return "", "", nil, 0, err
+	}
+
+	return accessToken, refreshToken, payload, int64(u.UserID), nil
 }
 
 // HashPassword generates a bcrypt hash of the password.
