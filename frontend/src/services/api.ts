@@ -1,6 +1,6 @@
 import { env } from "../config/env";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -26,6 +26,11 @@ export const apiClient = async <T>(
   });
 
   if (!response.ok) {
+    if (response.status === 401 && !path.startsWith("/auth/")) {
+      localStorage.removeItem("gc_token");
+      localStorage.removeItem("gc_user");
+      window.location.href = "/auth/login";
+    }
     let message = `API error: ${response.status}`;
     try {
       const err = await response.json();

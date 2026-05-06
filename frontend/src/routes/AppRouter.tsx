@@ -14,15 +14,16 @@ import CheckoutPage from "../pages/Customer/Checkout";
 import PaymentPage from "../pages/Customer/Payment";
 import ProfilePage from "../pages/Customer/Profile";
 import MyBookingsPage from "../pages/Customer/MyBookings";
-import MyBlogsPage from "../pages/Customer/MyBlogs";
-import EditBlogPage from "../pages/Customer/MyBlogs/EditBlog";
 import LoginPage from "../pages/Auth/Login";
 import RegisterPage from "../pages/Auth/Register";
+import AdminLoginPage from "../pages/Auth/AdminLogin";
+import ConfirmationPage from "../pages/Customer/Confirmation";
 import DashboardPage from "../pages/Admin/Dashboard";
 import VehicleManagePage from "../pages/Admin/VehicleManage";
 import BookingManagePage from "../pages/Admin/BookingManage";
 import UserManagePage from "../pages/Admin/UserManage";
 import BlogManagePage from "../pages/Admin/BlogManage";
+import AdminBlogEditPage from "../pages/Admin/BlogEdit";
 
 const AppRouter: React.FC = () => {
   return (
@@ -71,21 +72,25 @@ const AppRouter: React.FC = () => {
       <Route
         path="/customer/checkout"
         element={
-          <ProtectedRoute>
-            <MainLayout>
-              <CheckoutPage />
-            </MainLayout>
-          </ProtectedRoute>
+          <MainLayout>
+            <CheckoutPage />
+          </MainLayout>
         }
       />
       <Route
         path="/customer/payment"
         element={
-          <ProtectedRoute>
-            <MainLayout>
-              <PaymentPage />
-            </MainLayout>
-          </ProtectedRoute>
+          <MainLayout>
+            <PaymentPage />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/customer/confirmation"
+        element={
+          <MainLayout>
+            <ConfirmationPage />
+          </MainLayout>
         }
       />
       <Route
@@ -109,37 +114,6 @@ const AppRouter: React.FC = () => {
         }
       />
       <Route
-        path="/customer/blogs"
-        element={
-          <AdminRoute>
-            <MainLayout>
-              <MyBlogsPage />
-            </MainLayout>
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/customer/blogs/new"
-        element={
-          <AdminRoute>
-            <MainLayout>
-              <EditBlogPage />
-            </MainLayout>
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/customer/blogs/edit/:id"
-        element={
-          <AdminRoute>
-            <MainLayout>
-              <EditBlogPage />
-            </MainLayout>
-          </AdminRoute>
-        }
-      />
-
-      <Route
         path="/auth/login"
         element={
           <AuthLayout>
@@ -154,6 +128,10 @@ const AppRouter: React.FC = () => {
             <RegisterPage />
           </AuthLayout>
         }
+      />
+      <Route
+        path="/admin/login"
+        element={<AdminLoginPage />}
       />
 
       <Route
@@ -202,6 +180,26 @@ const AppRouter: React.FC = () => {
           <AdminRoute>
             <AdminLayout>
               <BlogManagePage />
+            </AdminLayout>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/blogs/new"
+        element={
+          <AdminRoute>
+            <AdminLayout>
+              <AdminBlogEditPage />
+            </AdminLayout>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/blogs/edit/:id"
+        element={
+          <AdminRoute>
+            <AdminLayout>
+              <AdminBlogEditPage />
             </AdminLayout>
           </AdminRoute>
         }

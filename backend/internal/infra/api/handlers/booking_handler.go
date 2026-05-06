@@ -50,8 +50,7 @@ func CreateBookingHandler(bookingSvc *service.BookingService, log *logger.Logger
 			return
 		}
 
-		// Default booking status (can be adjusted to match business rules).
-		b.Status = "pending"
+		b.Status = "confirmed"
 
 		if err := bookingSvc.CreateBooking(&b); err != nil {
 			log.Warn("create booking: %v", err)
@@ -124,6 +123,30 @@ func GetMyBookingsHandler(bookingSvc *service.BookingService, log *logger.Logger
 			return
 		}
 		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponses(bookings))
+	}
+}
+
+// SetBookingStatusHandler allows admin to change only the status of a booking.
+func SetBookingStatusHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid booking id")
+			return
+		}
+		var req dto.SetBookingStatusRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Status == "" {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+		if err := bookingSvc.SetBookingStatus(id, req.Status); err != nil {
+			log.Warn("set booking status %d: %v", id, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to update status")
+			return
+		}
+		b, _ := bookingSvc.GetBooking(id)
+		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponse(b))
 	}
 }
 

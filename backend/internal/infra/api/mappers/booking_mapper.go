@@ -43,7 +43,13 @@ func ToBookingResponse(b *entities.Booking) *dto.BookingResponse {
 		OverKMFee:     b.OverKMFee,
 		TotalPrice:    b.TotalPrice,
 		Status:        b.Status,
+		PaymentMethod: b.PaymentMethod,
 		CreatedAt:     createdAt,
+		VehicleBrand:  b.VehicleBrand,
+		VehicleName:   b.VehicleName,
+		LicensePlate:  b.LicensePlate,
+		CustomerName:  b.CustomerName,
+		CustomerPhone: b.CustomerPhone,
 	}
 }
 
@@ -79,6 +85,7 @@ func ToBookingCreateParams(req *dto.CreateBookingRequest) (entities.Booking, err
 		PlannedKM:     req.PlannedKM,
 		DepositAmount: req.DepositAmount,
 		TotalPrice:    req.TotalPrice,
+		PaymentMethod: req.PaymentMethod,
 	}, nil
 }
 

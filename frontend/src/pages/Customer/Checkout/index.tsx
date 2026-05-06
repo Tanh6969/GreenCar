@@ -1,49 +1,359 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { bookingService } from "../../../services/booking.service";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { BookingContext } from "../../../context/BookingContext";
 import { vehicleService } from "../../../services/vehicle.service";
-import { estimatePrice } from "../../../utils/calculators";
+import { useAuth } from "../../../hooks/useAuth";
+import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
+const PLAN_HOURS: Record<number, number> = { 1: 4, 2: 8, 3: 24 };
+const PLAN_NAMES: Record<number, string> = { 1: "Gói 4 giờ", 2: "Gói 8 giờ", 3: "Gói 24 giờ" };
+const DEPOSIT_RATIO = 0.3;
+
+function addHours(iso: string, h: number) {
+  const d = new Date(iso);
+  d.setHours(d.getHours() + h);
+  return d.toISOString();
+}
+function toLocal(iso: string) {
+  return iso.slice(0, 16); // "YYYY-MM-DDTHH:MM" for datetime-local input
+}
+function fromLocal(local: string) {
+  return new Date(local).toISOString();
+}
+function formatDT(iso: string) {
+  return new Date(iso).toLocaleString("vi-VN", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+const StepBar: React.FC<{ step: number }> = ({ step }) => {
+  const steps = ["Thông tin", "Thanh toán", "Xác nhận"];
+  return (
+    <div className="flex items-center justify-center gap-0 mb-8">
+      {steps.map((label, i) => {
+        const idx = i + 1;
+        const done = idx < step;
+        const active = idx === step;
+        return (
+          <React.Fragment key={label}>
+            <div className="flex flex-col items-center">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
+                ${done ? "bg-[#006C4C] border-[#006C4C] text-white"
+                  : active ? "bg-white border-[#006C4C] text-[#006C4C]"
+                  : "bg-white border-[#E5E7EB] text-[#9CA3AF]"}`}>
+                {done ? "✓" : idx}
+              </div>
+              <span className={`text-xs mt-1 font-medium ${active ? "text-[#006C4C]" : "text-[#9CA3AF]"}`}>
+                {label}
+              </span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className={`h-0.5 w-16 mb-5 mx-1 ${done ? "bg-[#006C4C]" : "bg-[#E5E7EB]"}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
 const CheckoutPage: React.FC = () => {
-  const [cards, setCards] = React.useState<any[]>([]);
-  const [plans, setPlans] = React.useState<any[]>([]);
-  const [pricing, setPricing] = React.useState<any[]>([]);
-  const [selectedVehicle, setSelectedVehicle] = React.useState<number>(1);
-  const [selectedPlan, setSelectedPlan] = React.useState<number>(3);
+  const [params] = useSearchParams();
+  const vehicleId = Number(params.get("vehicle") ?? 0);
+  const planId    = Number(params.get("plan") ?? 3);
 
-  React.useEffect(() => {
-    vehicleService.getVehicleCards().then(setCards);
-    bookingService.getRentalPlans().then(setPlans);
-    bookingService.getPricing().then(setPricing);
-  }, []);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { setPendingBooking } = useContext(BookingContext);
 
-  const current = cards.find((c) => c.vehicle.vehicle_id === selectedVehicle);
-  const base = pricing.find((p) => p.vehicle_model_id === current?.model.vehicle_model_id && p.rental_plan_id === selectedPlan)?.price ?? 0;
-  const total = estimatePrice(base);
+  const [detail, setDetail]     = useState<any>(null);
+  const [loading, setLoading]   = useState(true);
+
+  const defaultStart = () => {
+    const d = new Date();
+    d.setMinutes(0, 0, 0);
+    d.setHours(d.getHours() + 1);
+    return toLocal(d.toISOString());
+  };
+  const [startLocal, setStartLocal] = useState(defaultStart);
+
+  const [form, setForm] = useState({
+    name: user?.name ?? "",
+    phone: user?.phone ?? "",
+    licenseNo: user?.license_no ?? "",
+    email: user?.email ?? "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!vehicleId) { navigate("/cars"); return; }
+    vehicleService.getVehicleDetail(vehicleId).then((d) => {
+      setDetail(d);
+      setLoading(false);
+    });
+  }, [vehicleId, navigate]);
+
+  // Pre-fill from user profile when it becomes available
+  useEffect(() => {
+    if (user) {
+      setForm({
+        name: user.name ?? "",
+        phone: user.phone ?? "",
+        licenseNo: user.license_no ?? "",
+        email: user.email ?? "",
+      });
+    }
+  }, [user]);
+
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-[60vh]">
+      <div className="w-10 h-10 border-4 border-[#bbf7d0] border-t-[#006C4C] rounded-full animate-spin" />
+    </div>
+  );
+  if (!detail) return (
+    <div className="text-center py-20 text-[#6E7A72]">
+      <p className="text-4xl mb-3">🚗</p>
+      <p>Không tìm thấy xe. <Link to="/cars" className="text-[#006C4C] underline">Quay lại</Link></p>
+    </div>
+  );
+
+  const { vehicle, model, location, pricing } = detail;
+  const planPrice = pricing.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
+  const hours     = PLAN_HOURS[planId] ?? 24;
+  const planName  = PLAN_NAMES[planId] ?? `Gói thuê`;
+  const startISO  = fromLocal(startLocal);
+  const endISO    = addHours(startISO, hours);
+  const deposit   = Math.round(planPrice * DEPOSIT_RATIO);
+  const imgUrl    = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? detail.images?.[0]?.image_url ?? "";
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!form.name.trim())      e.name      = "Vui lòng nhập họ tên";
+    if (!form.phone.trim())     e.phone     = "Vui lòng nhập số điện thoại";
+    if (!form.licenseNo.trim()) e.licenseNo = "Vui lòng nhập số GPLX";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleContinue = () => {
+    if (!validate()) return;
+    setPendingBooking({
+      vehicleId: vehicle.vehicle_id,
+      vehicleInfo: {
+        name: model.name, brand: model.brand, imageUrl: imgUrl,
+        locationName: location?.name ?? "", locationCity: location?.city ?? "",
+        licensePlate: vehicle.license_plate, batteryLevel: vehicle.battery_level,
+      },
+      planId, planName, planDurationHours: hours,
+      startTime: startISO, endTime: endISO,
+      totalPrice: planPrice, depositAmount: deposit,
+      contactInfo: { ...form },
+    });
+    navigate("/customer/payment");
+  };
 
   return (
-    <div className="section">
-      <h1>Checkout</h1>
-      <div className="cards-2">
-        <article className="panel">
-          <label>Chon xe
-            <select value={selectedVehicle} onChange={(e) => setSelectedVehicle(Number(e.target.value))}>
-              {cards.map((c) => <option key={c.vehicle.vehicle_id} value={c.vehicle.vehicle_id}>{`${c.model.brand} ${c.model.name}`}</option>)}
-            </select>
-          </label>
-          <label>Chon goi
-            <select value={selectedPlan} onChange={(e) => setSelectedPlan(Number(e.target.value))}>
-              {plans.map((p) => <option key={p.rental_plan_id} value={p.rental_plan_id}>{p.name}</option>)}
-            </select>
-          </label>
-        </article>
-        <article className="panel">
-          <h3>Tom tat</h3>
-          <p>{`Gia goi: ${formatCurrency(base)}`}</p>
-          <p>{`Du kien thanh toan: ${formatCurrency(total)}`}</p>
-          <Link className="link-btn" to="/customer/payment">Sang thanh toan</Link>
-        </article>
+    <div className="min-h-screen bg-[#F8F9FB] py-8">
+      <div className="max-w-[1080px] mx-auto px-4 sm:px-6">
+        <StepBar step={1} />
+
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+
+          {/* ── LEFT: form ───────────────────────────────────────── */}
+          <div className="flex-1 flex flex-col gap-5">
+
+            {/* guest login prompt */}
+            {!user && (
+              <div className="flex items-center justify-between gap-4 bg-[#ECFDF5] border border-[#86efac] rounded-2xl p-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎁</span>
+                  <div>
+                    <p className="font-bold text-[#006C4C] text-sm">Đăng nhập để đặt xe nhanh hơn</p>
+                    <p className="text-xs text-[#3E4943] mt-0.5">Thông tin sẽ được điền sẵn từ tài khoản của bạn</p>
+                  </div>
+                </div>
+                <Link to={`/auth/login?redirect=/customer/checkout?vehicle=${vehicleId}%26plan=${planId}`}
+                  className="bg-[#006C4C] text-white text-sm font-bold px-4 py-2 rounded-xl whitespace-nowrap hover:bg-[#004832] transition-colors">
+                  Đăng nhập
+                </Link>
+              </div>
+            )}
+
+            {/* contact info */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+              <h2 className="font-bold text-[#191C1E] text-base mb-5">
+                {user ? "Thông tin liên lạc" : "Nhập thông tin đặt xe"}
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* name */}
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Họ và tên *
+                  </label>
+                  <input
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="Nguyễn Văn A"
+                    readOnly={!!user}
+                    className={`w-full h-11 border rounded-xl px-3.5 text-sm text-[#191C1E] transition-colors
+                      focus:outline-none focus:border-[#006C4C]
+                      ${user ? "bg-[#F8F9FB] text-[#6E7A72] cursor-default" : "bg-white"}
+                      ${errors.name ? "border-red-400" : "border-[#E5E7EB]"}`}
+                  />
+                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                </div>
+
+                {/* phone */}
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Số điện thoại *
+                  </label>
+                  <input
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="0912 345 678"
+                    className={`w-full h-11 border rounded-xl px-3.5 text-sm text-[#191C1E] bg-white transition-colors
+                      focus:outline-none focus:border-[#006C4C]
+                      ${errors.phone ? "border-red-400" : "border-[#E5E7EB]"}`}
+                  />
+                  {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                </div>
+
+                {/* license */}
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Số giấy phép lái xe *
+                  </label>
+                  <input
+                    value={form.licenseNo}
+                    onChange={e => setForm(f => ({ ...f, licenseNo: e.target.value }))}
+                    placeholder="0123456789"
+                    readOnly={!!user && !!user.license_no}
+                    className={`w-full h-11 border rounded-xl px-3.5 text-sm text-[#191C1E] transition-colors
+                      focus:outline-none focus:border-[#006C4C]
+                      ${user && user.license_no ? "bg-[#F8F9FB] text-[#6E7A72] cursor-default" : "bg-white"}
+                      ${errors.licenseNo ? "border-red-400" : "border-[#E5E7EB]"}`}
+                  />
+                  {errors.licenseNo && <p className="text-red-500 text-xs mt-1">{errors.licenseNo}</p>}
+                </div>
+
+                {/* email */}
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    value={form.email}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                    placeholder="email@example.com"
+                    readOnly={!!user}
+                    className={`w-full h-11 border rounded-xl px-3.5 text-sm text-[#191C1E] transition-colors
+                      focus:outline-none focus:border-[#006C4C]
+                      ${user ? "bg-[#F8F9FB] text-[#6E7A72] cursor-default" : "bg-white border-[#E5E7EB]"}`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* pickup time */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+              <h2 className="font-bold text-[#191C1E] text-base mb-5">Thời gian nhận xe</h2>
+              <div>
+                <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                  Nhận xe lúc *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={startLocal}
+                  min={toLocal(new Date().toISOString())}
+                  onChange={e => setStartLocal(e.target.value)}
+                  className="h-11 border border-[#E5E7EB] rounded-xl px-3.5 text-sm text-[#191C1E] bg-white
+                    focus:outline-none focus:border-[#006C4C] w-full sm:w-auto"
+                />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-[#F8F9FB] rounded-xl p-3">
+                  <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Nhận xe</p>
+                  <p className="font-semibold text-[#191C1E]">{formatDT(startISO)}</p>
+                </div>
+                <div className="bg-[#F8F9FB] rounded-xl p-3">
+                  <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Trả xe</p>
+                  <p className="font-semibold text-[#191C1E]">{formatDT(endISO)}</p>
+                </div>
+              </div>
+            </div>
+
+            <button onClick={handleContinue}
+              className="w-full bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white
+                font-bold py-4 rounded-xl text-base transition-all shadow-md hover:shadow-lg">
+              Tiếp tục thanh toán →
+            </button>
+          </div>
+
+          {/* ── RIGHT: order summary ──────────────────────────────── */}
+          <div className="w-full lg:w-[320px] flex-shrink-0">
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden sticky top-[84px]">
+              {/* car image */}
+              <div className="relative h-44 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] overflow-hidden">
+                {imgUrl
+                  ? <img src={imgUrl} alt={model.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-6xl">🚗</div>}
+                <span className="absolute bottom-3 left-3 bg-white/90 text-[#006C4C] text-[11px] font-bold
+                  px-2.5 py-1 rounded-full backdrop-blur-sm">
+                  {model.brand}
+                </span>
+              </div>
+
+              <div className="p-5 flex flex-col gap-4">
+                <div>
+                  <h3 className="font-bold text-[#191C1E]">{model.brand} {model.name}</h3>
+                  <p className="text-xs text-[#6E7A72] mt-0.5">
+                    📍 {location?.name}, {location?.city}
+                  </p>
+                  <p className="text-xs text-[#6E7A72] mt-0.5 font-mono">{vehicle.license_plate}</p>
+                </div>
+
+                <div className="border-t border-[#F3F4F6] pt-4 flex flex-col gap-2.5 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Gói thuê</span>
+                    <span className="font-semibold text-[#191C1E]">{planName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Nhận xe</span>
+                    <span className="font-semibold text-[#191C1E] text-right text-xs">{formatDT(startISO)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Trả xe</span>
+                    <span className="font-semibold text-[#191C1E] text-right text-xs">{formatDT(endISO)}</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-[#F3F4F6] pt-4 flex flex-col gap-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Phí thuê xe</span>
+                    <span className="font-semibold">{formatCurrency(planPrice)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#006C4C]">
+                    <span className="font-semibold">Đặt cọc (30%)</span>
+                    <span className="font-bold">{formatCurrency(deposit)}</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#F0FDF4] rounded-xl p-3 flex justify-between items-center">
+                  <span className="text-sm font-bold text-[#006C4C]">Tổng thanh toán</span>
+                  <span className="text-lg font-black text-[#006C4C]">{formatCurrency(planPrice)}</span>
+                </div>
+
+                <p className="text-center text-xs text-[#9CA3AF]">
+                  Cọc {formatCurrency(deposit)} khi xác nhận đặt xe
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

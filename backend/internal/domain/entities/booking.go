@@ -2,7 +2,7 @@ package entities
 
 import "time"
 
-// Booking represents the bookings table.
+// Booking represents the bookings table, optionally enriched with joined fields.
 type Booking struct {
 	BookingID       int        `json:"booking_id"`
 	UserID          int        `json:"user_id"`
@@ -19,5 +19,12 @@ type Booking struct {
 	OverKMFee       float64    `json:"over_km_fee"`
 	TotalPrice      float64    `json:"total_price"`
 	Status          string     `json:"status"`
+	PaymentMethod   string     `json:"payment_method,omitempty"`
 	CreatedAt       *time.Time `json:"created_at"`
+	// Joined fields (populated by detail queries)
+	VehicleBrand  string `json:"vehicle_brand,omitempty"`
+	VehicleName   string `json:"vehicle_name,omitempty"`
+	LicensePlate  string `json:"license_plate,omitempty"`
+	CustomerName  string `json:"customer_name,omitempty"`
+	CustomerPhone string `json:"customer_phone,omitempty"`
 }

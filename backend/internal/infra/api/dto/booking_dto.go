@@ -19,7 +19,14 @@ type BookingResponse struct {
 	OverKMFee     float64    `json:"over_km_fee"`
 	TotalPrice    float64    `json:"total_price"`
 	Status        string     `json:"status"`
+	PaymentMethod string     `json:"payment_method,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
+	// Enriched from JOIN
+	VehicleBrand  string `json:"vehicle_brand,omitempty"`
+	VehicleName   string `json:"vehicle_name,omitempty"`
+	LicensePlate  string `json:"license_plate,omitempty"`
+	CustomerName  string `json:"customer_name,omitempty"`
+	CustomerPhone string `json:"customer_phone,omitempty"`
 }
 
 // CreateBookingRequest is the request payload to create a booking.
@@ -32,6 +39,7 @@ type CreateBookingRequest struct {
 	PlannedKM     int     `json:"planned_km"`
 	DepositAmount float64 `json:"deposit_amount"`
 	TotalPrice    float64 `json:"total_price"`
+	PaymentMethod string  `json:"payment_method"`
 }
 
 // UpdateBookingRequest is the request payload to update a booking.
@@ -48,4 +56,9 @@ type UpdateBookingRequest struct {
 	OverKMFee     float64 `json:"over_km_fee"`
 	TotalPrice    float64 `json:"total_price"`
 	Status        string  `json:"status"`
+}
+
+// SetBookingStatusRequest is used by admin to change only the booking status.
+type SetBookingStatusRequest struct {
+	Status string `json:"status"`
 }

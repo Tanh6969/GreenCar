@@ -1,32 +1,161 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { bookingService } from "../../../services/booking.service";
-import { formatDateTime } from "../../../utils/date";
+import { formatCurrency } from "../../../utils/formatters";
+import { Booking } from "../../../types/booking.type";
 
-const BookingManagePage: React.FC = () => {
-  const [data, setData] = React.useState<any[]>([]);
-  React.useEffect(() => {
-    bookingService.getAllBookings().then(setData);
-  }, []);
+type Status = Booking["status"] | "all";
+
+const STATUS_CONFIG: Record<Booking["status"], { label: string; color: string; bg: string }> = {
+  pending:   { label: "Chờ xác nhận", color: "#b45309", bg: "#fef3c7" },
+  confirmed: { label: "Đã xác nhận",  color: "#1d4ed8", bg: "#dbeafe" },
+  active:    { label: "Đang thuê",    color: "#006C4C", bg: "#dcfce7" },
+  running:   { label: "Đang thuê",    color: "#006C4C", bg: "#dcfce7" },
+  completed: { label: "Hoàn thành",   color: "#374151", bg: "#f3f4f6" },
+  cancelled: { label: "Đã huỷ",       color: "#dc2626", bg: "#fef2f2" },
+};
+
+const FILTERS: { key: Status; label: string }[] = [
+  { key: "all",       label: "Tất cả" },
+  { key: "confirmed", label: "Đã xác nhận" },
+  { key: "active",    label: "Đang thuê" },
+  { key: "completed", label: "Hoàn thành" },
+  { key: "cancelled", label: "Đã huỷ" },
+];
+
+function formatDT(iso: string) {
+  return new Date(iso).toLocaleString("vi-VN", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function BookingNotification({ b }: { b: Booking }) {
+  const st      = STATUS_CONFIG[b.status] ?? STATUS_CONFIG.confirmed;
+  const carLabel = b.vehicle_brand && b.vehicle_name
+    ? `${b.vehicle_brand} ${b.vehicle_name}`
+    : `Xe #${b.vehicle_id}`;
 
   return (
-    <div className="section">
-      <h1>Booking Manage</h1>
-      <div className="table-wrap">
-        <table>
-          <thead><tr><th>ID</th><th>Status</th><th>Start</th><th>End</th><th>Actual KM</th></tr></thead>
-          <tbody>
-            {data.map((b) => (
-              <tr key={b.booking_id}>
-                <td>{b.booking_id}</td>
-                <td>{b.status}</td>
-                <td>{formatDateTime(b.start_time)}</td>
-                <td>{formatDateTime(b.end_time)}</td>
-                <td>{b.actual_km}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="panel" style={{ borderLeft: `4px solid ${st.color}`, marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        {/* Left: car + dates */}
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+            <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--green)", fontSize: 13 }}>
+              GC-{String(b.booking_id).padStart(5, "0")}
+            </span>
+            <span style={{ padding: "2px 10px", borderRadius: 9999, fontSize: 11, fontWeight: 700, color: st.color, background: st.bg }}>
+              {st.label}
+            </span>
+          </div>
+          <p style={{ fontWeight: 700, fontSize: 15, color: "var(--text)", margin: "0 0 2px" }}>{carLabel}</p>
+          {b.license_plate && (
+            <p style={{ fontSize: 12, fontFamily: "monospace", color: "var(--text-muted)", margin: "0 0 8px" }}>{b.license_plate}</p>
+          )}
+          <div style={{ display: "flex", gap: 16, fontSize: 13, color: "var(--text-muted)", flexWrap: "wrap" }}>
+            <span><strong style={{ color: "var(--text)" }}>Nhận xe:</strong> {formatDT(b.start_time)}</span>
+            <span><strong style={{ color: "var(--text)" }}>Trả xe:</strong> {formatDT(b.end_time)}</span>
+          </div>
+        </div>
+
+        {/* Right: customer + amount */}
+        <div style={{ textAlign: "right", minWidth: 160 }}>
+          {b.customer_name && (
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", margin: "0 0 2px" }}>{b.customer_name}</p>
+          )}
+          {b.customer_phone && (
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>{b.customer_phone}</p>
+          )}
+          <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 2px" }}>Đặt cọc</p>
+          <p style={{ fontSize: 16, fontWeight: 800, color: "var(--green)", margin: 0 }}>{formatCurrency(b.deposit_amount)}</p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "2px 0 0" }}>/ {formatCurrency(b.total_price)} tổng</p>
+        </div>
       </div>
+    </div>
+  );
+}
+
+const BookingManagePage: React.FC = () => {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [filter,   setFilter]   = useState<Status>("all");
+  const [error,    setError]    = useState("");
+
+  const refresh = useCallback(() => {
+    setLoading(true);
+    bookingService.getAllBookings()
+      .then(setBookings)
+      .catch(() => setError("Không tải được danh sách đơn."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const counts = bookings.reduce<Record<string, number>>((acc, b) => {
+    const key = (b.status === "active" || b.status === "running") ? "active" : b.status;
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const visible = filter === "all"
+    ? bookings
+    : bookings.filter(b => b.status === filter || (filter === "active" && b.status === "running"));
+
+  if (loading) return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 240 }}>
+      <div style={{ width: 36, height: 36, border: "3px solid #006C4C", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+    </div>
+  );
+
+  return (
+    <div style={{ padding: 24 }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", margin: "0 0 4px" }}>Đơn thuê xe</h1>
+        <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>Danh sách các lượt đặt cọc và thuê xe</p>
+      </div>
+
+      {/* Stats */}
+      <div className="cards-3" style={{ marginBottom: 24 }}>
+        {[
+          { label: "Đã xác nhận", count: counts.confirmed ?? 0, color: "#1d4ed8", bg: "#dbeafe" },
+          { label: "Đang thuê",   count: counts.active    ?? 0, color: "#006C4C", bg: "#dcfce7" },
+          { label: "Tổng đơn",    count: bookings.length,       color: "#374151", bg: "#f3f4f6" },
+        ].map(s => (
+          <div key={s.label} className="panel" style={{ textAlign: "center", background: s.bg, border: `1px solid ${s.color}22` }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.count}</div>
+            <div style={{ fontSize: 13, color: s.color, fontWeight: 600 }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {error && (
+        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#dc2626", marginBottom: 16 }}>
+          {error}
+        </div>
+      )}
+
+      {/* Filter tabs */}
+      <div className="brand-filter" style={{ marginBottom: 20 }}>
+        {FILTERS.map(f => (
+          <button key={f.key} onClick={() => setFilter(f.key)} className={filter === f.key ? "active" : ""}>
+            {f.label}
+            {f.key !== "all" && counts[f.key] != null && (
+              <span style={{ marginLeft: 6, background: "rgba(0,0,0,0.1)", borderRadius: 9999, padding: "1px 7px", fontSize: 11 }}>
+                {counts[f.key]}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Notification list */}
+      {visible.length === 0 ? (
+        <div className="panel" style={{ textAlign: "center", padding: 40, color: "var(--text-muted)" }}>
+          Không có đơn nào.
+        </div>
+      ) : (
+        visible.map(b => <BookingNotification key={b.booking_id} b={b} />)
+      )}
     </div>
   );
 };

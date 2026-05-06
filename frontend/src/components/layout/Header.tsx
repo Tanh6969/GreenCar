@@ -27,17 +27,24 @@ const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="container header-inner">
-        <Link to="/" className="logo">
-          <div className="logo-icon">G</div>
-          GreenCar
-        </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Link to="/" className="logo">
+            <div className="logo-icon">G</div>
+            GreenCar
+          </Link>
 
-        <nav className="nav">
-          <Link to="/cars">Danh sách xe</Link>
-          <Link to="/blog">Blog</Link>
-          {user && <Link to="/customer/my-bookings">Đơn của tôi</Link>}
-          {isAdmin && <Link to="/admin/dashboard">Admin</Link>}
+          <nav className="nav">
+          {isAdmin ? (
+            <Link to="/admin/dashboard">Bảng điều khiển</Link>
+          ) : (
+            <>
+              <Link to="/cars">Danh sách xe</Link>
+              <Link to="/blog">Blog</Link>
+              {user && <Link to="/customer/my-bookings">Đơn của tôi</Link>}
+            </>
+          )}
         </nav>
+        </div>
 
         <div className="nav-actions">
           {user ? (
@@ -76,14 +83,17 @@ const Header: React.FC = () => {
                     <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{user.email}</div>
                   </div>
 
-                  {[
-                    { to: "/customer/profile", icon: "👤", label: "Tài khoản của tôi" },
+                  {(isAdmin ? [
+                    { to: "/admin/dashboard",  icon: "📊", label: "Dashboard" },
+                    { to: "/admin/vehicles",   icon: "🚗", label: "Quản lý xe" },
+                    { to: "/admin/bookings",   icon: "📋", label: "Đơn thuê xe" },
+                    { to: "/admin/users",      icon: "👥", label: "Người dùng" },
+                    { to: "/admin/blogs",      icon: "📝", label: "Quản lý Blog" },
+                    { to: "/admin/blogs/new",  icon: "✍️", label: "Viết bài mới" },
+                  ] : [
+                    { to: "/customer/profile",     icon: "👤", label: "Tài khoản của tôi" },
                     { to: "/customer/my-bookings", icon: "📋", label: "Đơn thuê xe" },
-                    ...(isAdmin ? [
-                      { to: "/customer/blogs", icon: "✍️", label: "Bài viết của tôi" },
-                      { to: "/admin/dashboard", icon: "⚙️", label: "Quản trị" },
-                    ] : []),
-                  ].map(item => (
+                  ]).map(item => (
                     <Link
                       key={item.to}
                       to={item.to}

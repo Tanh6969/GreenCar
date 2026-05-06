@@ -29,6 +29,13 @@ export interface Booking {
   overtime_fee: number;
   over_km_fee: number;
   total_price: number;
-  status: "pending" | "confirmed" | "running" | "completed" | "cancelled";
+  status: "pending" | "confirmed" | "active" | "running" | "completed" | "cancelled";
+  payment_method: string;
   created_at: string;
+  // Enriched from JOIN (may be absent on create response)
+  vehicle_brand?: string;
+  vehicle_name?: string;
+  license_plate?: string;
+  customer_name?: string;
+  customer_phone?: string;
 }

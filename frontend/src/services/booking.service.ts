@@ -7,7 +7,9 @@ interface ApiBooking {
   actual_start_time?: string; actual_end_time?: string;
   planned_km: number; actual_km: number;
   deposit_amount: number; overtime_fee: number; over_km_fee: number; total_price: number;
-  status: string; created_at: string;
+  status: string; payment_method?: string; created_at: string;
+  vehicle_brand?: string; vehicle_name?: string; license_plate?: string;
+  customer_name?: string; customer_phone?: string;
 }
 
 function toBooking(b: ApiBooking): Booking {
@@ -27,7 +29,13 @@ function toBooking(b: ApiBooking): Booking {
     over_km_fee:    b.over_km_fee,
     total_price:    b.total_price,
     status:         b.status as Booking["status"],
+    payment_method: b.payment_method ?? "",
     created_at:     b.created_at,
+    vehicle_brand:  b.vehicle_brand,
+    vehicle_name:   b.vehicle_name,
+    license_plate:  b.license_plate,
+    customer_name:  b.customer_name,
+    customer_phone: b.customer_phone,
   };
 }
 
@@ -43,7 +51,7 @@ export const bookingService = {
   },
 
   async createBooking(payload: Omit<Booking, "booking_id" | "created_at">): Promise<Booking> {
-    const body = {
+    const data = await apiClient<ApiBooking>("/bookings", "POST", {
       user_id:        payload.user_id,
       vehicle_id:     payload.vehicle_id,
       rental_plan_id: payload.rental_plan_id,
@@ -52,9 +60,13 @@ export const bookingService = {
       planned_km:     payload.planned_km,
       deposit_amount: payload.deposit_amount,
       total_price:    payload.total_price,
-    };
-    const data = await apiClient<ApiBooking>("/bookings", "POST", body);
+      payment_method: payload.payment_method,
+    });
     return toBooking(data);
+  },
+
+  async setBookingStatus(id: number, status: string): Promise<void> {
+    await apiClient<ApiBooking>(`/admin/bookings/${id}/status`, "PATCH", { status });
   },
 
   async updateBooking(id: number, payload: Partial<Booking>): Promise<Booking> {

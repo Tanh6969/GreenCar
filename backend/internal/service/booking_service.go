@@ -64,3 +64,13 @@ func (s *BookingService) UpdateBooking(b *entities.Booking) error {
 func (s *BookingService) DeleteBooking(id int) error {
 	return s.repo.Delete(id)
 }
+
+// SetBookingStatus updates only the status of an existing booking.
+func (s *BookingService) SetBookingStatus(id int, status string) error {
+	b, err := s.repo.GetByID(id)
+	if err != nil {
+		return err
+	}
+	b.Status = status
+	return s.repo.Update(b)
+}

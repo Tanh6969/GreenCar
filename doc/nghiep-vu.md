@@ -4,7 +4,7 @@
 > Phiên bản: 1.0 — Cập nhật: 05/2026
 
 ---
-
+GreenCar là mô hình thuê xe trực tiếp từ công ty (không phải P2P như BonbonCar), nên bỏ hẳn bước "chủ xe nhận đơn" và "theo dõi trên app" — những bước đó chỉ hợp lý với mô hình cho thuê ngang hàng. Đặt xe xong là xác nhận ngay.
 ## MỤC LỤC
 
 1. [Tổng quan hệ thống](#1-tổng-quan-hệ-thống)

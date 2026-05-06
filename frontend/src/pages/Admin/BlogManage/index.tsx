@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { blogService } from "../../../services/blog.service";
 import { BlogPost, BlogCategory, BlogStatus } from "../../../types/blog.type";
 import { User } from "../../../types/user.type";
@@ -22,6 +22,7 @@ const FILTERS: { key: BlogStatus | "all"; label: string }[] = [
 ];
 
 const BlogManagePage: React.FC = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<BlogStatus | "all">("pending");
@@ -76,9 +77,17 @@ const BlogManagePage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", margin: "0 0 4px" }}>Quản lý Blog</h1>
-        <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>Duyệt và quản lý bài viết của người dùng</p>
+      <div style={{ marginBottom: 24, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text)", margin: "0 0 4px" }}>Quản lý Blog</h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", margin: 0 }}>Duyệt và quản lý bài viết</p>
+        </div>
+        <button
+          onClick={() => navigate("/admin/blogs/new")}
+          style={{ padding: "10px 20px", borderRadius: 10, fontSize: 14, fontWeight: 700, background: "var(--green)", color: "#fff", border: "none", cursor: "pointer" }}
+        >
+          + Viết bài mới
+        </button>
       </div>
 
       {/* Stats */}

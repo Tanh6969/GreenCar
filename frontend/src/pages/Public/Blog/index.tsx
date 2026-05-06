@@ -100,8 +100,7 @@ const BlogListPage: React.FC = () => {
         {posts.length === 0 && (
           <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
             <p style={{ fontSize: 48, marginBottom: 16 }}>📝</p>
-            <p>Chưa có bài viết nào. Hãy là người đầu tiên!</p>
-            <Link to="/customer/blogs/new" className="btn btn-primary" style={{ marginTop: 16 }}>Viết bài ngay</Link>
+            <p>Chưa có bài viết nào.</p>
           </div>
         )}
       </div>

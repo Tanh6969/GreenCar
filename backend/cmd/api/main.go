@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"greencar/internal/infra/api"
 	repository "greencar/internal/infra/postgresql"
 	"greencar/internal/service"
@@ -14,6 +15,9 @@ import (
 )
 
 func main() {
+	// Load .env if present (ignored in production where env vars are set externally)
+	_ = godotenv.Load()
+
 	log := logger.New()
 
 	dsn := os.Getenv("DB_DSN")

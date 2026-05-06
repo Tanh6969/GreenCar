@@ -230,7 +230,7 @@ export const pricing: Pricing[] = [
 ];
 
 export const bookings: Booking[] = [
-  { booking_id: 1, user_id: 2, vehicle_id: 1, rental_plan_id: 3, start_time: "2026-04-26T01:00:00Z", end_time: "2026-04-27T01:00:00Z", planned_km: 120, actual_km: 110, deposit_amount: 500000, overtime_fee: 0, over_km_fee: 0, total_price: 860000, status: "confirmed", created_at: "2026-04-25T12:00:00Z" }
+  { booking_id: 1, user_id: 2, vehicle_id: 1, rental_plan_id: 3, start_time: "2026-04-26T01:00:00Z", end_time: "2026-04-27T01:00:00Z", planned_km: 120, actual_km: 110, deposit_amount: 500000, overtime_fee: 0, over_km_fee: 0, total_price: 860000, status: "confirmed", payment_method: "transfer", created_at: "2026-04-25T12:00:00Z" }
 ];
 
 export const payments: Payment[] = [

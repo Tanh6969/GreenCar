@@ -88,6 +88,7 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", handlers.GetBookingHandler(bookingSvc, log))
 				r.Put("/", handlers.UpdateBookingHandler(bookingSvc, log))
+				r.Patch("/status", handlers.SetBookingStatusHandler(bookingSvc, log))
 				r.Delete("/", handlers.DeleteBookingHandler(bookingSvc, log))
 			})
 		})
