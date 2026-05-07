@@ -20,4 +20,5 @@ type VehicleRepository interface {
 	// If start or end is nil, no availability filtering is applied.
 	// locationID/modelID are optional filters (nil => ignore).
 	ListAvailable(start, end *time.Time, locationID, modelID *int, limit, offset int) ([]*entities.Vehicle, error)
+	AddImage(modelID int, url string) error
 }

@@ -4,6 +4,18 @@ import { blogService } from "../../../services/blog.service";
 import { useAuth } from "../../../hooks/useAuth";
 import { BlogCategory } from "../../../types/blog.type";
 
+function toSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 const AdminBlogEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate  = useNavigate();
@@ -55,7 +67,7 @@ const AdminBlogEditPage: React.FC = () => {
           title, excerpt, content,
           cover_image: coverImage,
           category_id: categoryId,
-          slug: "",
+          slug: toSlug(title),
         });
         postId = created.post_id;
       }

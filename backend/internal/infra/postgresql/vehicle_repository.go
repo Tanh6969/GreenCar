@@ -52,6 +52,14 @@ func (r *vehicleRepository) Delete(id int) error {
 	return err
 }
 
+func (r *vehicleRepository) AddImage(modelID int, url string) error {
+	_, err := r.db.Exec(
+		`INSERT INTO vehicle_images (vehicle_model_id, image_url) VALUES ($1, $2)`,
+		modelID, url,
+	)
+	return err
+}
+
 func (r *vehicleRepository) List(limit, offset int) ([]*entities.Vehicle, error) {
 	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id 
 		FROM vehicles ORDER BY vehicle_id LIMIT $1 OFFSET $2`

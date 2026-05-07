@@ -19,6 +19,7 @@ type CreateVehicleRequest struct {
 	BatteryLevel  int    `json:"battery_level"`
 	BatteryHealth int    `json:"battery_health"`
 	LocationID    int    `json:"location_id"`
+	ImageURL      string `json:"image_url"`
 }
 
 // UpdateVehicleRequest is the request payload to update a vehicle.
@@ -29,4 +30,5 @@ type UpdateVehicleRequest struct {
 	BatteryLevel  int    `json:"battery_level"`
 	BatteryHealth int    `json:"battery_health"`
 	LocationID    int    `json:"location_id"`
+	ImageURL      string `json:"image_url"`
 }

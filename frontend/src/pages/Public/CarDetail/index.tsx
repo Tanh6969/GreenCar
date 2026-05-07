@@ -4,6 +4,15 @@ import { vehicleService } from "../../../services/vehicle.service";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
+// ── icons ─────────────────────────────────────────────────────
+const IcCarLg  = () => <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#BDCAC1" strokeWidth="1" strokeLinecap="round"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>;
+const IcPin    = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }}><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>;
+const IcBolt   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2" strokeLinecap="round"><polyline points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/></svg>;
+const IcPower  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2" strokeLinecap="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg>;
+const IcSeat   = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const IcShield = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const IcLeaf   = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round"><path d="M2 22l10-10"/><path d="M13.5 21.5C18 21.5 21 17.5 21 12c0-5.5-4-9-9-9C7 3 3 7 3 12c0 3 1.5 5.5 4 7l6.5 2.5z"/></svg>;
+
 interface DetailData {
   vehicle: { vehicle_id: number; license_plate: string; status: string; battery_level: number; battery_health: number };
   model: { vehicle_model_id: number; name: string; brand: string; seats: number; horsepower: number; range_km: number; trunk_capacity: number; airbags: number; vehicle_type: string; transmission: string };
@@ -20,18 +29,11 @@ const PLAN_LABELS: Record<number, { label: string; sub: string }> = {
   3: { label: "Gói 24 giờ", sub: "Tối đa 400km" },
 };
 
-const FEATURE_ICONS: Record<string, string> = {
-  "Camera 360°": "📷",
-  "Cruise Control": "🛞",
-  "Màn hình lớn": "🖥️",
-  "Autopilot": "🤖",
-  "Sạc nhanh DC": "⚡",
-  "Cửa sổ trời": "☀️",
-  "Ghế sưởi": "🔥",
-  "Đỗ xe tự động": "🅿️",
-  "Hệ thống âm thanh premium": "🎵",
-  "AWD": "⚙️",
-};
+const IcCheck = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <polyline points="20,6 9,17 4,12"/>
+  </svg>
+);
 
 const CarDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +62,7 @@ const CarDetailPage: React.FC = () => {
   if (!data) {
     return (
       <div className="text-center py-24 text-[#6E7A72]">
-        <p className="text-4xl mb-3">🚗</p>
+        <div className="flex justify-center mb-3"><IcCarLg /></div>
         <p className="font-semibold text-lg">Không tìm thấy xe.</p>
         <Link to="/cars" className="mt-4 inline-block text-[#006C4C] font-semibold hover:underline">
           ← Quay lại danh sách xe
@@ -97,7 +99,7 @@ const CarDetailPage: React.FC = () => {
             {mainImg ? (
               <img src={mainImg} alt={model.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-7xl">🚗</div>
+              <div className="w-full h-full flex items-center justify-center"><IcCarLg /></div>
             )}
             <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full shadow
               ${available ? "bg-[#006C4C] text-white" : "bg-[#E5E7EB] text-[#6E7A72]"}`}>
@@ -127,7 +129,7 @@ const CarDetailPage: React.FC = () => {
                 </span>
                 <h1 className="text-2xl font-bold text-[#191C1E] mt-2">{model.brand} {model.name}</h1>
                 {location && (
-                  <p className="text-sm text-[#6E7A72] mt-1">📍 {location.name}, {location.city}</p>
+                  <p className="text-sm text-[#6E7A72] mt-1"><IcPin />{location.name}, {location.city}</p>
                 )}
               </div>
               <div className="text-right">
@@ -139,14 +141,14 @@ const CarDetailPage: React.FC = () => {
 
           {/* EV key specs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { icon: "⚡", label: "Phạm vi", val: `${model.range_km} km` },
-              { icon: "🐎", label: "Công suất", val: `${model.horsepower} hp` },
-              { icon: "💺", label: "Số chỗ", val: `${model.seats} chỗ` },
-              { icon: "🛡️", label: "Túi khí", val: `${model.airbags} túi` },
-            ].map(s => (
+            {([
+              { icon: <IcBolt />,   label: "Phạm vi",  val: `${model.range_km} km` },
+              { icon: <IcPower />,  label: "Công suất", val: `${model.horsepower} hp` },
+              { icon: <IcSeat />,   label: "Số chỗ",   val: `${model.seats} chỗ` },
+              { icon: <IcShield />, label: "Túi khí",  val: `${model.airbags} túi` },
+            ] as { icon: React.ReactNode; label: string; val: string }[]).map(s => (
               <div key={s.label} className="bg-white rounded-xl border border-[#BDCAC1] p-4 text-center shadow-sm">
-                <div className="text-2xl mb-1">{s.icon}</div>
+                <div className="flex justify-center mb-1">{s.icon}</div>
                 <div className="text-[10px] text-[#6E7A72] uppercase tracking-wide">{s.label}</div>
                 <div className="font-bold text-[#191C1E] text-sm mt-0.5">{s.val}</div>
               </div>
@@ -215,7 +217,7 @@ const CarDetailPage: React.FC = () => {
                 {features.map(f => (
                   <span key={f.feature_id}
                     className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#bbf7d0] text-[#006C4C] text-sm font-medium px-3 py-1.5 rounded-full">
-                    <span>{FEATURE_ICONS[f.feature_name] ?? "✓"}</span>
+                    <IcCheck />
                     {f.feature_name}
                   </span>
                 ))}
@@ -225,7 +227,7 @@ const CarDetailPage: React.FC = () => {
 
           {/* eco badge */}
           <div className="bg-gradient-to-r from-[#F0FDF4] to-[#dcfce7] border border-[#bbf7d0] rounded-xl p-5 flex items-center gap-4">
-            <div className="text-4xl">🌱</div>
+            <div className="flex-shrink-0"><IcLeaf /></div>
             <div>
               <p className="font-bold text-[#006C4C]">Eco Impact</p>
               <p className="text-sm text-[#3E4943]">

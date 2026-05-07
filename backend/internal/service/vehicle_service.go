@@ -49,6 +49,11 @@ func (s *VehicleService) DeleteVehicle(id int) error {
 	return s.repo.Delete(id)
 }
 
+// AddVehicleImage adds an image URL for the given vehicle model.
+func (s *VehicleService) AddVehicleImage(modelID int, url string) error {
+	return s.repo.AddImage(modelID, url)
+}
+
 // GetVehicleDetail returns enriched vehicle detail including model, pricing, reviews, and location.
 func (s *VehicleService) GetVehicleDetail(id int) (*entities.VehicleDetail, error) {
 	return s.detailRepo.GetByVehicleID(id)

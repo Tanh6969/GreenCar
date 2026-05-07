@@ -167,6 +167,11 @@ func CreateVehicleHandler(vehicleSvc *service.VehicleService, log *logger.Logger
 			response.WriteError(w, http.StatusBadRequest, err.Error())
 			return
 		}
+		if req.ImageURL != "" {
+			if err := vehicleSvc.AddVehicleImage(v.VehicleModelID, req.ImageURL); err != nil {
+				log.Warn("add vehicle image: %v", err)
+			}
+		}
 		response.WriteJSON(w, http.StatusCreated, mappers.ToVehicleResponse(&v))
 	}
 }
@@ -192,6 +197,11 @@ func UpdateVehicleHandler(vehicleSvc *service.VehicleService, log *logger.Logger
 			log.Warn("update vehicle %d: %v", id, err)
 			response.WriteError(w, http.StatusBadRequest, err.Error())
 			return
+		}
+		if req.ImageURL != "" {
+			if err := vehicleSvc.AddVehicleImage(v.VehicleModelID, req.ImageURL); err != nil {
+				log.Warn("add vehicle image on update: %v", err)
+			}
 		}
 
 		updated, err := vehicleSvc.GetVehicle(id)

@@ -5,6 +5,39 @@ import { pricing } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
+// ── icons ─────────────────────────────────────────────────────
+const IcSearch = () => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#BDCAC1" strokeWidth="1.5" strokeLinecap="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+const IcCarPlaceholder = () => (
+  <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#4FBD91" strokeWidth="1" strokeLinecap="round">
+    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
+    <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
+const IcPin = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 3 }}>
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+const IcBolt = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
+    <polyline points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+  </svg>
+);
+const IcPower = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
+    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+  </svg>
+);
+const IcSeat = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
+    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
 const VEHICLE_TYPES = ["Sedan", "SUV", "Crossover", "Fastback", "Hatchback"];
 const RANGE_OPTIONS = [
   { label: "Tất cả",  min: 0   },
@@ -182,7 +215,7 @@ const CarListPage: React.FC = () => {
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-[#6E7A72]">
-              <div className="text-5xl mb-4">🔍</div>
+              <div className="mb-4 flex justify-center"><IcSearch /></div>
               <p className="font-semibold">Không tìm thấy xe phù hợp.</p>
               <button onClick={resetFilters} className="mt-3 text-[#006C4C] font-semibold hover:underline text-sm">
                 Xóa bộ lọc
@@ -203,7 +236,7 @@ const CarListPage: React.FC = () => {
                         <img src={MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image?.image_url} alt={item.model.name}
                           className="w-full h-48 object-cover" />
                       ) : (
-                        <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center text-5xl">🚗</div>
+                        <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center"><IcCarPlaceholder /></div>
                       )}
                       <span className={`absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full
                         ${available ? "bg-[#006C4C] text-white" : "bg-[#E5E7EB] text-[#6E7A72]"}`}>
@@ -219,12 +252,12 @@ const CarListPage: React.FC = () => {
                         </span>
                       </div>
 
-                      <p className="text-xs text-[#6E7A72] mb-3">📍 {item.location.name}, {item.location.city}</p>
+                      <p className="text-xs text-[#6E7A72] mb-3"><IcPin />{item.location.name}, {item.location.city}</p>
 
                       <div className="flex gap-2 text-[11px] text-[#3E4943] mb-3 pb-3 border-b border-[#F3F4F6]">
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full">⚡ {item.model.range_km}km</span>
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full">🐎 {item.model.horsepower}hp</span>
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full">💺 {item.model.seats} chỗ</span>
+                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcBolt />{item.model.range_km}km</span>
+                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcPower />{item.model.horsepower}hp</span>
+                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcSeat />{item.model.seats} chỗ</span>
                       </div>
 
                       <div className="flex gap-2 text-xs text-[#6E7A72] mb-4">
