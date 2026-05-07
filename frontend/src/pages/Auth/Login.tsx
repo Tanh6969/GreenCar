@@ -25,7 +25,8 @@ const LoginPage: React.FC = () => {
     try {
       const result = await authService.login(email.trim(), password);
       login(result.token, result.user);
-      navigate(from, { replace: true });
+      const destination = result.user.role_id === 1 ? "/admin/dashboard" : from;
+      navigate(destination, { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Email hoặc mật khẩu không đúng.");
     } finally {

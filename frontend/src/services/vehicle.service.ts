@@ -118,4 +118,22 @@ export const vehicleService = {
       meta: r.meta,
     };
   },
+
+  async adminCreateVehicle(data: {
+    model_id: number; license_plate: string; status: string;
+    battery_level: number; battery_health: number; location_id: number;
+  }): Promise<void> {
+    await apiClient("/admin/vehicles", "POST", data);
+  },
+
+  async adminUpdateVehicle(id: number, data: {
+    model_id: number; license_plate: string; status: string;
+    battery_level: number; battery_health: number; location_id: number;
+  }): Promise<void> {
+    await apiClient(`/admin/vehicles/${id}`, "PUT", data);
+  },
+
+  async adminDeleteVehicle(id: number): Promise<void> {
+    await apiClient(`/admin/vehicles/${id}`, "DELETE");
+  },
 };

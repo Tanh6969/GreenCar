@@ -87,6 +87,7 @@ CREATE TABLE "bookings" (
   "over_km_fee" decimal,
   "total_price" decimal,
   "status" varchar,
+  "payment_method" varchar(20),
   "created_at" timestamp
 );
 

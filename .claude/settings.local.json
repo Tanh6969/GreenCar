@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Stop-Process -Name \"main\" -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process -NoNewWindow -FilePath \"go\" -WorkingDirectory \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\" -ArgumentList \"run\",\"./cmd/api/main.go\"; Start-Sleep 3; $TOKEN = \\(curl -s -X POST http://localhost:8080/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"nguyenvanan@gmail.com\",\"password\":\"password\"}' | ConvertFrom-Json\\).access_token; curl -s \"http://localhost:8080/customers/me/bookings\" -H \"Authorization: Bearer $TOKEN\")"
+      "PowerShell(Stop-Process -Name \"main\" -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process -NoNewWindow -FilePath \"go\" -WorkingDirectory \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\" -ArgumentList \"run\",\"./cmd/api/main.go\"; Start-Sleep 3; $TOKEN = \\(curl -s -X POST http://localhost:8080/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"nguyenvanan@gmail.com\",\"password\":\"password\"}' | ConvertFrom-Json\\).access_token; curl -s \"http://localhost:8080/customers/me/bookings\" -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(curl -s http://localhost:8080/health)",
+      "Bash(go run *)",
+      "PowerShell($env:PGPASSWORD = \"Megake123\"; psql -U postgres -d greencar -f \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\\\\sql\\\\datasample.sql\" 2>&1)"
     ]
   }
 }

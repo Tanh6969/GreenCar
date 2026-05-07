@@ -28,19 +28,63 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }>
   pending:   { label: "Chờ xác nhận",color: "#b45309", bg: "#fef3c7" },
 };
 
+// ── SVG icons ─────────────────────────────────────────────────
+const IcClipboard = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+    <rect x="8" y="2" width="8" height="4" rx="1"/>
+    <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+  </svg>
+);
+const IcKey = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+  </svg>
+);
+const IcCar = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
+    <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
+const IcUsers = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+  </svg>
+);
+const IcFileText = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+    <polyline points="14,2 14,8 20,8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+  </svg>
+);
+const IcPen = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+  </svg>
+);
+const IcChevron = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18l6-6-6-6"/>
+  </svg>
+);
+
 // ── StatCard ──────────────────────────────────────────────────
 interface StatCardProps {
   label: string;
   value: string | number;
   sub?: string;
-  icon: string;
+  icon: React.ReactNode;
   accent: string;
   bg: string;
 }
 function StatCard({ label, value, sub, icon, accent, bg }: StatCardProps) {
   return (
     <div className="panel" style={{ background: bg, border: `1px solid ${accent}33`, position: "relative", overflow: "hidden" }}>
-      <div style={{ position: "absolute", right: 16, top: 14, fontSize: 32, opacity: 0.18 }}>{icon}</div>
+      <div style={{ position: "absolute", right: 16, top: 14, color: accent, opacity: 0.2 }}>{icon}</div>
       <p style={{ fontSize: 12, fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: 1, margin: "0 0 8px" }}>{label}</p>
       <p style={{ fontSize: 28, fontWeight: 900, color: accent, margin: "0 0 4px", lineHeight: 1 }}>{value}</p>
       {sub && <p style={{ fontSize: 12, color: accent, opacity: 0.7, margin: 0 }}>{sub}</p>}
@@ -49,7 +93,7 @@ function StatCard({ label, value, sub, icon, accent, bg }: StatCardProps) {
 }
 
 // ── QuickAction ────────────────────────────────────────────────
-function QuickAction({ to, icon, label, sub }: { to: string; icon: string; label: string; sub: string }) {
+function QuickAction({ to, icon, label, sub }: { to: string; icon: React.ReactNode; label: string; sub: string }) {
   return (
     <Link to={to} style={{ textDecoration: "none" }}>
       <div className="panel" style={{
@@ -106,7 +150,7 @@ const DashboardPage: React.FC = () => {
             {todayLabel()}
           </p>
           <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: "0 0 4px" }}>
-            Chào mừng trở lại{user?.name ? `, ${user.name}` : ""} 👋
+            Chào mừng trở lại{user?.name ? `, ${user.name}` : ""}
           </h1>
           <p style={{ fontSize: 13, color: "#6ee7b7", margin: 0 }}>
             Dưới đây là tổng quan hoạt động GreenCar hôm nay.
@@ -126,7 +170,7 @@ const DashboardPage: React.FC = () => {
           label="Tổng đơn thuê"
           value={loading ? "—" : bookings.length}
           sub="tất cả thời gian"
-          icon="📋"
+          icon={<IcClipboard size={36} />}
           accent="#1d4ed8"
           bg="#eff6ff"
         />
@@ -134,7 +178,7 @@ const DashboardPage: React.FC = () => {
           label="Chờ nhận xe"
           value={loading ? "—" : confirmedCount}
           sub="đã đặt cọc, chưa nhận"
-          icon="🔑"
+          icon={<IcKey size={36} />}
           accent="#006C4C"
           bg="#f0fdf4"
         />
@@ -142,7 +186,7 @@ const DashboardPage: React.FC = () => {
           label="Đang thuê"
           value={loading ? "—" : activeCount}
           sub="xe đang trên đường"
-          icon="🚗"
+          icon={<IcCar size={36} />}
           accent="#d97706"
           bg="#fffbeb"
         />
@@ -209,11 +253,11 @@ const DashboardPage: React.FC = () => {
         <div>
           <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", margin: "0 0 14px" }}>Thao tác nhanh</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <QuickAction to="/admin/vehicles"  icon="🚗" label="Quản lý xe"       sub="Thêm, sửa, xoá xe" />
-            <QuickAction to="/admin/bookings"  icon="📋" label="Đơn thuê xe"      sub="Xem tất cả đơn" />
-            <QuickAction to="/admin/users"     icon="👥" label="Người dùng"       sub="Quản lý tài khoản" />
-            <QuickAction to="/admin/blogs"     icon="✍️" label="Quản lý blog"     sub="Bài viết & nội dung" />
-            <QuickAction to="/admin/blogs/new" icon="📝" label="Viết bài mới"     sub="Tạo bài đăng mới" />
+            <QuickAction to="/admin/vehicles"  icon={<IcCar size={20}/>}      label="Quản lý xe"       sub="Thêm, sửa, xoá xe" />
+            <QuickAction to="/admin/bookings"  icon={<IcClipboard size={20}/>} label="Đơn thuê xe"      sub="Xem tất cả đơn" />
+            <QuickAction to="/admin/users"     icon={<IcUsers size={20}/>}     label="Người dùng"       sub="Quản lý tài khoản" />
+            <QuickAction to="/admin/blogs"     icon={<IcFileText size={20}/>}  label="Quản lý blog"     sub="Bài viết & nội dung" />
+            <QuickAction to="/admin/blogs/new" icon={<IcPen size={20}/>}       label="Viết bài mới"     sub="Tạo bài đăng mới" />
           </div>
         </div>
 
