@@ -5,6 +5,31 @@
 
 ---
 GreenCar là mô hình thuê xe trực tiếp từ công ty (không phải P2P như BonbonCar), nên bỏ hẳn bước "chủ xe nhận đơn" và "theo dõi trên app" — những bước đó chỉ hợp lý với mô hình cho thuê ngang hàng. Đặt xe xong là xác nhận ngay.
+
+Luồng đề xuất cho GreenCar
+
+[1] Chọn xe + gói thuê (CarDetail)
+         ↓
+[2] Thông tin đặt xe (Checkout)
+    • Guest:   nhập Tên / SĐT / Số GPLX / Email
+    • Account: điền sẵn từ profile, chỉ xác nhận
+    • Chọn ngày nhận – trả, địa điểm
+         ↓
+[3] Thanh toán giữ chỗ (Payment)
+    • Hiện tóm tắt đơn + số tiền cọc (VD: 30% tổng)
+    • Chọn phương thức: Chuyển khoản / Thẻ / COD
+    • Bấm "Xác nhận & Giữ chỗ"
+         ↓
+[4] Xác nhận đơn (Confirmation)
+    • Hiện mã đơn, chi tiết xe, thời gian
+    • "Email xác nhận đã gửi về [email]"  ← future
+    • Nút "Xem đơn của tôi"
+
+Step 2 (Thanh toán): Chỉ còn chuyển khoản, xóa tùy chọn tiền mặt
+Booking tạo ra với status confirmed ngay (không cần admin xác nhận)
+Admin: Chỉ hiển thị thông báo/danh sách đặt cọc, không có nút xác nhận/huỷ
+Đơn của tôi: Hiển thị đúng tên xe, thời gian, đã cọc bao nhiêu
+
 ## MỤC LỤC
 
 1. [Tổng quan hệ thống](#1-tổng-quan-hệ-thống)
