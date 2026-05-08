@@ -4,7 +4,13 @@
       "PowerShell(Stop-Process -Name \"main\" -ErrorAction SilentlyContinue; Start-Sleep 1; Start-Process -NoNewWindow -FilePath \"go\" -WorkingDirectory \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\" -ArgumentList \"run\",\"./cmd/api/main.go\"; Start-Sleep 3; $TOKEN = \\(curl -s -X POST http://localhost:8080/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"nguyenvanan@gmail.com\",\"password\":\"password\"}' | ConvertFrom-Json\\).access_token; curl -s \"http://localhost:8080/customers/me/bookings\" -H \"Authorization: Bearer $TOKEN\")",
       "Bash(curl -s http://localhost:8080/health)",
       "Bash(go run *)",
-      "PowerShell($env:PGPASSWORD = \"Megake123\"; psql -U postgres -d greencar -f \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\\\\sql\\\\datasample.sql\" 2>&1)"
+      "PowerShell($env:PGPASSWORD = \"Megake123\"; psql -U postgres -d greencar -f \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\backend\\\\sql\\\\datasample.sql\" 2>&1)",
+      "Bash(go build *)",
+      "Bash(Start-Process -NoNewWindow -FilePath \"go\" -ArgumentList \"run\",\"./cmd/api\")",
+      "PowerShell(Start-Sleep -Seconds 4; try { Invoke-WebRequest -Uri \"http://localhost:8080/vehicles/cards\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode } catch { $_.Exception.Message })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://localhost:8080/vehicles/cards\" -UseBasicParsing -TimeoutSec 5; $j = $r.Content | ConvertFrom-Json; $j | ForEach-Object { $_.model.brand } | Sort-Object -Unique } catch { $_.Exception.Message })",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(Set-Location \"e:\\\\New folder\\\\ProjectGreenCar\\\\GreenCar\\\\frontend\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"npm start\" -PassThru | Select-Object Id)"
     ]
   }
 }

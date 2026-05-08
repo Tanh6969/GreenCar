@@ -28,22 +28,24 @@ const STATUS_LABEL: Record<string, { label: string; color: string; bg: string }>
   pending:   { label: "Chờ xác nhận",color: "#b45309", bg: "#fef3c7" },
 };
 
-// ── SVG icons ─────────────────────────────────────────────────
+// ── SVG icons (same paths as Sidebar/Header for consistency) ──
 const IcClipboard = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
-    <rect x="8" y="2" width="8" height="4" rx="1"/>
+    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+    <rect x="9" y="3" width="6" height="4" rx="1"/>
     <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
   </svg>
 );
-const IcKey = ({ size = 22 }: { size?: number }) => (
+const IcCalendar = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+    <rect x="3" y="4" width="18" height="18" rx="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
 const IcCar = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h14l4 4v4a2 2 0 01-2 2h-2"/>
+    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
     <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
   </svg>
 );
@@ -64,11 +66,6 @@ const IcFileText = ({ size = 16 }: { size?: number }) => (
 const IcPen = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
-  </svg>
-);
-const IcChevron = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 18l6-6-6-6"/>
   </svg>
 );
 
@@ -178,7 +175,7 @@ const DashboardPage: React.FC = () => {
           label="Chờ nhận xe"
           value={loading ? "—" : confirmedCount}
           sub="đã đặt cọc, chưa nhận"
-          icon={<IcKey size={36} />}
+          icon={<IcCalendar size={36} />}
           accent="#006C4C"
           bg="#f0fdf4"
         />

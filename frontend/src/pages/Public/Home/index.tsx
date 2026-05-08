@@ -9,6 +9,72 @@ import { VehicleCardData } from "../../../types/vehicle.type";
 
 import heroBg from "../../../assets/images/Premium EV Experience.png";
 
+// ── icons ──────────────────────────────────────────────────────
+const IcCar = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
+    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
+    <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
+const IcBolt = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+  </svg>
+);
+const IcSeat = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/>
+  </svg>
+);
+const IcSpeed = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+  </svg>
+);
+const IcPin = ({ size = 12, color = "#6E7A72" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+const IcShield = ({ size = 13 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 4 }}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+);
+const IcSearch = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+const IcClipboard = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
+    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+    <rect x="9" y="3" width="6" height="4" rx="1"/>
+    <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+  </svg>
+);
+const IcLeaf = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 5 }}>
+    <path d="M2 22l10-10"/><path d="M13.5 21.5C18 21.5 21 17.5 21 12c0-5.5-4-9-9-9C7 3 3 7 3 12c0 3 1.5 5.5 4 7l6.5 2.5z"/>
+  </svg>
+);
+const IcTree = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
+    <path d="M12 22V12"/><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 17H3l9-9 9 9h-2"/>
+  </svg>
+);
+const IcBattery = ({ size = 22 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
+    <rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/>
+    <line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="11" x2="10" y2="13"/>
+  </svg>
+);
+const IcTimer = ({ size = 14, color = "#4FBD91" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 6 }}>
+    <circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>
+  </svg>
+);
+
 const LUXURY_MODEL_IDS = [9, 10, 11, 12, 13, 14];
 const BRANDS = ["TESLA", "VINFAST", "HYUNDAI", "RIVIAN", "LUCID", "POLESTAR"];
 
@@ -50,7 +116,9 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
           <img src={img} alt={model.name}
             className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
-          <div className="w-full h-36 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center text-5xl">🚗</div>
+          <div className="w-full h-36 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center">
+            <IcCar size={48} color="#4FBD91" />
+          </div>
         )}
         <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full
           ${available ? "bg-[#006C4C] text-white" : "bg-[#9CA3AF] text-white"}`}>
@@ -64,12 +132,15 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         <h4 className={`font-bold text-sm leading-tight mb-2
           ${isLuxury ? "text-white" : "text-[#191C1E]"}`}>{model.name}</h4>
 
-        <div className="flex gap-2 text-[10px] mb-3">
-          <span className={`px-1.5 py-0.5 rounded-full ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F3F4F6] text-[#3E4943]"}`}>
-            ⚡ {model.range_km}km
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcBolt size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.range_km} km
           </span>
-          <span className={`px-1.5 py-0.5 rounded-full ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F3F4F6] text-[#3E4943]"}`}>
-            💺 {model.seats} chỗ
+          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcSpeed size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.horsepower} hp
+          </span>
+          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcSeat size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.seats} chỗ
           </span>
         </div>
 
@@ -86,7 +157,7 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
 
         {location && (
           <p className={`text-[10px] mt-1.5 ${isLuxury ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>
-            📍 {location.name}
+            <IcPin size={10} color={isLuxury ? "#4FBD91" : "#6E7A72"} />{location.name}
           </p>
         )}
       </div>
@@ -199,8 +270,8 @@ const SearchWidget: React.FC = () => {
       </button>
 
       <div className="flex justify-between items-center mt-3 text-[10px] text-[#9CA3AF]">
-        <span>⚡ Sạc đầy trước mỗi chuyến</span>
-        <span>🛡️ Bảo hiểm đầy đủ</span>
+        <span className="inline-flex items-center"><IcBolt size={11} color="#9CA3AF" /> Sạc đầy trước mỗi chuyến</span>
+        <span className="inline-flex items-center"><IcShield size={12} /> Bảo hiểm đầy đủ</span>
       </div>
     </div>
   );
@@ -304,13 +375,13 @@ const HomePage: React.FC = () => {
             <h2 className="text-xl font-bold text-[#191C1E]">Đặt xe chỉ 3 bước</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { step: "01", icon: "🔍", title: "Chọn xe & địa điểm", desc: "Lọc theo loại xe, khu vực đón và ngày giờ phù hợp." },
-              { step: "02", icon: "📋", title: "Đặt & thanh toán",   desc: "Xác nhận thông tin, chọn gói thuê và thanh toán an toàn." },
-              { step: "03", icon: "🚗", title: "Nhận xe & lái",      desc: "Nhận xe tại điểm hẹn. Xe đã sạc đầy, bảo hiểm đầy đủ." },
-            ].map(s => (
+            {([
+              { step: "01", icon: <IcSearch size={32} />,                   title: "Chọn xe & địa điểm", desc: "Lọc theo loại xe, khu vực đón và ngày giờ phù hợp." },
+              { step: "02", icon: <IcClipboard size={32} />,                 title: "Đặt & thanh toán",   desc: "Xác nhận thông tin, chọn gói thuê và thanh toán an toàn." },
+              { step: "03", icon: <IcCar size={32} color="#006C4C" />,       title: "Nhận xe & lái",      desc: "Nhận xe tại điểm hẹn. Xe đã sạc đầy, bảo hiểm đầy đủ." },
+            ] as { step: string; icon: React.ReactNode; title: string; desc: string }[]).map(s => (
               <div key={s.step} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 text-center hover:border-[#BDCAC1] transition-colors">
-                <div className="text-3xl mb-3">{s.icon}</div>
+                <div className="flex justify-center mb-3">{s.icon}</div>
                 <p className="text-[10px] font-black text-[#006C4C] uppercase tracking-[0.15em] mb-1">Bước {s.step}</p>
                 <h3 className="font-bold text-[#191C1E] text-sm mb-2">{s.title}</h3>
                 <p className="text-xs text-[#6E7A72] leading-relaxed">{s.desc}</p>
@@ -356,11 +427,11 @@ const HomePage: React.FC = () => {
                   </p>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#334155] text-xs">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#4FBD91]">⚡</span>
+                      <IcBolt size={14} color="#4FBD91" />
                       <span className="text-white font-semibold">{car.range}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#4FBD91]">🏎️</span>
+                      <IcTimer size={14} color="#4FBD91" />
                       <span className="text-white font-semibold">0–100: {car.accel}</span>
                     </div>
                   </div>
@@ -376,8 +447,8 @@ const HomePage: React.FC = () => {
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="bg-gradient-to-br from-[#F0FDF4] to-[#dcfce7] rounded-3xl p-10 grid sm:grid-cols-[1fr_auto] gap-8 items-center border border-[#bbf7d0]">
             <div>
-              <span className="inline-block bg-[#006C4C] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                🌱 Eco Impact
+              <span className="inline-flex items-center bg-[#006C4C] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+                <IcLeaf size={13} /> Eco Impact
               </span>
               <h2 className="text-xl font-bold text-[#191C1E] mb-2">
                 Cộng đồng GreenCar đã tiết kiệm 4.2 tấn CO₂
@@ -391,13 +462,13 @@ const HomePage: React.FC = () => {
               </Link>
             </div>
             <div className="flex sm:flex-col gap-3">
-              {[
-                { icon: "🌳", num: "12.5K", lbl: "Trees equivalent" },
-                { icon: "🔋", num: "450K",  lbl: "kWh tiết kiệm" },
-                { icon: "🚗", num: "20K+",  lbl: "Chuyến thành công" },
-              ].map(s => (
+              {([
+                { icon: <IcTree size={22} />,                    num: "12.5K", lbl: "Trees equivalent" },
+                { icon: <IcBattery size={22} />,                 num: "450K",  lbl: "kWh tiết kiệm" },
+                { icon: <IcCar size={22} color="#006C4C" />,     num: "20K+",  lbl: "Chuyến thành công" },
+              ] as { icon: React.ReactNode; num: string; lbl: string }[]).map(s => (
                 <div key={s.lbl} className="bg-white rounded-xl border border-[#bbf7d0] p-4 text-center min-w-[100px] shadow-sm">
-                  <div className="text-xl mb-1">{s.icon}</div>
+                  <div className="flex justify-center mb-1">{s.icon}</div>
                   <div className="font-bold text-[#191C1E] text-base">{s.num}</div>
                   <div className="text-[9px] font-bold text-[#6E7A72] uppercase tracking-wide mt-0.5">{s.lbl}</div>
                 </div>

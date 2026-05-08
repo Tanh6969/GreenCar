@@ -18,23 +18,23 @@ const IcCarPlaceholder = () => (
   </svg>
 );
 const IcPin = () => (
-  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 3 }}>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6E7A72" strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
     <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
   </svg>
 );
 const IcBolt = () => (
-  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
-    <polyline points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
-  </svg>
-);
-const IcPower = () => (
-  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
-    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="#006C4C" stroke="none" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
   </svg>
 );
 const IcSeat = () => (
-  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline", verticalAlign: "middle", marginRight: 2 }}>
-    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/>
+  </svg>
+);
+const IcSpeed = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
+    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
   </svg>
 );
 
@@ -145,7 +145,8 @@ const CarListPage: React.FC = () => {
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex gap-6 items-start">
 
         {/* ── SIDEBAR ───────────────────────────────────────────── */}
-        <aside className="w-64 flex-shrink-0 bg-white rounded-xl border border-[#BDCAC1] p-5 sticky top-[84px]">
+        <aside className="w-64 flex-shrink-0 bg-white rounded-xl border border-[#BDCAC1] p-5 sticky top-[84px]"
+          style={{ maxHeight: "calc(100vh - 104px)", overflowY: "auto" }}>
           <div className="flex justify-between items-center mb-5">
             <span className="font-semibold text-[#151C27]">Bộ lọc</span>
             <button onClick={resetFilters} className="text-sm text-[#006C4C] hover:underline font-medium">Xóa tất cả</button>
@@ -163,14 +164,24 @@ const CarListPage: React.FC = () => {
           {/* vehicle type */}
           <div className="mb-5">
             <p className="text-sm font-semibold text-[#151C27] mb-3">Loại xe</p>
-            <div className="flex flex-col gap-2">
-              {VEHICLE_TYPES.map(t => (
-                <label key={t} className="flex items-center gap-2.5 cursor-pointer">
-                  <input type="checkbox" checked={selectedTypes.includes(t)} onChange={() => toggleType(t)}
-                    className="w-4 h-4 accent-[#006C4C]" />
-                  <span className="text-sm text-[#3E4943]">{t}</span>
-                </label>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {VEHICLE_TYPES.map(t => {
+                const active = selectedTypes.includes(t);
+                return (
+                  <button
+                    key={t}
+                    onClick={() => toggleType(t)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-all"
+                    style={{
+                      background: active ? "#006C4C" : "#fff",
+                      color: active ? "#fff" : "#3E4943",
+                      borderColor: active ? "#006C4C" : "#BDCAC1",
+                    }}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -179,14 +190,24 @@ const CarListPage: React.FC = () => {
           {/* brand */}
           <div className="mb-5">
             <p className="text-sm font-semibold text-[#151C27] mb-3">Hãng xe</p>
-            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-              {brands.map(b => (
-                <label key={b} className="flex items-center gap-2.5 cursor-pointer">
-                  <input type="checkbox" checked={selectedBrands.includes(b)} onChange={() => toggleBrand(b)}
-                    className="w-4 h-4 accent-[#006C4C]" />
-                  <span className="text-sm text-[#3E4943]">{b}</span>
-                </label>
-              ))}
+            <div className="flex flex-wrap gap-2">
+              {brands.map(b => {
+                const active = selectedBrands.includes(b);
+                return (
+                  <button
+                    key={b}
+                    onClick={() => toggleBrand(b)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-all"
+                    style={{
+                      background: active ? "#006C4C" : "#fff",
+                      color: active ? "#fff" : "#3E4943",
+                      borderColor: active ? "#006C4C" : "#BDCAC1",
+                    }}
+                  >
+                    {b}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -244,34 +265,50 @@ const CarListPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-1">
-                        <h4 className="font-bold text-[#191C1E] text-base">{item.model.brand} {item.model.name}</h4>
-                        <span className="text-[#006C4C] font-bold text-sm whitespace-nowrap ml-2">
-                          {formatCurrency(p24h)}<span className="text-[10px] text-[#6E7A72] font-normal">/ngày</span>
+                    <div className="p-4">
+                      {/* brand chip */}
+                      <p className="text-[10px] font-bold text-[#006C4C] uppercase tracking-wider mb-1">
+                        {item.model.brand}
+                      </p>
+
+                      {/* title + price */}
+                      <div className="flex justify-between items-start gap-2 mb-3">
+                        <h4 className="font-bold text-[#191C1E] text-[15px] leading-tight">{item.model.name}</h4>
+                        <div className="text-right shrink-0">
+                          <p className="text-[#006C4C] font-bold text-sm leading-tight">{formatCurrency(p24h)}</p>
+                          <p className="text-[10px] text-[#6E7A72]">/ngày</p>
+                        </div>
+                      </div>
+
+                      {/* spec badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        <span className="inline-flex items-center bg-[#F0FDF4] text-[#3E4943] text-[11px] font-medium px-2 py-1 rounded-md">
+                          <IcBolt />{item.model.range_km} km
+                        </span>
+                        <span className="inline-flex items-center bg-[#F0FDF4] text-[#3E4943] text-[11px] font-medium px-2 py-1 rounded-md">
+                          <IcSpeed />{item.model.horsepower} hp
+                        </span>
+                        <span className="inline-flex items-center bg-[#F0FDF4] text-[#3E4943] text-[11px] font-medium px-2 py-1 rounded-md">
+                          <IcSeat />{item.model.seats} chỗ
                         </span>
                       </div>
 
-                      <p className="text-xs text-[#6E7A72] mb-3"><IcPin />{item.location.name}, {item.location.city}</p>
-
-                      <div className="flex gap-2 text-[11px] text-[#3E4943] mb-3 pb-3 border-b border-[#F3F4F6]">
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcBolt />{item.model.range_km}km</span>
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcPower />{item.model.horsepower}hp</span>
-                        <span className="bg-[#F3F4F6] px-2 py-0.5 rounded-full"><IcSeat />{item.model.seats} chỗ</span>
-                      </div>
-
-                      <div className="flex gap-2 text-xs text-[#6E7A72] mb-4">
-                        <span>{formatCurrency(p4h)}/4h</span>
-                        <span>·</span>
-                        <span>{item.model.transmission}</span>
+                      {/* price 4h + link */}
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[11px] text-[#6E7A72]">{formatCurrency(p4h)}/4h · {item.model.vehicle_type}</span>
                       </div>
 
                       <Link
                         to={`/cars/${item.vehicle.vehicle_id}`}
-                        className="block text-center border border-[#006C4C] text-[#006C4C] hover:bg-[#006C4C] hover:text-white font-bold py-2.5 rounded-lg text-sm transition-colors"
+                        className="block text-center bg-[#006C4C] hover:bg-[#005a3e] text-white font-bold py-2 rounded-lg text-sm transition-colors mb-3"
                       >
-                        Chi tiết
+                        Xem chi tiết
                       </Link>
+
+                      {/* location at bottom */}
+                      <p className="flex items-center text-[11px] text-[#6E7A72]">
+                        <IcPin />{item.location.name}, {item.location.city}
+                      </p>
                     </div>
                   </article>
                 );

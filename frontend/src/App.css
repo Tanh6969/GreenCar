@@ -1022,13 +1022,20 @@ th { font-weight: 700; color: var(--text-mid); background: var(--bg); }
   background: var(--bg-white);
 }
 
-.admin-layout {
-  min-height: calc(100vh - 68px);
-  display: grid;
-  grid-template-columns: 240px 1fr;
+.admin-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.admin-layout main { padding: 24px; }
+.admin-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 0;
+}
+
+.admin-layout main { padding: 24px; overflow-y: auto; }
 
 .auth-layout {
   min-height: 100vh;
@@ -1122,6 +1129,7 @@ th { font-weight: 700; color: var(--text-mid); background: var(--bg); }
   .footer-top { grid-template-columns: 1fr; gap: 28px; }
   .footer-bottom { flex-direction: column; text-align: center; }
   .admin-layout { grid-template-columns: 1fr; }
+  .admin-shell > .admin-layout { flex-direction: column; }
   .sidebar { border-right: none; border-bottom: 1px solid #e2e8f0; }
   .nav { display: none; }
   .brands-inner { flex-wrap: wrap; justify-content: center; gap: 20px; }
