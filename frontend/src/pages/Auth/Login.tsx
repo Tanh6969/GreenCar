@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../../services/auth.service";
 import { useAuth } from "../../hooks/useAuth";
+import Logo from "../../components/Logo";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -38,9 +39,8 @@ const LoginPage: React.FC = () => {
     <div className="auth-layout">
       <div className="auth-card">
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-          <div className="logo-icon" style={{ width: 40, height: 40, fontSize: 20 }}>G</div>
-          <span style={{ fontSize: 22, fontWeight: 900, color: "var(--green)", letterSpacing: -0.5 }}>GreenCar</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 32 }}>
+          <Logo size="large" showText={true} />
         </div>
 
         <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", margin: "0 0 6px" }}>Đăng nhập</h1>

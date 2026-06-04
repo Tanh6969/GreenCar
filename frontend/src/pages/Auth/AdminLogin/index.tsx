@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../../services/auth.service";
 import { useAuth } from "../../../hooks/useAuth";
+import Logo from "../../../components/Logo";
 
 const AdminLoginPage: React.FC = () => {
   const [email, setEmail]       = useState("");
@@ -41,11 +42,7 @@ const AdminLoginPage: React.FC = () => {
 
         {/* Logo */}
         <div className="flex items-center gap-3 mb-10 justify-center">
-          <div className="w-10 h-10 rounded-xl bg-[#006C4C] flex items-center justify-center
-            font-black text-white text-lg shadow-lg">
-            G
-          </div>
-          <span className="text-2xl font-black text-white tracking-tight">GreenCar</span>
+          <Logo size="large" showText={true} />
           <span className="text-xs font-bold text-[#94A3B8] bg-[#1E293B] px-2 py-1 rounded-full">
             ADMIN
           </span>

@@ -1,4 +1,7 @@
 import { env } from "../config/env";
+import { mockApiCall } from "./mockApiHandlers";
+
+const USE_MOCK = process.env.REACT_APP_USE_MOCK === "true";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -15,6 +18,20 @@ export const apiClient = async <T>(
   method: HttpMethod = "GET",
   body?: unknown
 ): Promise<T> => {
+  if (USE_MOCK) {
+    const token = localStorage.getItem("gc_token");
+    try {
+      return await mockApiCall<T>(path, method, body, token);
+    } catch (err: any) {
+      if (err.status === 401 && !path.startsWith("/auth/")) {
+        localStorage.removeItem("gc_token");
+        localStorage.removeItem("gc_user");
+        window.location.href = "/auth/login";
+      }
+      throw new ApiError(err.status ?? 500, err.message);
+    }
+  }
+
   const token = localStorage.getItem("gc_token");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;

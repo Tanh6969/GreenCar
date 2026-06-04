@@ -5,6 +5,7 @@ import AuthLayout from "../layouts/AuthLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
+import { useAuth } from "../hooks/useAuth";
 import HomePage from "../pages/Public/Home";
 import CarListPage from "../pages/Public/CarList";
 import CarDetailPage from "../pages/Public/CarDetail";
@@ -26,14 +27,16 @@ import BlogManagePage from "../pages/Admin/BlogManage";
 import AdminBlogEditPage from "../pages/Admin/BlogEdit";
 
 const AppRouter: React.FC = () => {
+  const { isAdmin } = useAuth();
+
   return (
     <Routes>
       <Route
         path="/"
         element={
-          <MainLayout>
-            <HomePage />
-          </MainLayout>
+          isAdmin
+            ? <Navigate to="/admin/dashboard" replace />
+            : <MainLayout><HomePage /></MainLayout>
         }
       />
       <Route

@@ -83,10 +83,13 @@ function getImage(data: VehicleCardData): string | undefined {
 }
 
 function dedupeByModel(list: VehicleCardData[]): VehicleCardData[] {
-  const seen = new Set<number>();
+  const seenModels   = new Set<number>();
+  const seenVehicles = new Set<number>();
   return list.filter(v => {
-    if (seen.has(v.model.vehicle_model_id)) return false;
-    seen.add(v.model.vehicle_model_id);
+    if (seenModels.has(v.model.vehicle_model_id))   return false;
+    if (seenVehicles.has(v.vehicle.vehicle_id))     return false;
+    seenModels.add(v.model.vehicle_model_id);
+    seenVehicles.add(v.vehicle.vehicle_id);
     return true;
   });
 }
@@ -264,7 +267,13 @@ const SearchWidget: React.FC = () => {
         </div>
       </div>
 
-      <button onClick={() => navigate("/cars")}
+      <button onClick={() => {
+          const params = new URLSearchParams();
+          if (search.locationId) params.append("locationId", String(search.locationId));
+          if (search.startDate) params.append("startDate", search.startDate);
+          if (search.endDate) params.append("endDate", search.endDate);
+          navigate(`/cars?${params.toString()}`);
+        }}
         className="w-full bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white font-bold py-3 rounded-xl text-sm transition-all">
         Tìm Xe Trống →
       </button>

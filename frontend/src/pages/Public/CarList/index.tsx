@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useVehicles } from "../../../hooks/useVehicles";
 import { pricing } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
@@ -55,6 +55,7 @@ const SORT_OPTIONS = [
 
 const CarListPage: React.FC = () => {
   const { vehicles, loading } = useVehicles();
+  const [searchParams] = useSearchParams();
 
   const [selectedTypes,  setSelectedTypes]  = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -62,6 +63,20 @@ const CarListPage: React.FC = () => {
   const [onlyAvailable,  setOnlyAvailable]  = useState(false);
   const [sortBy,         setSortBy]         = useState("price_asc");
   const [searchQuery,    setSearchQuery]    = useState("");
+  const [filterLocation, setFilterLocation] = useState<number | null>(null);
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+
+  // Read search params from URL on mount
+  useEffect(() => {
+    const locationId = searchParams.get("locationId");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    
+    if (locationId) setFilterLocation(Number(locationId));
+    if (startDate) setFilterStartDate(startDate);
+    if (endDate) setFilterEndDate(endDate);
+  }, [searchParams]);
 
   const brands = useMemo(() =>
     Array.from(new Set(vehicles.map(v => v.model.brand))).sort(),
@@ -77,6 +92,8 @@ const CarListPage: React.FC = () => {
   const filtered = useMemo(() => {
     let list = [...vehicles];
 
+    if (filterLocation)
+      list = list.filter(v => v.location.location_id === filterLocation);
     if (onlyAvailable)
       list = list.filter(v => v.vehicle.status === "available");
     if (selectedTypes.length)
@@ -99,7 +116,7 @@ const CarListPage: React.FC = () => {
     });
 
     return list;
-  }, [vehicles, onlyAvailable, selectedTypes, selectedBrands, minRange, searchQuery, sortBy]);
+  }, [vehicles, filterLocation, onlyAvailable, selectedTypes, selectedBrands, minRange, searchQuery, sortBy]);
 
   const toggleType = (t: string) =>
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
@@ -112,6 +129,9 @@ const CarListPage: React.FC = () => {
     setSelectedBrands([]);
     setMinRange(0);
     setOnlyAvailable(false);
+    setFilterLocation(null);
+    setFilterStartDate("");
+    setFilterEndDate("");
   };
 
   return (

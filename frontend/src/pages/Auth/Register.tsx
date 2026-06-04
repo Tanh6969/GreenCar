@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authService } from "../../services/auth.service";
 import { useAuth } from "../../hooks/useAuth";
+import Logo from "../../components/Logo";
 
 interface FormState {
   name: string;
@@ -64,9 +65,8 @@ const RegisterPage: React.FC = () => {
     <div className="auth-layout" style={{ padding: "32px 0" }}>
       <div className="auth-card" style={{ width: "min(480px, calc(100% - 32px))" }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-          <div className="logo-icon" style={{ width: 40, height: 40, fontSize: 20 }}>G</div>
-          <span style={{ fontSize: 22, fontWeight: 900, color: "var(--green)", letterSpacing: -0.5 }}>GreenCar</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 28 }}>
+          <Logo size="large" showText={true} />
         </div>
 
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text)", margin: "0 0 4px" }}>Tạo tài khoản</h1>
