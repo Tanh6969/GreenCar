@@ -130,37 +130,37 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
       </div>
 
       <div className="p-3.5">
-        <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5
+        <p className={`text-xs font-bold uppercase tracking-wider mb-0.5
           ${isLuxury ? "text-[#4FBD91]" : "text-[#006C4C]"}`}>{model.brand}</p>
-        <h4 className={`font-bold text-sm leading-tight mb-2
+        <h4 className={`font-bold text-base leading-tight mb-2
           ${isLuxury ? "text-white" : "text-[#191C1E]"}`}>{model.name}</h4>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcBolt size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.range_km} km
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcBolt size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.range_km} km
           </span>
-          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcSpeed size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.horsepower} hp
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcSpeed size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.horsepower} hp
           </span>
-          <span className={`inline-flex items-center text-[11px] font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcSeat size={11} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.seats} chỗ
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
+            <IcSeat size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.seats} chỗ
           </span>
         </div>
 
         <div className={`border-t pt-2.5 flex justify-between items-end
           ${isLuxury ? "border-[#334155]" : "border-[#F3F4F6]"}`}>
           <div>
-            <div className="text-[#006C4C] font-bold text-sm">{formatCurrency(price24h)}</div>
-            <div className={`text-[10px] ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</div>
+            <div className="text-[#006C4C] font-bold text-lg">{formatCurrency(price24h)}</div>
+            <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</div>
           </div>
-          <div className={`text-[10px] ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>
+          <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>
             {formatCurrency(price4h)}/4h
           </div>
         </div>
 
         {location && (
-          <p className={`text-[10px] mt-1.5 ${isLuxury ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>
-            <IcPin size={10} color={isLuxury ? "#4FBD91" : "#6E7A72"} />{location.name}
+          <p className={`text-xs mt-1.5 ${isLuxury ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>
+            <IcPin size={12} color={isLuxury ? "#4FBD91" : "#6E7A72"} />{location.name}
           </p>
         )}
       </div>
@@ -186,12 +186,12 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
 
   return (
     <section id={id} className={`py-12 ${dark ? "bg-[#0F172A]" : "bg-white"}`}>
-      <div className="max-w-[1200px] mx-auto px-6">
+      <div className="max-w-[1440px] mx-auto px-6">
         <div className="flex items-end justify-between mb-5">
           <div>
-            <p className={`text-[10px] font-bold uppercase tracking-[0.15em] mb-1
+            <p className={`text-sm font-bold uppercase tracking-[0.15em] mb-1
               ${dark ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>{subtitle}</p>
-            <h2 className={`text-xl font-bold ${dark ? "text-white" : "text-[#191C1E]"}`}>{title}</h2>
+            <h2 className={`text-3xl font-bold ${dark ? "text-white" : "text-[#191C1E]"}`}>{title}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => scroll("left")}
@@ -205,7 +205,7 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
               ›
             </button>
             <Link to="/cars"
-              className={`ml-2 text-xs font-semibold transition-colors hidden sm:block
+              className={`ml-2 text-base font-semibold transition-colors hidden sm:block
                 ${dark ? "text-[#4FBD91] hover:text-white" : "text-[#006C4C] hover:text-[#004832]"}`}>
               Xem tất cả →
             </Link>
@@ -222,7 +222,7 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
 
         <div className="mt-4 text-center sm:hidden">
           <Link to="/cars"
-            className={`text-sm font-semibold ${dark ? "text-[#4FBD91]" : "text-[#006C4C]"}`}>
+            className={`text-base font-semibold ${dark ? "text-[#4FBD91]" : "text-[#006C4C]"}`}>
             Xem tất cả →
           </Link>
         </div>
@@ -302,7 +302,7 @@ const HomePage: React.FC = () => {
         <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
 
-        <div className="relative z-10 max-w-[1200px] mx-auto px-6 w-full grid lg:grid-cols-[1fr_400px] gap-10 items-center">
+        <div className="relative z-10 max-w-[1440px] mx-auto px-6 w-full grid lg:grid-cols-[1fr_400px] gap-10 items-center">
           <div>
             <p className="text-[#4FBD91] text-xs font-bold uppercase tracking-[0.2em] mb-3">
               100% Electric Vehicle Fleet
@@ -337,7 +337,7 @@ const HomePage: React.FC = () => {
 
       {/* ── BRANDS BAR ────────────────────────────────────────── */}
       <div className="bg-white border-y border-[#E5E7EB] py-4">
-        <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between gap-4">
           {BRANDS.map(b => (
             <span key={b} className="text-base font-black text-[#BDCAC1] tracking-wider whitespace-nowrap hover:text-[#006C4C] transition-colors cursor-default">
               {b}
@@ -348,7 +348,7 @@ const HomePage: React.FC = () => {
 
       {/* ── STATS ─────────────────────────────────────────────── */}
       <div className="bg-[#F8F9FB] border-b border-[#E5E7EB] py-5">
-        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E5E7EB]">
+        <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E5E7EB]">
           {[
             { num: "15+",    lbl: "Mẫu xe điện" },
             { num: "7",      lbl: "Điểm đón Hà Nội" },
@@ -378,10 +378,10 @@ const HomePage: React.FC = () => {
 
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
       <section className="bg-[#F8F9FB] py-14">
-        <div className="max-w-[1200px] mx-auto px-6">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="text-center mb-10">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Quy trình</p>
-            <h2 className="text-xl font-bold text-[#191C1E]">Đặt xe chỉ 3 bước</h2>
+            <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Quy trình</p>
+            <h2 className="text-3xl font-bold text-[#191C1E]">Đặt xe chỉ 3 bước</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {([
@@ -391,9 +391,9 @@ const HomePage: React.FC = () => {
             ] as { step: string; icon: React.ReactNode; title: string; desc: string }[]).map(s => (
               <div key={s.step} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 text-center hover:border-[#BDCAC1] transition-colors">
                 <div className="flex justify-center mb-3">{s.icon}</div>
-                <p className="text-[10px] font-black text-[#006C4C] uppercase tracking-[0.15em] mb-1">Bước {s.step}</p>
-                <h3 className="font-bold text-[#191C1E] text-sm mb-2">{s.title}</h3>
-                <p className="text-xs text-[#6E7A72] leading-relaxed">{s.desc}</p>
+                <p className="text-xs font-black text-[#006C4C] uppercase tracking-[0.15em] mb-1">Bước {s.step}</p>
+                <h3 className="font-bold text-[#191C1E] text-lg mb-2">{s.title}</h3>
+                <p className="text-sm text-[#6E7A72] leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -402,14 +402,14 @@ const HomePage: React.FC = () => {
 
       {/* ── PREMIUM DARK ──────────────────────────────────────── */}
       <section className="bg-[#0F172A] py-14">
-        <div className="max-w-[1200px] mx-auto px-6">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#4FBD91] mb-1">Cao cấp</p>
-              <h2 className="text-xl font-bold text-white">Dòng Xe Sang Premium</h2>
-              <p className="text-[#64748B] text-xs mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#4FBD91] mb-1">Cao cấp</p>
+              <h2 className="text-3xl font-bold text-white">Dòng Xe Sang Premium</h2>
+              <p className="text-[#64748B] text-sm mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
             </div>
-            <Link to="/cars" className="text-xs font-semibold text-[#4FBD91] hover:text-white transition-colors hidden sm:block">
+            <Link to="/cars" className="text-base font-semibold text-[#4FBD91] hover:text-white transition-colors hidden sm:block">
               Xem tất cả →
             </Link>
           </div>
@@ -429,18 +429,18 @@ const HomePage: React.FC = () => {
                   </span>
                 </div>
                 <div className="p-5">
-                  <p className="text-[#64748B] text-xs mb-0.5">{car.brand}</p>
-                  <p className="text-white font-bold text-base mb-1">{car.name}</p>
-                  <p className="text-[#4FBD91] font-bold text-lg mb-4">
-                    {car.price}đ<span className="text-[#64748B] text-xs font-normal">/ngày</span>
+                  <p className="text-[#64748B] text-sm mb-0.5">{car.brand}</p>
+                  <p className="text-white font-bold text-lg mb-1">{car.name}</p>
+                  <p className="text-[#4FBD91] font-bold text-2xl mb-4">
+                    {car.price}đ<span className="text-[#64748B] text-sm font-normal">/ngày</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#334155] text-xs">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#334155] text-sm">
                     <div className="flex items-center gap-1.5">
-                      <IcBolt size={14} color="#4FBD91" />
+                      <IcBolt size={16} color="#4FBD91" />
                       <span className="text-white font-semibold">{car.range}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <IcTimer size={14} color="#4FBD91" />
+                      <IcTimer size={16} color="#4FBD91" />
                       <span className="text-white font-semibold">0–100: {car.accel}</span>
                     </div>
                   </div>
@@ -453,33 +453,33 @@ const HomePage: React.FC = () => {
 
       {/* ── ECO SECTION ───────────────────────────────────────── */}
       <section className="bg-white py-14">
-        <div className="max-w-[1200px] mx-auto px-6">
+        <div className="max-w-[1440px] mx-auto px-6">
           <div className="bg-gradient-to-br from-[#F0FDF4] to-[#dcfce7] rounded-3xl p-10 grid sm:grid-cols-[1fr_auto] gap-8 items-center border border-[#bbf7d0]">
             <div>
-              <span className="inline-flex items-center bg-[#006C4C] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                <IcLeaf size={13} /> Eco Impact
+              <span className="inline-flex items-center bg-[#006C4C] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+                <IcLeaf size={14} /> Eco Impact
               </span>
-              <h2 className="text-xl font-bold text-[#191C1E] mb-2">
+              <h2 className="text-3xl font-bold text-[#191C1E] mb-2">
                 Cộng đồng GreenCar đã tiết kiệm 4.2 tấn CO₂
               </h2>
-              <p className="text-sm text-[#3E4943] leading-relaxed mb-5 max-w-md">
+              <p className="text-base text-[#3E4943] leading-relaxed mb-5 max-w-md">
                 Mỗi chuyến thuê xe điện thay vì xe xăng giúp giảm trung bình 2.3kg CO₂. Hơn 20.000 chuyến đang tạo ra sự thay đổi thực sự.
               </p>
               <Link to="/cars"
-                className="inline-block bg-[#006C4C] hover:bg-[#004832] text-white font-bold px-6 py-2.5 rounded-full text-sm transition-colors">
+                className="inline-block bg-[#006C4C] hover:bg-[#004832] text-white font-bold px-6 py-2.5 rounded-full text-base transition-colors">
                 Bắt đầu hành trình xanh →
               </Link>
             </div>
             <div className="flex sm:flex-col gap-3">
               {([
-                { icon: <IcTree size={22} />,                    num: "12.5K", lbl: "Trees equivalent" },
-                { icon: <IcBattery size={22} />,                 num: "450K",  lbl: "kWh tiết kiệm" },
-                { icon: <IcCar size={22} color="#006C4C" />,     num: "20K+",  lbl: "Chuyến thành công" },
+                { icon: <IcTree size={26} />,                    num: "12.5K", lbl: "Trees equivalent" },
+                { icon: <IcBattery size={26} />,                 num: "450K",  lbl: "kWh tiết kiệm" },
+                { icon: <IcCar size={26} color="#006C4C" />,     num: "20K+",  lbl: "Chuyến thành công" },
               ] as { icon: React.ReactNode; num: string; lbl: string }[]).map(s => (
-                <div key={s.lbl} className="bg-white rounded-xl border border-[#bbf7d0] p-4 text-center min-w-[100px] shadow-sm">
+                <div key={s.lbl} className="bg-white rounded-xl border border-[#bbf7d0] p-4 text-center min-w-[110px] shadow-sm">
                   <div className="flex justify-center mb-1">{s.icon}</div>
-                  <div className="font-bold text-[#191C1E] text-base">{s.num}</div>
-                  <div className="text-[9px] font-bold text-[#6E7A72] uppercase tracking-wide mt-0.5">{s.lbl}</div>
+                  <div className="font-bold text-[#191C1E] text-2xl">{s.num}</div>
+                  <div className="text-xs font-bold text-[#6E7A72] uppercase tracking-wide mt-0.5">{s.lbl}</div>
                 </div>
               ))}
             </div>
@@ -489,26 +489,26 @@ const HomePage: React.FC = () => {
 
       {/* ── TESTIMONIALS MARQUEE ──────────────────────────────── */}
       <section className="bg-white py-14 overflow-hidden">
-        <div className="max-w-[1200px] mx-auto px-6 mb-8">
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Đánh giá</p>
-          <h2 className="text-xl font-bold text-[#191C1E]">Khách Hàng Nói Gì</h2>
+        <div className="max-w-[1440px] mx-auto px-6 mb-8">
+          <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#6E7A72] mb-1">Đánh giá</p>
+          <h2 className="text-3xl font-bold text-[#191C1E]">Khách Hàng Nói Gì</h2>
         </div>
 
         {/* Marquee — duplicated for seamless loop */}
         <div className="marquee-track">
           {[...homepageTestimonials, ...homepageTestimonials].map((t, i) => (
-            <div key={i} className="flex-shrink-0 w-72 mx-2.5 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-5">
-              <div className="text-[#4FBD91] text-sm mb-2">
+            <div key={i} className="flex-shrink-0 w-80 mx-2.5 bg-[#F8F9FB] border border-[#E5E7EB] rounded-2xl p-6">
+              <div className="text-[#4FBD91] text-base mb-2">
                 {"★".repeat(t.rating ?? 5)}
               </div>
-              <p className="text-sm text-[#3E4943] leading-relaxed italic mb-4 line-clamp-3">"{t.message}"</p>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-[#006C4C] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <p className="text-base text-[#3E4943] leading-relaxed italic mb-5 line-clamp-3">"{t.message}"</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#006C4C] flex items-center justify-center text-white font-bold text-base flex-shrink-0">
                   {t.name.split(" ").at(-1)![0]}
                 </div>
                 <div>
-                  <div className="font-bold text-xs text-[#191C1E]">{t.name}</div>
-                  <div className="text-[10px] text-[#6E7A72]">{t.area}</div>
+                  <div className="font-bold text-sm text-[#191C1E]">{t.name}</div>
+                  <div className="text-xs text-[#6E7A72]">{t.area}</div>
                 </div>
               </div>
             </div>

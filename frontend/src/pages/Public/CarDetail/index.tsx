@@ -53,6 +53,10 @@ const CarDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(3);
   const [imgIdx, setImgIdx] = useState(0);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+  const [deliveryOption, setDeliveryOption] = useState<"self" | "custom" | "airport">("self");
+  const [showLightbox, setShowLightbox] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -85,13 +89,20 @@ const CarDetailPage: React.FC = () => {
   const { vehicle, model, location, images, specs, features, pricing } = data;
   const available = vehicle.status === "available";
   const selectedPrice = pricing.find(p => p.rental_plan_id === selectedPlan)?.price ?? 0;
-  const mainImg = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? images[imgIdx]?.image_url;
+  
+  const baseImg = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? images[0]?.image_url;
+  const galleryImages = [
+    baseImg,
+    "/images/extra_1.png",
+    "/images/extra_2.png",
+    "/images/extra_3.png"
+  ].filter(Boolean) as string[];
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
       {/* breadcrumb */}
       <div className="bg-white border-b border-[#BDCAC1]">
-        <div className="max-w-[1200px] mx-auto px-6 py-3 flex items-center gap-2 text-sm text-[#6E7A72]">
+        <div className="max-w-[1440px] mx-auto px-6 py-3 flex items-center gap-2 text-sm text-[#6E7A72]">
           <Link to="/" className="hover:text-[#006C4C]">Trang chủ</Link>
           <span>/</span>
           <Link to="/cars" className="hover:text-[#006C4C]">Danh sách xe</Link>
@@ -100,36 +111,43 @@ const CarDetailPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8 items-start">
+      <div className="max-w-[1440px] mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8 items-start">
 
         {/* ── LEFT: images + info ── */}
         <div className="flex-1 min-w-0 flex flex-col gap-6">
 
           {/* main image */}
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] aspect-[16/9]">
-            {mainImg ? (
-              <img src={mainImg} alt={model.name} className="w-full h-full object-cover" />
+          <div 
+            className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] aspect-[16/9] cursor-pointer group"
+            onClick={() => setShowLightbox(true)}
+          >
+            {galleryImages[imgIdx] ? (
+              <img src={galleryImages[imgIdx]} alt={model.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             ) : (
               <div className="w-full h-full flex items-center justify-center"><IcCarLg /></div>
             )}
-            <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full shadow
+            <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full shadow z-10
               ${available ? "bg-[#006C4C] text-white" : "bg-[#E5E7EB] text-[#6E7A72]"}`}>
               {available ? "✓ Còn trống" : "✗ Đã đặt"}
             </span>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+               <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-opacity backdrop-blur-sm">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2 -mt-0.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                 Xem ảnh lớn
+               </span>
+            </div>
           </div>
 
           {/* thumbnail strip */}
-          {images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {images.map((img, i) => (
-                <button key={img.image_id} onClick={() => setImgIdx(i)}
-                  className={`flex-shrink-0 w-20 h-16 rounded-lg overflow-hidden border-2 transition-all
-                    ${i === imgIdx ? "border-[#006C4C]" : "border-transparent opacity-60 hover:opacity-90"}`}>
-                  <img src={img.image_url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+            {galleryImages.map((url, i) => (
+              <button key={i} onClick={() => setImgIdx(i)}
+                className={`flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-[3px] transition-all
+                  ${i === imgIdx ? "border-[#006C4C]" : "border-transparent opacity-70 hover:opacity-100"}`}>
+                <img src={url} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
 
           {/* title + badge */}
           <div>
@@ -250,14 +268,35 @@ const CarDetailPage: React.FC = () => {
           {/* location map */}
           {location && location.latitude && location.longitude && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-              <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Địa điểm giao nhận xe</h3>
-              <div className="border border-[#E5EBE8] rounded-xl p-4 mb-4 bg-[#F8F9FB]">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
-                  <span className="font-bold text-[#191C1E]">Tôi tự đến lấy xe</span>
-                  <span className="ml-auto text-[#10B981] font-semibold text-sm">Miễn phí</span>
-                </div>
-                <p className="text-sm text-[#3E4943] ml-6 font-medium">{location.address}, {location.city}</p>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-[#191C1E] text-lg">Địa điểm giao nhận xe</h3>
+              </div>
+              <div className="border border-[#E5EBE8] rounded-xl p-4 mb-4 bg-white cursor-pointer hover:border-[#006C4C] transition-colors" onClick={() => setShowDeliveryModal(true)}>
+                {deliveryOption === "self" ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
+                      <span className="font-bold text-[#191C1E]">Tôi tự đến lấy xe</span>
+                      <div className="ml-auto flex items-center gap-2">
+                        <span className="text-[#10B981] font-semibold text-sm">Miễn phí</span>
+                        <span className="text-[#006C4C] text-sm underline font-semibold">Thay đổi</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[#3E4943] ml-6 font-medium">{location.address}, {location.city}</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
+                      <span className="font-bold text-[#191C1E]">Giao xe tận nơi</span>
+                      <div className="ml-auto flex items-center gap-2">
+                        <span className="text-[#10B981] font-semibold text-sm">Có phí</span>
+                        <span className="text-[#006C4C] text-sm underline font-semibold">Thay đổi</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-[#3E4943] ml-6 font-medium">Chủ xe sẽ giao và nhận xe tận nơi theo yêu cầu của bạn.</p>
+                  </>
+                )}
               </div>
               <div className="h-[250px] rounded-xl overflow-hidden border border-[#E5EBE8] z-0">
                 <MapContainer center={[location.latitude, location.longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
@@ -275,6 +314,15 @@ const CarDetailPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* insurance */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+            <h3 className="font-bold text-[#191C1E] mb-2 text-lg flex items-center gap-2">
+              <IcShield /> Bảo hiểm thuê xe
+            </h3>
+            <p className="text-sm text-[#3E4943] mb-2">Chuyến đi có mua bảo hiểm. Khách thuê bồi thường tối đa 2.000.000 VNĐ trong trường hợp có sự cố ngoài ý muốn.</p>
+            <button onClick={() => setShowInsuranceModal(true)} className="text-sm font-bold text-[#191C1E] hover:text-[#006C4C] underline-offset-2 underline">Xem thêm &gt;</button>
+          </div>
 
           {/* terms and conditions */}
           <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
@@ -420,6 +468,129 @@ const CarDetailPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      {/* DELIVERY MODAL */}
+      {showDeliveryModal && (
+        <div className="fixed inset-0 z-[9999] flex justify-center items-end sm:items-center bg-black/40 p-0 sm:p-4" onClick={() => setShowDeliveryModal(false)}>
+          <div className="bg-white w-full sm:w-[500px] rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[90vh] shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-[#E5EBE8]">
+              <h3 className="font-bold text-lg">Địa điểm giao nhận xe</h3>
+              <button onClick={() => setShowDeliveryModal(false)} className="text-[#6E7A72] hover:bg-[#F3F4F6] rounded-full p-2">✕</button>
+            </div>
+            <div className="p-5 overflow-y-auto">
+              <div className="bg-[#F8F9FB] rounded-xl p-4 mb-6">
+                <div className="flex justify-between mb-2"><span className="text-[#3E4943] text-sm">Dịch vụ giao xe tận nơi</span><span className="text-[#191C1E] text-sm font-medium">trong vòng 15 km</span></div>
+                <div className="flex justify-between"><span className="text-[#3E4943] text-sm">Phí giao nhận xe (2 chiều)</span><span className="text-[#191C1E] text-sm font-medium">16.000đ /km</span></div>
+              </div>
+
+              <h4 className="font-bold text-[#191C1E] mb-3">Địa điểm của chủ xe</h4>
+              <label className={`flex items-center gap-3 p-4 border rounded-xl mb-6 cursor-pointer ${deliveryOption === "self" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
+                <input type="radio" checked={deliveryOption === "self"} onChange={() => setDeliveryOption("self")} className="accent-[#006C4C] w-4 h-4" />
+                <span className="font-medium text-[#191C1E] flex-1">Tôi tự đến lấy xe</span>
+                <span className="text-[#10B981] font-semibold text-sm">Miễn phí</span>
+              </label>
+
+              <h4 className="font-bold text-[#191C1E] mb-3">Giao xe tận nơi</h4>
+              <label className={`flex items-start gap-3 p-4 border rounded-xl mb-6 cursor-pointer ${deliveryOption === "custom" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
+                <input type="radio" checked={deliveryOption === "custom"} onChange={() => setDeliveryOption("custom")} className="accent-[#006C4C] w-4 h-4 mt-1" />
+                <div>
+                  <span className="font-medium text-[#191C1E] block mb-1">Tôi muốn giao xe tận nơi</span>
+                  <span className="text-[#6E7A72] text-sm">Nhập địa chỉ tùy chỉnh</span>
+                </div>
+              </label>
+
+              <h4 className="font-bold text-[#191C1E] mb-3">Giao xe sân bay</h4>
+              <div className="flex flex-col gap-3">
+                <label className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer ${deliveryOption === "airport" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
+                  <div className="flex items-center gap-3">
+                    <input type="radio" checked={deliveryOption === "airport"} onChange={() => setDeliveryOption("airport")} className="accent-[#006C4C] w-4 h-4" />
+                    <span className="font-medium text-[#191C1E]">Sân bay Nội Bài</span>
+                  </div>
+                  <span className="font-bold text-[#191C1E]">250.000đ</span>
+                </label>
+              </div>
+            </div>
+            <div className="p-5 border-t border-[#E5EBE8]">
+              <button onClick={() => setShowDeliveryModal(false)} className="w-full bg-[#006C4C] text-white py-3 rounded-xl font-bold">Xác nhận</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INSURANCE MODAL */}
+      {showInsuranceModal && (
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-black/40 p-4" onClick={() => setShowInsuranceModal(false)}>
+          <div className="bg-white w-full sm:w-[500px] rounded-2xl flex flex-col max-h-[90vh] shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-[#E5EBE8]">
+              <h3 className="font-bold text-lg text-[#006C4C]">Bảo hiểm thuê xe tự lái</h3>
+              <button onClick={() => setShowInsuranceModal(false)} className="text-[#6E7A72] hover:bg-[#F3F4F6] rounded-full p-2">✕</button>
+            </div>
+            <div className="p-5 overflow-y-auto text-[#3E4943] text-sm leading-relaxed flex flex-col gap-4">
+              <p>Với nhiều năm kinh nghiệm trong lĩnh vực cho thuê xe tự lái, GreenCar hiểu rằng các rủi ro đâm đụng, cháy nổ, thủy kích gây tổn thất lớn (vượt quá khả năng chi trả) luôn tiềm ẩn trong thời gian thuê xe.</p>
+              <p>❌ Trong khi đó, hầu hết các rủi ro phát sinh trong quá trình thuê xe tự lái sẽ <strong className="text-red-500">không thuộc phạm vi</strong> của <strong>Bảo hiểm thân vỏ xe theo năm</strong> (hay còn gọi là Bảo hiểm 2 chiều).</p>
+              <p>✅ Xuất phát từ nhu cầu thiết yếu của khách hàng, GreenCar kết hợp cùng đối tác bảo hiểm hàng đầu Việt Nam cung cấp sản phẩm <strong>Bảo hiểm thuê xe tự lái</strong> với mức phí thực sự tiết kiệm và số tiền bảo hiểm lớn giúp bạn an tâm tận hưởng chuyến đi.</p>
+              
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">I. Nội dung sản phẩm bảo hiểm thuê xe</h4>
+              <p>Trong thời gian thuê xe, nếu xảy ra các sự cố va chạm ngoài ý muốn dẫn đến tổn thất về xe, khách thuê sẽ chỉ bồi thường số tiền <strong>tối đa 2.000.000 VNĐ</strong> để sửa chữa xe (mức khấu trừ), nhà bảo hiểm sẽ hỗ trợ cho các chi phí phát sinh vượt mức khấu trừ.</p>
+
+              <div className="border border-[#E5EBE8] rounded-xl overflow-hidden mt-2 text-center text-xs">
+                <div className="grid grid-cols-3 bg-[#F8F9FB] p-3 font-bold text-[#191C1E] border-b border-[#E5EBE8]">
+                  <div>Thiệt hại xe</div>
+                  <div>Khách thanh toán</div>
+                  <div>BH thanh toán</div>
+                </div>
+                <div className="grid grid-cols-3 p-3 border-b border-[#E5EBE8]">
+                  <div>{'<='} 2 triệu</div>
+                  <div>{'<='} 2 triệu</div>
+                  <div>0 triệu</div>
+                </div>
+                <div className="grid grid-cols-3 p-3">
+                  <div>{'>'} 2 triệu</div>
+                  <div>2 triệu</div>
+                  <div>Phần còn lại</div>
+                </div>
+              </div>
+
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">II. Điều khoản Bảo hiểm</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Bảo hiểm vật chất xe: đâm va, hỏa hoạn, cháy nổ.</li>
+                <li>Miễn phí cứu hộ tối đa 70 km/vụ.</li>
+                <li>Bảo hiểm thủy kích (khấu trừ 20% số tiền bảo hiểm, tối thiểu 3.000.000 VNĐ).</li>
+                <li>Mức khấu trừ: <strong>2.000.000 VNĐ/vụ</strong>.</li>
+              </ul>
+              
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">III. Quy trình xử lý nếu xảy ra sự cố</h4>
+              <ol className="list-decimal pl-5 space-y-1">
+                <li>Khách thuê <strong>giữ nguyên hiện trường và chụp ảnh xe đang bị sự cố</strong>.</li>
+                <li>Tại thời điểm xảy ra sự cố, khách thuê gọi đến trung tâm bồi thường của nhà bảo hiểm (MIC - 1900 55 88 91), đọc số hợp đồng bảo hiểm và làm theo hướng dẫn tổng đài.</li>
+                <li>Giám định viên bảo hiểm liên hệ khách thuê để hướng dẫn xử lí, xác minh thông tin.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* LIGHTBOX MODAL */}
+      {showLightbox && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4" onClick={() => setShowLightbox(false)}>
+          <button className="absolute top-6 right-6 text-white hover:text-gray-300" onClick={() => setShowLightbox(false)}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          
+          <button className="absolute left-6 text-white hover:text-gray-300 p-4" onClick={(e) => { e.stopPropagation(); setImgIdx((prev) => (prev - 1 + galleryImages.length) % galleryImages.length); }}>
+             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+
+          <img src={galleryImages[imgIdx]} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+
+          <button className="absolute right-6 text-white hover:text-gray-300 p-4" onClick={(e) => { e.stopPropagation(); setImgIdx((prev) => (prev + 1) % galleryImages.length); }}>
+             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-semibold">
+            {imgIdx + 1} / {galleryImages.length}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

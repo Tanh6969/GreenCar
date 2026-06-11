@@ -46,7 +46,7 @@ const MyVehiclesPage: React.FC = () => {
 
   return (
     <div style={{ background: "#F8F9FB", minHeight: "100vh", padding: "48px 0 80px" }}>
-      <div className="container" style={{ maxWidth: 900 }}>
+      <div className="container" style={{ maxWidth: 1200 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 36 }}>
           <div>
             <h1 style={{ fontSize: 30, fontWeight: 900, color: "#191C1E", margin: "0 0 6px" }}>Xe của tôi</h1>

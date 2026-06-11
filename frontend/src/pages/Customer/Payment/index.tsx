@@ -105,7 +105,7 @@ const PaymentPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] py-8">
-      <div className="max-w-[1080px] mx-auto px-4 sm:px-6">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
         <StepBar step={2} />
 
         <div className="flex flex-col lg:flex-row gap-6 items-start">

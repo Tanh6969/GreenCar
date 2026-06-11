@@ -138,7 +138,7 @@ const CarListPage: React.FC = () => {
     <div className="min-h-screen bg-[#F9F9FF]">
       {/* page header */}
       <div className="bg-white border-b border-[#BDCAC1]">
-        <div className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-6 py-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-[#151C27]">Danh sách xe điện</h1>
             <p className="text-sm text-[#6E7A72] mt-0.5">{filtered.length} xe phù hợp</p>
@@ -162,7 +162,7 @@ const CarListPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-6 flex gap-6 items-start">
+      <div className="max-w-[1440px] mx-auto px-6 py-6 flex gap-6 items-start">
 
         {/* ── SIDEBAR ───────────────────────────────────────────── */}
         <aside className="w-64 flex-shrink-0 bg-white rounded-xl border border-[#BDCAC1] p-5 sticky top-[84px]"

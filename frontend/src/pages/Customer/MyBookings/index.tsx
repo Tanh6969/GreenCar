@@ -107,7 +107,7 @@ const MyBookingsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-[#006C4C] px-4 py-10 text-white">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Đơn thuê xe của tôi</h1>
           <p className="text-[#ECFDF5] text-sm opacity-90">
             Theo dõi trạng thái và lịch sử các chuyến thuê xe của bạn.
@@ -115,7 +115,7 @@ const MyBookingsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {loading && (
           <div className="flex justify-center items-center py-20">
             <div className="w-10 h-10 border-4 border-[#006C4C] border-t-transparent rounded-full animate-spin" />
