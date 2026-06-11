@@ -25,6 +25,10 @@ import BookingManagePage from "../pages/Admin/BookingManage";
 import UserManagePage from "../pages/Admin/UserManage";
 import BlogManagePage from "../pages/Admin/BlogManage";
 import AdminBlogEditPage from "../pages/Admin/BlogEdit";
+import AdminOwnerRegistrations from "../pages/Admin/OwnerRegistrations";
+import OwnerRegisterLanding from "../pages/Owner/Register";
+import OwnerRegisterSteps from "../pages/Owner/Register/Steps";
+import MyVehiclesPage from "../pages/Owner/MyVehicles";
 
 const AppRouter: React.FC = () => {
   const { isAdmin } = useAuth();
@@ -137,6 +141,28 @@ const AppRouter: React.FC = () => {
         element={<AdminLoginPage />}
       />
 
+      {/* Owner registration routes */}
+      <Route
+        path="/owner/register"
+        element={<MainLayout><OwnerRegisterLanding /></MainLayout>}
+      />
+      <Route
+        path="/owner/register/steps"
+        element={
+          <ProtectedRoute>
+            <MainLayout><OwnerRegisterSteps /></MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/owner/my-vehicles"
+        element={
+          <ProtectedRoute>
+            <MainLayout><MyVehiclesPage /></MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/admin/dashboard"
         element={
@@ -203,6 +229,17 @@ const AppRouter: React.FC = () => {
           <AdminRoute>
             <AdminLayout>
               <AdminBlogEditPage />
+            </AdminLayout>
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/owner-registrations"
+        element={
+          <AdminRoute>
+            <AdminLayout>
+              <AdminOwnerRegistrations />
             </AdminLayout>
           </AdminRoute>
         }

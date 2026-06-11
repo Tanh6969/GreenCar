@@ -43,10 +43,11 @@ const IcPen = () => (
 );
 
 const NAV_MANAGE = [
-  { to: "/admin/dashboard", icon: <IcDashboard />, label: "Dashboard" },
-  { to: "/admin/vehicles",  icon: <IcCar />,       label: "Quản lý xe" },
-  { to: "/admin/bookings",  icon: <IcClipboard />, label: "Đơn thuê xe" },
-  { to: "/admin/users",     icon: <IcUsers />,     label: "Người dùng" },
+  { to: "/admin/dashboard",             icon: <IcDashboard />, label: "Dashboard" },
+  { to: "/admin/vehicles",              icon: <IcCar />,       label: "Quản lý xe" },
+  { to: "/admin/bookings",              icon: <IcClipboard />, label: "Đơn thuê xe" },
+  { to: "/admin/owner-registrations",   icon: <IcUsers />,     label: "Đơn đăng ký xe" },
+  { to: "/admin/users",                 icon: <IcUsers />,     label: "Người dùng" },
 ];
 
 const NAV_BLOG = [

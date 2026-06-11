@@ -69,6 +69,40 @@ let _nextPostId   = 6;
 let _nextBookingId = 7;
 let _nextVehicleId = 23;
 
+// Owner registrations store
+let _ownerRegs: any[] = [
+  {
+    id: 1, user_id: 2, owner_name: "Nguyễn Văn A", owner_phone: "0901234567",
+    brand: "VinFast", model: "VF8 Plus", year: "2023", license_plate: "30A-12345",
+    color: "Trắng", seats: "5", transmission: "auto", fuel_type: "electric",
+    city: "Hà Nội", address: "45 Trần Đại Nghĩa, Hai Bà Trưng",
+    price_per_day: 1200000,
+    description: "Xe như mới, camera 360, ghế da cao cấp.",
+    images: [
+      { type: "front", url: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop" },
+      { type: "back", url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop" },
+      { type: "left", url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop" },
+      { type: "interior", url: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=300&fit=crop" },
+    ],
+    status: "pending", created_at: "2026-06-10T09:00:00Z",
+  },
+  {
+    id: 2, user_id: 3, owner_name: "Trần Thị B", owner_phone: "0912345678",
+    brand: "Toyota", model: "Camry 2.5Q", year: "2022", license_plate: "51G-98765",
+    color: "Đen", seats: "5", transmission: "auto", fuel_type: "gasoline",
+    city: "TP. Hồ Chí Minh", address: "123 Nguyễn Huệ, Quận 1",
+    price_per_day: 900000, description: "Camry đen bóng, nội thất da.",
+    images: [
+      { type: "front", url: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop" },
+      { type: "back", url: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=300&fit=crop" },
+      { type: "left", url: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop" },
+      { type: "interior", url: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop" },
+    ],
+    status: "reviewing", created_at: "2026-06-09T14:30:00Z",
+  },
+];
+
+
 // Mật khẩu mock (chỉ demo)
 const PASSWORDS: Record<string, string> = {
   "admin@greencar.vn":    "admin123",
@@ -485,6 +519,52 @@ export async function mockApiCall<T>(
     const pid = parseInt(adminPostDeleteM[1], 10);
     _posts = _posts.filter(p => p.post_id !== pid);
     return undefined as T;
+  }
+
+  // ── Owner registration routes ──────────────────────────────
+
+  // POST /owner/registrations  (user submits registration)
+  if (method === "POST" && path === "/owner/registrations") {
+    if (!authedUser) throw new MockApiError(401, "Chưa đăng nhập.");
+    const d = body as any;
+    const newReg = {
+      id: _ownerRegs.length + 100,
+      user_id: authedUser.user_id,
+      owner_name: authedUser.name,
+      owner_phone: (authedUser as any).phone ?? "",
+      brand: d.brand, model: d.model, year: d.year,
+      license_plate: d.licensePlate, color: d.color,
+      seats: d.seats, transmission: d.transmission, fuel_type: d.fuelType,
+      city: d.city, address: d.address, description: d.description,
+      price_per_day: Number(d.pricePerDay),
+      images: d.images ?? [],
+      status: "pending" as const,
+      created_at: new Date().toISOString(),
+    };
+    _ownerRegs.push(newReg);
+    return newReg as T;
+  }
+
+  // GET /owner/my-registrations  (owner sees their own)
+  if (method === "GET" && path === "/owner/my-registrations") {
+    if (!authedUser) throw new MockApiError(401, "Chưa đăng nhập.");
+    return _ownerRegs.filter(r => r.user_id === authedUser.user_id) as T;
+  }
+
+  // GET /admin/owner-registrations  (admin sees all)
+  if (method === "GET" && path === "/admin/owner-registrations") {
+    return _ownerRegs as T;
+  }
+
+  // PATCH /admin/owner-registrations/:id/status
+  const ownerRegStatusM = path.match(/^\/admin\/owner-registrations\/(\d+)\/status$/);
+  if (method === "PATCH" && ownerRegStatusM) {
+    const rid = parseInt(ownerRegStatusM[1], 10);
+    const { status, reject_reason } = body as { status: string; reject_reason?: string };
+    const idx = _ownerRegs.findIndex(r => r.id === rid);
+    if (idx < 0) throw new MockApiError(404, "Đơn đăng ký không tồn tại.");
+    _ownerRegs[idx] = { ..._ownerRegs[idx], status: status as any, ...(reject_reason ? { reject_reason } : {}) };
+    return _ownerRegs[idx] as T;
   }
 
   throw new MockApiError(404, `Mock: route không tìm thấy → ${method} ${path}`);
