@@ -16,12 +16,12 @@ const OwnerRegisterLanding: React.FC = () => {
   };
 
   const benefits = [
-    { icon: "💰", title: "Thu nhập thụ động hấp dẫn", desc: "Kiếm từ 8–30 triệu/tháng khi xe không sử dụng. Tối ưu hóa tài sản, tăng thu nhập đều đặn." },
-    { icon: "🛡️", title: "Bảo hiểm toàn diện", desc: "GreenCar phối hợp bảo hiểm vật chất 24/7. Mọi sự cố đều được xử lý nhanh chóng, minh bạch." },
-    { icon: "📱", title: "Quản lý dễ dàng", desc: "Theo dõi xe, lịch đặt, doanh thu mọi lúc mọi nơi qua ứng dụng. Tự chủ lịch trình cho thuê." },
-    { icon: "✅", title: "Khách hàng được xác minh", desc: "100% khách hàng đã xác minh CCCD & GPLX. Quy trình đặt xe chặt chẽ, bảo vệ chủ xe." },
-    { icon: "🔧", title: "Hỗ trợ kỹ thuật 24/7", desc: "Đội ngũ GreenCar luôn sẵn sàng hỗ trợ. Xử lý sự cố, bảo dưỡng định kỳ có tư vấn viên." },
-    { icon: "📊", title: "Báo cáo thu nhập rõ ràng", desc: "Sao kê chi tiết từng chuyến, thanh toán đúng hạn vào ngày 5 hàng tháng qua tài khoản ngân hàng." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>, title: "Thu nhập thụ động hấp dẫn", desc: "Kiếm từ 8–30 triệu/tháng khi xe không sử dụng. Tối ưu hóa tài sản, tăng thu nhập đều đặn." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: "Bảo hiểm toàn diện", desc: "GreenCar phối hợp bảo hiểm vật chất 24/7. Mọi sự cố đều được xử lý nhanh chóng, minh bạch." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>, title: "Quản lý dễ dàng", desc: "Theo dõi xe, lịch đặt, doanh thu mọi lúc mọi nơi qua ứng dụng. Tự chủ lịch trình cho thuê." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>, title: "Khách hàng được xác minh", desc: "100% khách hàng đã xác minh CCCD & GPLX. Quy trình đặt xe chặt chẽ, bảo vệ chủ xe." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, title: "Hỗ trợ kỹ thuật 24/7", desc: "Đội ngũ GreenCar luôn sẵn sàng hỗ trợ. Xử lý sự cố, bảo dưỡng định kỳ có tư vấn viên." },
+    { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>, title: "Báo cáo thu nhập rõ ràng", desc: "Sao kê chi tiết từng chuyến, thanh toán đúng hạn vào ngày 5 hàng tháng qua tài khoản ngân hàng." },
   ];
 
   const steps = [
@@ -61,7 +61,9 @@ const OwnerRegisterLanding: React.FC = () => {
                 background: "rgba(79,189,145,0.2)", borderRadius: 999,
                 padding: "6px 16px", marginBottom: 24,
               }}>
-                <span style={{ fontSize: 14 }}>💚</span>
+                <span style={{ display: "flex", alignItems: "center" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </span>
                 <span style={{ color: "#4FBD91", fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>CHƯƠNG TRÌNH CHỦ XE GREENCAR</span>
               </div>
               <h1 style={{ fontSize: 52, fontWeight: 900, color: "#fff", lineHeight: 1.1, margin: "0 0 20px", letterSpacing: -2 }}>
@@ -126,7 +128,9 @@ const OwnerRegisterLanding: React.FC = () => {
                 marginTop: 20, background: "rgba(79,189,145,0.2)", borderRadius: 10,
                 padding: "12px 16px", display: "flex", alignItems: "center", gap: 10,
               }}>
-                <span>⭐</span>
+                <span style={{ color: "#4FBD91", display: "flex" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </span>
                 <span style={{ color: "#4FBD91", fontSize: 13, fontWeight: 600 }}>
                   Hơn 2.400 chủ xe đang kiếm thu nhập cùng GreenCar
                 </span>
@@ -156,7 +160,7 @@ const OwnerRegisterLanding: React.FC = () => {
                 onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,108,76,0.12)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
                 onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
               >
-                <div style={{ fontSize: 36, marginBottom: 16 }}>{b.icon}</div>
+                <div style={{ marginBottom: 16, color: "var(--green)" }}>{b.icon}</div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, color: "#191C1E", margin: "0 0 10px" }}>{b.title}</h3>
                 <p style={{ fontSize: 14, color: "#6E7A72", lineHeight: 1.65, margin: 0 }}>{b.desc}</p>
               </div>
@@ -217,8 +221,8 @@ const OwnerRegisterLanding: React.FC = () => {
             {/* Policy card */}
             <div style={{ background: "#fff", borderRadius: 20, padding: 36, border: "1px solid #E5EBE8" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--green-light)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 22 }}>📋</span>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--green-light)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--green)" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
                 </div>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: "#191C1E" }}>Điều khoản sử dụng</h3>
               </div>
@@ -243,8 +247,8 @@ const OwnerRegisterLanding: React.FC = () => {
             {/* Insurance card */}
             <div style={{ background: "#fff", borderRadius: 20, padding: 36, border: "1px solid #E5EBE8" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(79,189,145,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 22 }}>🛡️</span>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(79,189,145,0.15)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--green)" }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 </div>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: "#191C1E" }}>Chính sách bảo hiểm</h3>
               </div>
@@ -322,7 +326,9 @@ const OwnerRegisterLanding: React.FC = () => {
             background: "#fff", borderRadius: 20, padding: 48, maxWidth: 440, width: "90%",
             textAlign: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.3)",
           }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 52, marginBottom: 16 }}>🔐</div>
+            <div style={{ marginBottom: 16, color: "var(--green)", display: "flex", justifyContent: "center" }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
             <h2 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 12px", color: "#191C1E" }}>
               Đăng nhập để tiếp tục
             </h2>

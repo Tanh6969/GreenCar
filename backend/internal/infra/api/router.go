@@ -15,7 +15,7 @@ import (
 )
 
 // NewRouter creates an HTTP handler with all API routes wired.
-func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, db *database.DB) http.Handler {
+func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, ownerRegSvc *service.OwnerRegistrationService, db *database.DB) http.Handler {
 	r := chi.NewRouter()
 
 	// Global middleware
@@ -100,6 +100,13 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 			r.Put("/{id}/status", postHandler.AdminSetStatus)
 			r.Delete("/{id}", postHandler.AdminDeletePost)
 		})
+
+		// Admin owner registrations
+		ownerRegHandler := handlers.NewOwnerRegistrationHandler(ownerRegSvc, log)
+		r.Route("/owner-registrations", func(r chi.Router) {
+			r.Get("/", ownerRegHandler.GetAll)
+			r.Patch("/{id}/status", ownerRegHandler.UpdateStatus)
+		})
 	})
 
 	// Public vehicle browse
@@ -118,6 +125,14 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 	r.Route("/bookings", func(r chi.Router) {
 		r.Use(auth)
 		routes.RegisterBookingRoutes(r, bookingSvc, log)
+	})
+
+	// Owner registration routes
+	ownerRegHandler := handlers.NewOwnerRegistrationHandler(ownerRegSvc, log)
+	r.Route("/owner", func(r chi.Router) {
+		r.Use(auth)
+		r.Post("/registrations", ownerRegHandler.Create)
+		r.Get("/my-registrations", ownerRegHandler.GetMyRegistrations)
 	})
 
 	// Authenticated user blog routes

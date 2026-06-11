@@ -4,9 +4,9 @@ import { apiClient } from "../../../services/api";
 
 // ── Step indicator ────────────────────────────────────────────
 const STEPS = [
-  { label: "Thông tin xe", icon: "🚗" },
-  { label: "Hình ảnh xe", icon: "📸" },
-  { label: "Xác nhận", icon: "✅" },
+  { label: "Thông tin xe", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg> },
+  { label: "Hình ảnh xe", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> },
+  { label: "Xác nhận", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
 ];
 
 const StepBar: React.FC<{ current: number }> = ({ current }) => (
@@ -23,7 +23,7 @@ const StepBar: React.FC<{ current: number }> = ({ current }) => (
           }}>
             {i < current
               ? <span style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>✓</span>
-              : <span style={{ fontSize: 20 }}>{s.icon}</span>}
+              : <span style={{ display: "flex", color: i === current ? "#fff" : "#BDCAC1" }}>{s.icon}</span>}
           </div>
           <span style={{ fontSize: 12, fontWeight: 700, color: i <= current ? "var(--green)" : "#BDCAC1", whiteSpace: "nowrap" }}>
             {s.label}
@@ -112,9 +112,9 @@ const Step1: React.FC<{ data: CarInfo; onChange: (d: CarInfo) => void }> = ({ da
           <label style={labelStyle}>Nhiên liệu</label>
           <select style={selectStyle} value={data.fuelType} onChange={e => set("fuelType", e.target.value)}>
             <option value="">-- Chọn loại nhiên liệu --</option>
-            <option value="electric">Điện 🔋</option>
-            <option value="hybrid">Hybrid ⚡</option>
-            <option value="gasoline">Xăng ⛽</option>
+            <option value="electric">Điện</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="gasoline">Xăng</option>
             <option value="diesel">Dầu diesel</option>
           </select>
         </div>
@@ -147,7 +147,9 @@ const Step1: React.FC<{ data: CarInfo; onChange: (d: CarInfo) => void }> = ({ da
         marginTop: 24, background: "#FFF8E1", border: "1px solid #FFE082",
         borderRadius: 12, padding: "14px 18px", display: "flex", gap: 10, alignItems: "flex-start",
       }}>
-        <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
+        <span style={{ color: "#F57C00", display: "flex" }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
         <p style={{ margin: 0, fontSize: 13, color: "#795548", lineHeight: 1.6 }}>
           Thông tin biển số xe sẽ được xác minh với cơ sở dữ liệu đăng kiểm. Vui lòng nhập chính xác.
           Xe phải còn đăng kiểm ít nhất 6 tháng và bảo hiểm còn hiệu lực.
@@ -159,12 +161,12 @@ const Step1: React.FC<{ data: CarInfo; onChange: (d: CarInfo) => void }> = ({ da
 
 // ── Step 2: Images ────────────────────────────────────────────
 const REQUIRED_PHOTOS = [
-  { key: "front", label: "Đầu xe (mặt trước)", icon: "⬆️" },
-  { key: "back", label: "Đuôi xe (mặt sau)", icon: "⬇️" },
-  { key: "left", label: "Bên trái xe", icon: "⬅️" },
-  { key: "right", label: "Bên phải xe", icon: "➡️" },
-  { key: "interior", label: "Nội thất / Khoang lái", icon: "🪑" },
-  { key: "dashboard", label: "Đồng hồ & Táp-lô", icon: "📊" },
+  { key: "front", label: "Đầu xe (mặt trước)", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg> },
+  { key: "back", label: "Đuôi xe (mặt sau)", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg> },
+  { key: "left", label: "Bên trái xe", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> },
+  { key: "right", label: "Bên phải xe", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg> },
+  { key: "interior", label: "Nội thất / Khoang lái", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 4v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4"/><path d="M3 13h18"/><path d="M5 13v6"/><path d="M19 13v6"/></svg> },
+  { key: "dashboard", label: "Đồng hồ & Táp-lô", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
 ];
 
 const Step2: React.FC<{ images: Record<string, string>; onImages: (imgs: Record<string, string>) => void }> = ({ images, onImages }) => {
@@ -204,7 +206,7 @@ const Step2: React.FC<{ images: Record<string, string>; onImages: (imgs: Record<
                 </>
               ) : (
                 <>
-                  <span style={{ fontSize: 28 }}>{ph.icon}</span>
+                  <span style={{ color: "#BDCAC1", marginBottom: 4 }}>{ph.icon}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: "#6E7A72", textAlign: "center", padding: "0 8px" }}>{ph.label}</span>
                   <span style={{ fontSize: 11, color: "#BDCAC1" }}>Nhấn để tải ảnh</span>
                 </>
@@ -216,8 +218,9 @@ const Step2: React.FC<{ images: Record<string, string>; onImages: (imgs: Record<
       </div>
       <div style={{ marginTop: 20, background: "#E8F5E9", border: "1px solid #A5D6A7", borderRadius: 12, padding: "14px 18px" }}>
         <p style={{ margin: 0, fontSize: 13, color: "#2E7D32", lineHeight: 1.6 }}>
-          💡 <strong>Mẹo chụp ảnh đẹp:</strong> Chụp ngoài trời ban ngày, ánh sáng tự nhiên. Xe sạch sẽ, không có vật cản che khuất.
-          Ảnh tối thiểu 1MB, định dạng JPG/PNG. Không dùng ảnh chỉnh sửa quá mức.
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A6 6 0 1 0 7.5 11.5c.76.76 1.23 1.52 1.41 2.5Z"/></svg>
+          <span style={{ display: "inline-block", marginLeft: 8 }}><strong>Mẹo chụp ảnh đẹp:</strong> Chụp ngoài trời ban ngày, ánh sáng tự nhiên. Xe sạch sẽ, không có vật cản che khuất.
+          Ảnh tối thiểu 1MB, định dạng JPG/PNG. Không dùng ảnh chỉnh sửa quá mức.</span>
         </p>
       </div>
     </div>
@@ -250,7 +253,12 @@ const Step3: React.FC<{ carInfo: CarInfo; imageCount: number; agreed: boolean; o
     </div>
     <div style={{ background: "#fff", border: "1px solid #E5EBE8", borderRadius: 16, padding: 24, marginBottom: 24 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 32 }}>{imageCount >= 4 ? "✅" : "⚠️"}</span>
+        <span style={{ color: imageCount >= 4 ? "#10B981" : "#F59E0B", display: "flex" }}>
+          {imageCount >= 4 ? 
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> :
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          }
+        </span>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15, color: imageCount >= 4 ? "#006C4C" : "#F57C00" }}>
             {imageCount} / {REQUIRED_PHOTOS.length} ảnh đã tải lên
@@ -324,7 +332,9 @@ const OwnerRegisterSteps: React.FC = () => {
     return (
       <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
         <div style={{ textAlign: "center", maxWidth: 520 }}>
-          <div style={{ fontSize: 80, marginBottom: 24, animation: "bounce 0.6s ease" }}>🎉</div>
+          <div style={{ marginBottom: 24, animation: "bounce 0.6s ease", color: "#006C4C", display: "flex", justifyContent: "center" }}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
           <h1 style={{ fontSize: 32, fontWeight: 900, color: "#006C4C", margin: "0 0 16px" }}>
             Đăng ký thành công!
           </h1>
@@ -333,7 +343,10 @@ const OwnerRegisterSteps: React.FC = () => {
             trong vòng <strong style={{ color: "#191C1E" }}>24 giờ làm việc</strong> để hỗ trợ kiểm định xe và hoàn tất hợp đồng hợp tác.
           </p>
           <div style={{ background: "#E8F5E9", borderRadius: 14, padding: 20, marginBottom: 32, textAlign: "left" }}>
-            <div style={{ fontWeight: 700, color: "#2E7D32", marginBottom: 12, fontSize: 15 }}>📋 Bước tiếp theo:</div>
+            <div style={{ fontWeight: 700, color: "#2E7D32", marginBottom: 12, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              Bước tiếp theo:
+            </div>
             {["Chuyên viên liên hệ xác nhận thông tin qua điện thoại", "Hẹn lịch kiểm định xe tại nhà hoặc trung tâm GreenCar gần nhất", "Ký hợp đồng hợp tác điện tử", "Xe được đăng lên nền tảng & bắt đầu nhận đặt xe!"].map((s, i) => (
               <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8, fontSize: 14, color: "#3E4943" }}>
                 <span style={{ background: "#006C4C", color: "#fff", borderRadius: "50%", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{i + 1}</span>
@@ -387,7 +400,7 @@ const OwnerRegisterSteps: React.FC = () => {
                 className="btn btn-primary btn-lg"
                 style={{ opacity: canNext() && !submitting ? 1 : 0.5, minWidth: 160 }}
               >
-                {submitting ? "Đang gửi..." : "Gửi đơn đăng ký 🚀"}
+                {submitting ? "Đang gửi..." : "Gửi đơn đăng ký"}
               </button>
             )}
           </div>

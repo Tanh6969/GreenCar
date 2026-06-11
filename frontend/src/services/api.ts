@@ -1,7 +1,7 @@
 import { env } from "../config/env";
 import { mockApiCall } from "./mockApiHandlers";
 
-const USE_MOCK = process.env.REACT_APP_USE_MOCK === "true";
+const USE_MOCK = false;
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

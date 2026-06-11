@@ -31,28 +31,34 @@ INSERT INTO roles (role_name) VALUES
 -- role_id: 1=admin, 2=customer
 
 -- =============================================================
--- 2. USERS  (12 người dùng)
+-- 2. USERS  (12 người dùng + thêm 5 người dùng)
 -- =============================================================
 INSERT INTO users (name, email, password, phone, license_no, role_id, created_at) VALUES
-  ('Admin GreenCar',   'admin@greencar.vn',       '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0900000001', 'B2-ADMIN01', 1, '2026-01-01 08:00:00'),
-  ('Nguyễn Văn An',    'nguyenvanan@gmail.com',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234502', 'B2-023452',  2, '2026-01-10 09:15:00'),
-  ('Trần Thị Bình',    'tranthib@gmail.com',      '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234503', 'B2-023453',  2, '2026-01-12 10:30:00'),
-  ('Lê Hoàng Cường',   'lehcuong@gmail.com',      '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234504', 'B2-023454',  2, '2026-01-15 14:00:00'),
-  ('Phạm Minh Dũng',   'pminhd@gmail.com',        '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234505', 'B2-023455',  2, '2026-01-20 08:45:00'),
-  ('Hoàng Thị Lan',    'hthilan@gmail.com',       '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234506', 'B2-023456',  2, '2026-02-01 11:00:00'),
-  ('Vũ Đức Mạnh',      'vdmanh@gmail.com',        '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234507', 'B2-023457',  2, '2026-02-05 16:20:00'),
-  ('Đặng Thị Nga',     'dtnga@gmail.com',         '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234508', 'B2-023458',  2, '2026-02-10 09:00:00'),
-  ('Bùi Quang Hải',    'bqhai@gmail.com',         '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234509', 'B2-023459',  2, '2026-02-15 13:30:00'),
-  ('Ngô Thị Hương',    'nthhuong@gmail.com',      '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234510', 'B2-023460',  2, '2026-02-20 10:15:00'),
-  ('Đinh Văn Khoa',    'dvkhoa@gmail.com',        '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234511', 'B2-023461',  2, '2026-03-01 08:00:00'),
-  ('Lý Thị Mai',       'ltmai@gmail.com',         '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0901234512', 'B2-023462',  2, '2026-03-05 14:45:00'),
+  ('Admin GreenCar',   'admin@greencar.vn',       '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0900000001', 'B2-ADMIN01', 1, '2026-01-01 08:00:00'),
+  ('Nguyễn Văn An',    'nguyenvanan@gmail.com',   '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234502', 'B2-023452',  2, '2026-01-10 09:15:00'),
+  ('Trần Thị Bình',    'tranthib@gmail.com',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234503', 'B2-023453',  2, '2026-01-12 10:30:00'),
+  ('Lê Hoàng Cường',   'lehcuong@gmail.com',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234504', 'B2-023454',  2, '2026-01-15 14:00:00'),
+  ('Phạm Minh Dũng',   'pminhd@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234505', 'B2-023455',  2, '2026-01-20 08:45:00'),
+  ('Hoàng Thị Lan',    'hthilan@gmail.com',       '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234506', 'B2-023456',  2, '2026-02-01 11:00:00'),
+  ('Vũ Đức Mạnh',      'vdmanh@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234507', 'B2-023457',  2, '2026-02-05 16:20:00'),
+  ('Đặng Thị Nga',     'dtnga@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234508', 'B2-023458',  2, '2026-02-10 09:00:00'),
+  ('Bùi Quang Hải',    'bqhai@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234509', 'B2-023459',  2, '2026-02-15 13:30:00'),
+  ('Ngô Thị Hương',    'nthhuong@gmail.com',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234510', 'B2-023460',  2, '2026-02-20 10:15:00'),
+  ('Đinh Văn Khoa',    'dvkhoa@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234511', 'B2-023461',  2, '2026-03-01 08:00:00'),
+  ('Lý Thị Mai',       'ltmai@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234512', 'B2-023462',  2, '2026-03-05 14:45:00'),
   -- Khách hàng TP.HCM
-  ('Trần Văn Nam',     'tvnam.hcm@gmail.com',     '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0931234513', 'B2-HCM013',  2, '2026-01-18 10:00:00'),
-  ('Nguyễn Thị Oanh',  'ntoanh.hcm@gmail.com',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0931234514', 'B2-HCM014',  2, '2026-01-25 14:00:00'),
-  ('Phan Đức Phúc',    'pdphuc.hcm@gmail.com',    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0931234515', 'B2-HCM015',  2, '2026-02-08 09:30:00'),
-  ('Võ Thị Quỳnh',     'vtquynh.hcm@gmail.com',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0931234516', 'B2-HCM016',  2, '2026-02-14 11:00:00'),
-  ('Đỗ Minh Sơn',      'dmson.hcm@gmail.com',    '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0931234517', 'B2-HCM017',  2, '2026-03-02 15:00:00');
--- user_id: 1=admin, 2-12=KH Hà Nội, 13-17=KH TP.HCM
+  ('Trần Văn Nam',     'tvnam.hcm@gmail.com',     '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0931234513', 'B2-HCM013',  2, '2026-01-18 10:00:00'),
+  ('Nguyễn Thị Oanh',  'ntoanh.hcm@gmail.com',   '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0931234514', 'B2-HCM014',  2, '2026-01-25 14:00:00'),
+  ('Phan Đức Phúc',    'pdphuc.hcm@gmail.com',    '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0931234515', 'B2-HCM015',  2, '2026-02-08 09:30:00'),
+  ('Võ Thị Quỳnh',     'vtquynh.hcm@gmail.com',  '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0931234516', 'B2-HCM016',  2, '2026-02-14 11:00:00'),
+  ('Đỗ Minh Sơn',      'dmson.hcm@gmail.com',    '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0931234517', 'B2-HCM017',  2, '2026-03-02 15:00:00'),
+  -- Thêm 5 users mới
+  ('Nguyễn Quốc Toàn', 'nqtoan@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999001', 'B2-NEW001',  2, '2026-03-10 09:00:00'),
+  ('Phạm Thu Trà',     'pttra@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999002', 'B2-NEW002',  2, '2026-03-11 10:00:00'),
+  ('Vũ Nhật Quang',    'vnquang@gmail.com',       '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999003', 'B2-NEW003',  2, '2026-03-12 11:00:00'),
+  ('Lê Hải Yến',       'lhyen@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999004', 'B2-NEW004',  2, '2026-03-13 14:00:00'),
+  ('Đinh Tuấn Kiệt',   'dtkiet@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999005', 'B2-NEW005',  2, '2026-03-14 15:30:00');
+-- user_id: 1=admin, 2-12=KH Hà Nội, 13-17=KH TP.HCM, 18-22=KH Mới
 
 -- =============================================================
 -- 3. LOCATIONS  (7 Hà Nội + 6 TP.HCM = 13 địa điểm)
@@ -420,6 +426,21 @@ INSERT INTO reviews (user_id, vehicle_model_id, booking_id, rating, comment, cre
   (13, 7, 36, 5, 'VF 8 tại Tân Bình chở cả gia đình 6 người đi Đà Lạt. Cabin rộng, điều hòa mát. Dịch vụ GreenCar chuyên nghiệp, giao nhận tận nơi!',  '2026-03-11 10:00:00+07'),
   (14,11, 37, 5, 'Polestar 2 tại Phú Nhuận — thiết kế Scandinavian tinh tế. Âm thanh trong xe cực hay. Lái Sài Gòn mà không lo kẹt xe vì pin dự phòng.','2026-03-19 10:00:00+07'),
   (15, 3, 38, 4, 'VW ID.4 lái cảm giác chắc chắn. Hệ thống Discover Pro dễ dùng. Sẽ thuê lại cho chuyến Cần Thơ lần tới.',                              '2026-04-01 19:00:00+07');
+
+-- =============================================================
+-- OWNER REGISTRATIONS (Đơn đăng ký cho thuê xe)
+-- =============================================================
+INSERT INTO owner_registrations (user_id, brand, model, year, license_plate, color, seats, transmission, fuel_type, city, address, price_per_day, description, images, status, created_at) VALUES
+  (2, 'VinFast', 'VF 8', '2023', '30H-12345', 'Trắng', '5', 'auto', 'electric', 'Hà Nội', '45 Trần Đại Nghĩa', 1200000, 'Xe mới tinh, full lịch sử hãng.', '[{"type":"front","url":"https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop"}]', 'pending', '2026-06-10 10:00:00'),
+  (3, 'Toyota', 'Camry', '2022', '30G-56789', 'Đen', '5', 'auto', 'gasoline', 'Hà Nội', '12 Nguyễn Trãi', 950000, 'Xe doanh nhân, rất giữ gìn.', '[{"type":"front","url":"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop"}]', 'reviewing', '2026-06-09 15:30:00'),
+  (4, 'Mazda', 'CX-5', '2021', '30F-98765', 'Đỏ', '5', 'auto', 'gasoline', 'Hà Nội', '89 Láng Hạ', 850000, 'Xe gia đình, rộng rãi thoải mái.', '[{"type":"front","url":"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop"}]', 'approved', '2026-06-08 09:00:00'),
+  (5, 'Honda', 'CR-V', '2020', '30E-11223', 'Xanh', '7', 'auto', 'gasoline', 'Hà Nội', '112 Cầu Giấy', 900000, 'Chở được 7 người, cốp siêu rộng.', '[{"type":"front","url":"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop"}]', 'rejected', '2026-06-07 14:00:00'),
+  (6, 'Kia', 'Seltos', '2023', '30K-44556', 'Cam', '5', 'auto', 'gasoline', 'Hà Nội', '22 Thái Hà', 750000, 'Xe mới mua, đi phố cực bốc.', '[{"type":"front","url":"https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 08:30:00'),
+  (13, 'VinFast', 'VF e34', '2022', '51H-22334', 'Xanh dương', '5', 'auto', 'electric', 'TP.HCM', '88 Lê Lợi', 800000, 'Xe đi loanh quanh Sài Gòn rất sướng.', '[{"type":"front","url":"https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop"}]', 'reviewing', '2026-06-10 16:45:00'),
+  (14, 'Hyundai', 'Tucson', '2021', '51G-55667', 'Trắng', '5', 'auto', 'gasoline', 'TP.HCM', '320 Đinh Bộ Lĩnh', 850000, 'Nội thất sạch sẽ, không mùi.', '[{"type":"front","url":"https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop"}]', 'approved', '2026-06-05 10:15:00'),
+  (18, 'Ford', 'Everest', '2023', '30K-77889', 'Đen', '7', 'auto', 'diesel', 'Hà Nội', '15 Ngô Gia Tự', 1400000, 'Chuyên đi phượt, gầm cao máy thoáng.', '[{"type":"front","url":"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 11:20:00'),
+  (19, 'Mitsubishi', 'Xpander', '2022', '30H-99000', 'Bạc', '7', 'auto', 'gasoline', 'Hà Nội', '128 Đội Cấn', 700000, 'Giá bình dân, siêu tiết kiệm.', '[{"type":"front","url":"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 09:00:00'),
+  (20, 'VinFast', 'VF 9', '2024', '30L-11111', 'Xám', '7', 'auto', 'electric', 'Hà Nội', '45 Nguyễn Lương Bằng', 2000000, 'Chủ tịch, cực êm và xịn xò.', '[{"type":"front","url":"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 12:00:00');
 
 COMMIT;
 

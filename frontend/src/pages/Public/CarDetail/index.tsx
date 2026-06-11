@@ -3,6 +3,17 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { vehicleService } from "../../../services/vehicle.service";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Fix Leaflet marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
 
 // ── icons ─────────────────────────────────────────────────────
 const IcCarLg  = () => <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#BDCAC1" strokeWidth="1" strokeLinecap="round"><path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>;
@@ -16,7 +27,7 @@ const IcLeaf   = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="non
 interface DetailData {
   vehicle: { vehicle_id: number; license_plate: string; status: string; battery_level: number; battery_health: number };
   model: { vehicle_model_id: number; name: string; brand: string; seats: number; horsepower: number; range_km: number; trunk_capacity: number; airbags: number; vehicle_type: string; transmission: string };
-  location?: { name: string; city: string; address: string };
+  location?: { name: string; city: string; address: string; latitude: number; longitude: number };
   images: { image_id: number; image_url: string }[];
   specs: { spec_id: number; spec_name: string; spec_value: string }[];
   features: { feature_id: number; feature_name: string }[];
@@ -226,7 +237,7 @@ const CarDetailPage: React.FC = () => {
           )}
 
           {/* eco badge */}
-          <div className="bg-gradient-to-r from-[#F0FDF4] to-[#dcfce7] border border-[#bbf7d0] rounded-xl p-5 flex items-center gap-4">
+          <div className="bg-gradient-to-r from-[#F0FDF4] to-[#dcfce7] border border-[#bbf7d0] rounded-xl p-5 flex items-center gap-4 shadow-sm">
             <div className="flex-shrink-0"><IcLeaf /></div>
             <div>
               <p className="font-bold text-[#006C4C]">Eco Impact</p>
@@ -234,6 +245,91 @@ const CarDetailPage: React.FC = () => {
                 Thuê xe điện này tiết kiệm ~{Math.round(model.range_km * 0.21 / 100)} kg CO₂ mỗi 100km so với xe xăng.
               </p>
             </div>
+          </div>
+
+          {/* location map */}
+          {location && location.latitude && location.longitude && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Địa điểm giao nhận xe</h3>
+              <div className="border border-[#E5EBE8] rounded-xl p-4 mb-4 bg-[#F8F9FB]">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
+                  <span className="font-bold text-[#191C1E]">Tôi tự đến lấy xe</span>
+                  <span className="ml-auto text-[#10B981] font-semibold text-sm">Miễn phí</span>
+                </div>
+                <p className="text-sm text-[#3E4943] ml-6 font-medium">{location.address}, {location.city}</p>
+              </div>
+              <div className="h-[250px] rounded-xl overflow-hidden border border-[#E5EBE8] z-0">
+                <MapContainer center={[location.latitude, location.longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[location.latitude, location.longitude]}>
+                    <Popup>
+                      <div className="font-bold">{location.name}</div>
+                      <div className="text-xs">{location.address}</div>
+                    </Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            </div>
+          )}
+
+          {/* terms and conditions */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+            <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Điều khoản</h3>
+            <div className="text-sm text-[#3E4943] flex flex-col gap-2">
+              <p className="font-medium">Quy định khác:</p>
+              <ul className="list-disc pl-5 space-y-1 text-[#6E7A72]">
+                <li>Sử dụng xe đúng mục đích.</li>
+                <li>Không sử dụng xe thuê vào mục đích phi pháp, trái pháp luật.</li>
+                <li>Không sử dụng xe thuê để cầm cố, thế chấp.</li>
+                <li>Không hút thuốc, nhả kẹo cao su, xả rác trong xe.</li>
+                <li>Không chở hàng quốc cấm dễ cháy nổ.</li>
+                <li>Không chở hoa quả, thực phẩm nặng mùi trong xe.</li>
+                <li>Khi trả xe, nếu xe bẩn hoặc có mùi trong xe, khách hàng vui lòng vệ sinh xe sạch sẽ hoặc gửi phụ thu phí vệ sinh xe.</li>
+              </ul>
+              <p className="text-xs text-[#006C4C] mt-2 font-semibold cursor-pointer">Trân trọng cảm ơn, chúc quý khách hàng có những chuyến đi tuyệt vời!</p>
+            </div>
+          </div>
+
+          {/* extra fees */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+            <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Phụ phí có thể phát sinh</h3>
+            <div className="flex flex-col gap-4">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-semibold text-[#191C1E]">Phí vượt giới hạn</span>
+                  <span className="font-semibold text-[#10B981]">3.000đ /km</span>
+                </div>
+                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu di chuyển vượt quá <strong className="text-[#3E4943]">350 km</strong> khi thuê xe <strong className="text-[#3E4943]">1 ngày</strong>.</p>
+              </div>
+              <div className="h-px bg-[#E5EBE8] w-full"></div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-semibold text-[#191C1E]">Phí quá giờ</span>
+                  <span className="font-semibold text-[#10B981]">70.000đ /giờ</span>
+                </div>
+                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu hoàn trả xe trễ giờ. Trường hợp trễ quá <strong className="text-[#3E4943]">3 giờ</strong> phụ phí thêm 1 ngày thuê.</p>
+              </div>
+              <div className="h-px bg-[#E5EBE8] w-full"></div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-semibold text-[#191C1E]">Phụ phí khác</span>
+                  <span className="font-semibold text-[#10B981]">Thỏa thuận</span>
+                </div>
+                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu xe không đảm bảo vệ sinh hoặc bị ám mùi (hút thuốc, sầu riêng, hải sản...).</p>
+              </div>
+            </div>
+          </div>
+
+          {/* cancellation policy */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+            <h3 className="font-bold text-[#191C1E] mb-3 text-lg">Chính sách hủy chuyến</h3>
+            <p className="text-sm text-[#3E4943]">
+              An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer">Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
+            </p>
           </div>
         </div>
 

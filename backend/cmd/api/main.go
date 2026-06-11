@@ -49,14 +49,16 @@ func main() {
 	vehicleDetailRepo := repository.NewVehicleDetailRepository(db)
 	bookingRepo := repository.NewBookingRepository(db)
 	postRepo := repository.NewPostRepository(db)
+	ownerRegRepo := repository.NewOwnerRegistrationRepository(db)
 
 	userSvc := service.NewUserService(userRepo)
 	vehicleSvc := service.NewVehicleService(vehicleRepo, vehicleDetailRepo)
 	bookingSvc := service.NewBookingService(bookingRepo)
 	authSvc := service.NewAuthService(userRepo, roleRepo, maker, 15*time.Minute, 24*time.Hour)
 	postSvc := service.NewPostService(postRepo)
+	ownerRegSvc := service.NewOwnerRegistrationService(ownerRegRepo)
 
-	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, db)
+	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, db)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {

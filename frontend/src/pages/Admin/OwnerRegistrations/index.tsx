@@ -48,7 +48,7 @@ const AdminOwnerRegistrations: React.FC = () => {
     setLoading(true);
     try {
       const data = await apiClient<OwnerRegistration[]>("/admin/owner-registrations");
-      setItems(data);
+      setItems(data || []);
     } catch {
       // Use mock data
       setItems(MOCK_DATA);
@@ -88,8 +88,9 @@ const AdminOwnerRegistrations: React.FC = () => {
     setSelected(prev => prev?.id === id ? { ...prev, status: "reviewing" } : prev);
   };
 
-  const filtered = filter === "all" ? items : items.filter(i => i.status === filter);
-  const counts = { all: items.length, pending: items.filter(i => i.status === "pending").length, reviewing: items.filter(i => i.status === "reviewing").length, approved: items.filter(i => i.status === "approved").length, rejected: items.filter(i => i.status === "rejected").length };
+  const safeItems = items || [];
+  const filtered = filter === "all" ? safeItems : safeItems.filter(i => i.status === filter);
+  const counts = { all: safeItems.length, pending: safeItems.filter(i => i.status === "pending").length, reviewing: safeItems.filter(i => i.status === "reviewing").length, approved: safeItems.filter(i => i.status === "approved").length, rejected: safeItems.filter(i => i.status === "rejected").length };
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: selected ? "380px 1fr" : "1fr", gap: 24, minHeight: "calc(100vh - 120px)" }}>
@@ -151,7 +152,9 @@ const AdminOwnerRegistrations: React.FC = () => {
                 background: STATUS_MAP[selected.status].bg, color: STATUS_MAP[selected.status].color,
               }}>{STATUS_MAP[selected.status].label}</span>
             </div>
-            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#6E7A72" }}>✕</button>
+            <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#6E7A72", display: "flex" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
 
           {/* Images */}
@@ -198,16 +201,19 @@ const AdminOwnerRegistrations: React.FC = () => {
           {(selected.status === "pending" || selected.status === "reviewing") && (
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               {selected.status === "pending" && (
-                <button onClick={() => handleSetReviewing(selected.id)} className="btn btn-ghost" style={{ flex: 1 }}>
-                  🔍 Bắt đầu xem xét
+                <button onClick={() => handleSetReviewing(selected.id)} className="btn btn-ghost" style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", justifyContent: "center" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Bắt đầu xem xét
                 </button>
               )}
-              <button onClick={() => handleApprove(selected.id)} disabled={actionLoading} className="btn btn-primary" style={{ flex: 1 }}>
-                ✅ Duyệt xe
+              <button onClick={() => handleApprove(selected.id)} disabled={actionLoading} className="btn btn-primary" style={{ flex: 1, display: "flex", gap: 8, alignItems: "center", justifyContent: "center" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Duyệt xe
               </button>
               <button onClick={() => setShowRejectModal(true)} disabled={actionLoading}
-                style={{ flex: 1, padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #EF4444", color: "#EF4444", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
-                ❌ Từ chối
+                style={{ flex: 1, padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #EF4444", color: "#EF4444", fontWeight: 700, cursor: "pointer", fontSize: 14, display: "flex", gap: 8, alignItems: "center", justifyContent: "center" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Từ chối
               </button>
             </div>
           )}
