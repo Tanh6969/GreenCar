@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { vehicleService } from "../../../services/vehicle.service";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
@@ -55,8 +55,19 @@ const CarDetailPage: React.FC = () => {
   const [imgIdx, setImgIdx] = useState(0);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+  const [modalDeliveryType, setModalDeliveryType] = useState("custom");
   const [deliveryOption, setDeliveryOption] = useState<"self" | "custom" | "airport">("self");
   const [showLightbox, setShowLightbox] = useState(false);
+
+  const [searchParams] = useSearchParams();
+  const defaultStart = searchParams.get("startDate") ? `${searchParams.get("startDate")}T21:00` : "2026-06-13T21:00";
+  const defaultEnd = searchParams.get("endDate") ? `${searchParams.get("endDate")}T20:00` : "2026-06-14T20:00";
+
+  // Mock available dates
+  const [startDate, setStartDate] = useState(defaultStart);
+  const [endDate, setEndDate] = useState(defaultEnd);
+
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -88,6 +99,8 @@ const CarDetailPage: React.FC = () => {
 
   const { vehicle, model, location, images, specs, features, pricing } = data;
   const available = vehicle.status === "available";
+  
+  // Calculate pricing based on selected plan
   const selectedPrice = pricing.find(p => p.rental_plan_id === selectedPlan)?.price ?? 0;
   
   const baseImg = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? images[0]?.image_url;
@@ -265,39 +278,69 @@ const CarDetailPage: React.FC = () => {
             </div>
           </div>
 
+          {/* rental time */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+            <h3 className="font-bold text-[#191C1E] text-lg mb-4">Thời gian thuê xe</h3>
+            <div className="grid grid-cols-2 gap-4 border border-[#E5EBE8] rounded-xl p-4">
+              <div>
+                <p className="text-sm text-[#6E7A72] mb-1">Nhận xe</p>
+                <input 
+                  type="datetime-local" 
+                  value={startDate} 
+                  readOnly
+                  className="font-bold text-[#191C1E] border-none p-0 focus:ring-0 cursor-default"
+                />
+              </div>
+              <div>
+                <p className="text-sm text-[#6E7A72] mb-1">Trả xe</p>
+                <input 
+                  type="datetime-local" 
+                  value={endDate} 
+                  readOnly
+                  className="font-bold text-[#191C1E] border-none p-0 focus:ring-0 cursor-default"
+                />
+              </div>
+            </div>
+          </div>
+
           {/* location map */}
           {location && location.latitude && location.longitude && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-[#191C1E] text-lg">Địa điểm giao nhận xe</h3>
-              </div>
-              <div className="border border-[#E5EBE8] rounded-xl p-4 mb-4 bg-white cursor-pointer hover:border-[#006C4C] transition-colors" onClick={() => setShowDeliveryModal(true)}>
-                {deliveryOption === "self" ? (
-                  <>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
+              <h3 className="font-bold text-[#191C1E] text-lg mb-4">Địa điểm giao nhận xe</h3>
+              
+              <div className="flex flex-col gap-3 mb-4">
+                <label className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryOption === "self" ? "border-[#006C4C]" : "border-[#E5EBE8]"}`}>
+                  <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${deliveryOption === "self" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
+                    {deliveryOption === "self" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
                       <span className="font-bold text-[#191C1E]">Tôi tự đến lấy xe</span>
-                      <div className="ml-auto flex items-center gap-2">
-                        <span className="text-[#10B981] font-semibold text-sm">Miễn phí</span>
-                        <span className="text-[#006C4C] text-sm underline font-semibold">Thay đổi</span>
-                      </div>
+                      <span className="text-[#10B981] font-semibold text-sm">Miễn phí</span>
                     </div>
-                    <p className="text-sm text-[#3E4943] ml-6 font-medium">{location.address}, {location.city}</p>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-4 h-4 rounded-full bg-[#10B981] flex items-center justify-center border-2 border-[#D1FAE5]"><div className="w-1.5 h-1.5 rounded-full bg-white"></div></div>
-                      <span className="font-bold text-[#191C1E]">Giao xe tận nơi</span>
-                      <div className="ml-auto flex items-center gap-2">
-                        <span className="text-[#10B981] font-semibold text-sm">Có phí</span>
-                        <span className="text-[#006C4C] text-sm underline font-semibold">Thay đổi</span>
-                      </div>
+                    <p className="text-sm text-[#3E4943] font-medium">{location.address}, {location.city}</p>
+                  </div>
+                </label>
+
+                <label 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowDeliveryModal(true);
+                  }}
+                  className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryOption !== "self" ? "border-[#006C4C]" : "border-[#E5EBE8]"}`}
+                >
+                  <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${deliveryOption !== "self" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
+                    {deliveryOption !== "self" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-[#191C1E]">Tôi muốn được giao xe tận nơi</span>
                     </div>
-                    <p className="text-sm text-[#3E4943] ml-6 font-medium">Chủ xe sẽ giao và nhận xe tận nơi theo yêu cầu của bạn.</p>
-                  </>
-                )}
+                    <p className="text-sm text-[#6E7A72]">Chủ xe sẽ giao và nhận xe đến tận nhà hoặc địa chỉ mà bạn lựa chọn trên ứng dụng.</p>
+                  </div>
+                </label>
               </div>
+
               <div className="h-[250px] rounded-xl overflow-hidden border border-[#E5EBE8] z-0">
                 <MapContainer center={[location.latitude, location.longitude]} zoom={15} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
                   <TileLayer
@@ -436,7 +479,7 @@ const CarDetailPage: React.FC = () => {
               </div>
 
               {/* price summary */}
-              <div className="bg-[#F8F9FB] rounded-xl p-4">
+              <div className="bg-[#F8F9FB] rounded-xl p-4 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-[#6E7A72]">Tổng thanh toán</span>
                   <span className="text-xl font-bold text-[#006C4C]">{formatCurrency(selectedPrice)}</span>
@@ -447,12 +490,13 @@ const CarDetailPage: React.FC = () => {
               {/* CTA */}
               <button
                 disabled={!available}
-                onClick={() => navigate(`/customer/checkout?vehicle=${vehicle.vehicle_id}&plan=${selectedPlan}`)}
-                className={`w-full py-3.5 rounded-xl font-bold text-base transition-all
+                onClick={() => navigate(`/customer/checkout?vehicle=${vehicle.vehicle_id}&plan=${selectedPlan}&startDate=${startDate}&endDate=${endDate}&delivery=${deliveryOption}`)}
+                className={`w-full py-3.5 flex items-center justify-center gap-2 rounded-xl font-bold text-base transition-all
                   ${available
                     ? "bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white shadow-md hover:shadow-lg"
                     : "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"}`}>
-                {available ? "Đặt xe ngay" : "Xe đã được đặt"}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                {available ? "Chọn thuê" : "Xe đã được đặt"}
               </button>
 
               <p className="text-center text-xs text-[#6E7A72]">
@@ -469,53 +513,7 @@ const CarDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* DELIVERY MODAL */}
-      {showDeliveryModal && (
-        <div className="fixed inset-0 z-[9999] flex justify-center items-end sm:items-center bg-black/40 p-0 sm:p-4" onClick={() => setShowDeliveryModal(false)}>
-          <div className="bg-white w-full sm:w-[500px] rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[90vh] shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-[#E5EBE8]">
-              <h3 className="font-bold text-lg">Địa điểm giao nhận xe</h3>
-              <button onClick={() => setShowDeliveryModal(false)} className="text-[#6E7A72] hover:bg-[#F3F4F6] rounded-full p-2">✕</button>
-            </div>
-            <div className="p-5 overflow-y-auto">
-              <div className="bg-[#F8F9FB] rounded-xl p-4 mb-6">
-                <div className="flex justify-between mb-2"><span className="text-[#3E4943] text-sm">Dịch vụ giao xe tận nơi</span><span className="text-[#191C1E] text-sm font-medium">trong vòng 15 km</span></div>
-                <div className="flex justify-between"><span className="text-[#3E4943] text-sm">Phí giao nhận xe (2 chiều)</span><span className="text-[#191C1E] text-sm font-medium">16.000đ /km</span></div>
-              </div>
 
-              <h4 className="font-bold text-[#191C1E] mb-3">Địa điểm của chủ xe</h4>
-              <label className={`flex items-center gap-3 p-4 border rounded-xl mb-6 cursor-pointer ${deliveryOption === "self" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
-                <input type="radio" checked={deliveryOption === "self"} onChange={() => setDeliveryOption("self")} className="accent-[#006C4C] w-4 h-4" />
-                <span className="font-medium text-[#191C1E] flex-1">Tôi tự đến lấy xe</span>
-                <span className="text-[#10B981] font-semibold text-sm">Miễn phí</span>
-              </label>
-
-              <h4 className="font-bold text-[#191C1E] mb-3">Giao xe tận nơi</h4>
-              <label className={`flex items-start gap-3 p-4 border rounded-xl mb-6 cursor-pointer ${deliveryOption === "custom" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
-                <input type="radio" checked={deliveryOption === "custom"} onChange={() => setDeliveryOption("custom")} className="accent-[#006C4C] w-4 h-4 mt-1" />
-                <div>
-                  <span className="font-medium text-[#191C1E] block mb-1">Tôi muốn giao xe tận nơi</span>
-                  <span className="text-[#6E7A72] text-sm">Nhập địa chỉ tùy chỉnh</span>
-                </div>
-              </label>
-
-              <h4 className="font-bold text-[#191C1E] mb-3">Giao xe sân bay</h4>
-              <div className="flex flex-col gap-3">
-                <label className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer ${deliveryOption === "airport" ? "border-[#006C4C] bg-[#ECFDF5]" : "border-[#E5EBE8]"}`}>
-                  <div className="flex items-center gap-3">
-                    <input type="radio" checked={deliveryOption === "airport"} onChange={() => setDeliveryOption("airport")} className="accent-[#006C4C] w-4 h-4" />
-                    <span className="font-medium text-[#191C1E]">Sân bay Nội Bài</span>
-                  </div>
-                  <span className="font-bold text-[#191C1E]">250.000đ</span>
-                </label>
-              </div>
-            </div>
-            <div className="p-5 border-t border-[#E5EBE8]">
-              <button onClick={() => setShowDeliveryModal(false)} className="w-full bg-[#006C4C] text-white py-3 rounded-xl font-bold">Xác nhận</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* INSURANCE MODAL */}
       {showInsuranceModal && (
@@ -588,6 +586,92 @@ const CarDetailPage: React.FC = () => {
 
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-semibold">
             {imgIdx + 1} / {galleryImages.length}
+          </div>
+        </div>
+      )}
+
+      {/* ── DELIVERY MODAL ── */}
+      {showDeliveryModal && (
+        <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-fade-in sm:items-center sm:justify-center sm:bg-[#191C1E]/60 sm:p-4">
+          <div className="bg-white sm:rounded-3xl w-full h-full sm:h-auto sm:max-w-md flex flex-col shadow-2xl">
+            <div className="flex items-center p-4 border-b border-[#E5EBE8]">
+              <button onClick={() => setShowDeliveryModal(false)} className="text-[#191C1E] p-2 hover:bg-gray-100 rounded-full mr-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <h3 className="font-bold text-[#191C1E] text-lg flex-1 text-center pr-10">Địa điểm giao nhận xe</h3>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+              <div className="bg-[#F8F9FB] rounded-xl p-4 text-sm flex flex-col gap-2">
+                <div className="flex justify-between">
+                  <span className="text-[#3E4943]">Dịch vụ giao xe tận nơi</span>
+                  <span className="font-semibold text-[#191C1E]">trong vòng 15 km</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#3E4943]">Phí giao nhận xe (2 chiều)</span>
+                  <span className="font-semibold text-[#191C1E]">15.000đ /km</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="font-bold text-[#191C1E] text-base">Địa chỉ tùy chỉnh</h4>
+                  <span className="text-[#10B981] font-semibold text-sm cursor-pointer hover:underline">Thay đổi</span>
+                </div>
+                <label className="flex items-center gap-3 p-4 border border-[#E5EBE8] rounded-xl cursor-pointer hover:border-[#BDCAC1] transition-colors">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${modalDeliveryType === "custom" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
+                    {modalDeliveryType === "custom" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
+                  </div>
+                  <div className="flex-1">
+                    <input 
+                      type="text" 
+                      placeholder="Nhập địa chỉ tùy chỉnh" 
+                      className="w-full text-sm text-[#191C1E] placeholder:text-[#9CA3AF] focus:outline-none bg-transparent"
+                      onClick={() => setModalDeliveryType("custom")}
+                      onChange={() => setModalDeliveryType("custom")}
+                    />
+                  </div>
+                </label>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-[#191C1E] text-base mb-3">Địa chỉ của tôi</h4>
+                <label className="flex items-center gap-3 p-4 border border-[#E5EBE8] rounded-xl cursor-pointer hover:border-[#BDCAC1] transition-colors" onClick={() => setModalDeliveryType("my_address")}>
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${modalDeliveryType === "my_address" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
+                    {modalDeliveryType === "my_address" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
+                  </div>
+                  <span className="text-sm text-[#6E7A72]">Nhập địa chỉ của tôi</span>
+                </label>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-[#191C1E] text-base mb-3">Giao xe sân bay</h4>
+                <label className="flex justify-between items-center p-4 border border-[#E5EBE8] rounded-xl cursor-pointer hover:border-[#BDCAC1] transition-colors" onClick={() => setModalDeliveryType("airport")}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${modalDeliveryType === "airport" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
+                      {modalDeliveryType === "airport" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
+                    </div>
+                    <span className="font-semibold text-[#191C1E]">Sân bay Nội Bài</span>
+                  </div>
+                  <span className="font-bold text-[#191C1E]">150.000đ</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-[#E5EBE8]">
+              <button
+                onClick={() => {
+                  setDeliveryOption(modalDeliveryType === "airport" ? "airport" : "custom");
+                  setShowDeliveryModal(false);
+                }}
+                className={`w-full font-bold py-3.5 rounded-xl text-base transition-colors
+                  ${modalDeliveryType 
+                    ? "bg-[#006C4C] hover:bg-[#005a3e] text-white" 
+                    : "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"}`}
+              >
+                Xác nhận
+              </button>
+            </div>
           </div>
         </div>
       )}

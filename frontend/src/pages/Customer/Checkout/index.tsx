@@ -62,7 +62,10 @@ const StepBar: React.FC<{ step: number }> = ({ step }) => {
 const CheckoutPage: React.FC = () => {
   const [params] = useSearchParams();
   const vehicleId = Number(params.get("vehicle") ?? 0);
-  const planId    = Number(params.get("plan") ?? 3);
+  
+  const queryStartDate = params.get("startDate") ?? "";
+  const queryDelivery = params.get("delivery") ?? "self";
+  const planId = Number(params.get("plan") ?? 3);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -72,12 +75,29 @@ const CheckoutPage: React.FC = () => {
   const [loading, setLoading]   = useState(true);
 
   const defaultStart = () => {
+    if (queryStartDate) return toLocal(queryStartDate);
     const d = new Date();
     d.setMinutes(0, 0, 0);
     d.setHours(d.getHours() + 1);
     return toLocal(d.toISOString());
   };
   const [startLocal, setStartLocal] = useState(defaultStart);
+
+  const hours = PLAN_HOURS[planId] ?? 24;
+
+  const defaultEnd = () => {
+    const start = new Date(fromLocal(defaultStart()));
+    start.setHours(start.getHours() + hours);
+    return toLocal(start.toISOString());
+  };
+  const [endLocal, setEndLocal] = useState(defaultEnd);
+
+  // Update endLocal when startLocal changes
+  useEffect(() => {
+    const start = new Date(fromLocal(startLocal));
+    start.setHours(start.getHours() + hours);
+    setEndLocal(toLocal(start.toISOString()));
+  }, [startLocal, hours]);
 
   const [form, setForm] = useState({
     name: user?.name ?? "",
@@ -120,12 +140,19 @@ const CheckoutPage: React.FC = () => {
   );
 
   const { vehicle, model, location, pricing } = detail;
-  const planPrice = pricing.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
-  const hours     = PLAN_HOURS[planId] ?? 24;
-  const planName  = PLAN_NAMES[planId] ?? `Gói thuê`;
+  const planPrice = pricing?.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
+  const planName = PLAN_NAMES[planId] ?? "Gói thuê";
+  
   const startISO  = fromLocal(startLocal);
-  const endISO    = addHours(startISO, hours);
-  const deposit   = Math.round(planPrice * DEPOSIT_RATIO);
+  const endISO    = fromLocal(endLocal);
+  
+  const totalRentalPrice = planPrice;
+  
+  const deliveryFee = (queryDelivery === "custom" || queryDelivery === "airport") ? 150000 : 0;
+  const serviceFee = Math.round(totalRentalPrice * 0.1);
+  const totalPrice = totalRentalPrice + deliveryFee + serviceFee;
+  
+  const deposit   = Math.round(totalPrice * DEPOSIT_RATIO);
   const imgUrl    = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? detail.images?.[0]?.image_url ?? "";
 
   const validate = () => {
@@ -148,7 +175,7 @@ const CheckoutPage: React.FC = () => {
       },
       planId, planName, planDurationHours: hours,
       startTime: startISO, endTime: endISO,
-      totalPrice: planPrice, depositAmount: deposit,
+      totalPrice: totalPrice, depositAmount: deposit,
       contactInfo: { ...form },
     });
     navigate("/customer/payment");
@@ -174,7 +201,7 @@ const CheckoutPage: React.FC = () => {
                     <p className="text-xs text-[#3E4943] mt-0.5">Thông tin sẽ được điền sẵn từ tài khoản của bạn</p>
                   </div>
                 </div>
-                <Link to={`/auth/login?redirect=/customer/checkout?vehicle=${vehicleId}%26plan=${planId}`}
+                <Link to={`/auth/login?redirect=/customer/checkout?vehicle=${vehicleId}%26plan=${planId}%26startDate=${queryStartDate}%26delivery=${queryDelivery}`}
                   className="bg-[#006C4C] text-white text-sm font-bold px-4 py-2 rounded-xl whitespace-nowrap hover:bg-[#004832] transition-colors">
                   Đăng nhập
                 </Link>
@@ -261,18 +288,32 @@ const CheckoutPage: React.FC = () => {
             {/* pickup time */}
             <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
               <h2 className="font-bold text-[#191C1E] text-base mb-5">Thời gian nhận xe</h2>
-              <div>
-                <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
-                  Nhận xe lúc *
-                </label>
-                <input
-                  type="datetime-local"
-                  value={startLocal}
-                  min={toLocal(new Date().toISOString())}
-                  onChange={e => setStartLocal(e.target.value)}
-                  className="h-11 border border-[#E5E7EB] rounded-xl px-3.5 text-sm text-[#191C1E] bg-white
-                    focus:outline-none focus:border-[#006C4C] w-full sm:w-auto"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Nhận xe lúc *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={startLocal}
+                    min={toLocal(new Date().toISOString())}
+                    onChange={e => setStartLocal(e.target.value)}
+                    className="h-11 border border-[#E5E7EB] rounded-xl px-3.5 text-sm text-[#191C1E] bg-white
+                      focus:outline-none focus:border-[#006C4C] w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                    Trả xe lúc *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={endLocal}
+                    readOnly
+                    className="h-11 border border-[#E5E7EB] rounded-xl px-3.5 text-sm text-[#6E7A72] bg-[#F8F9FB]
+                      focus:outline-none focus:border-[#E5E7EB] w-full cursor-not-allowed"
+                  />
+                </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-[#F8F9FB] rounded-xl p-3">
@@ -329,14 +370,29 @@ const CheckoutPage: React.FC = () => {
                     <span className="text-[#6E7A72]">Trả xe</span>
                     <span className="font-semibold text-[#191C1E] text-right text-xs">{formatDT(endISO)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Giao nhận</span>
+                    <span className="font-semibold text-[#191C1E] text-right text-xs">{queryDelivery === "airport" ? "Giao tại sân bay Nội Bài" : queryDelivery === "custom" ? "Giao tận nơi" : "Tự đến lấy"}</span>
+                  </div>
                 </div>
 
                 <div className="border-t border-[#F3F4F6] pt-4 flex flex-col gap-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[#6E7A72]">Phí thuê xe</span>
+                    <span className="text-[#6E7A72]">Giá gói thuê</span>
                     <span className="font-semibold">{formatCurrency(planPrice)}</span>
                   </div>
-                  <div className="flex justify-between text-[#006C4C]">
+
+                  {deliveryFee > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-[#6E7A72]">Phí giao xe</span>
+                      <span className="font-semibold">{formatCurrency(deliveryFee)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-[#6E7A72]">Phí dịch vụ</span>
+                    <span className="font-semibold">{formatCurrency(serviceFee)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#006C4C] mt-2">
                     <span className="font-semibold">Đặt cọc (30%)</span>
                     <span className="font-bold">{formatCurrency(deposit)}</span>
                   </div>
@@ -344,7 +400,7 @@ const CheckoutPage: React.FC = () => {
 
                 <div className="bg-[#F0FDF4] rounded-xl p-3 flex justify-between items-center">
                   <span className="text-sm font-bold text-[#006C4C]">Tổng thanh toán</span>
-                  <span className="text-lg font-black text-[#006C4C]">{formatCurrency(planPrice)}</span>
+                  <span className="text-lg font-black text-[#006C4C]">{formatCurrency(totalPrice)}</span>
                 </div>
 
                 <p className="text-center text-xs text-[#9CA3AF]">

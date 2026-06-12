@@ -46,6 +46,7 @@ interface CarInfo {
   brand: string; model: string; year: string; licensePlate: string;
   color: string; seats: string; transmission: string; fuelType: string;
   address: string; city: string; description: string; pricePerDay: string;
+  availableFrom: string; availableTo: string;
 }
 
 const BRANDS = ["VinFast", "Toyota", "Kia", "Hyundai", "Honda", "Mazda", "Ford", "Mercedes-Benz", "BMW", "Audi", "Tesla", "Mitsubishi", "Suzuki", "Chevrolet", "Khác"];
@@ -128,6 +129,14 @@ const Step1: React.FC<{ data: CarInfo; onChange: (d: CarInfo) => void }> = ({ da
         <div>
           <label style={labelStyle}>Giá thuê mong muốn (VNĐ/ngày) *</label>
           <input style={inputStyle} type="number" placeholder="VD: 800000" value={data.pricePerDay} onChange={e => set("pricePerDay", e.target.value)} />
+        </div>
+        <div>
+          <label style={labelStyle}>Cho thuê từ ngày *</label>
+          <input style={inputStyle} type="date" value={data.availableFrom} onChange={e => set("availableFrom", e.target.value)} />
+        </div>
+        <div>
+          <label style={labelStyle}>Cho thuê đến ngày *</label>
+          <input style={inputStyle} type="date" value={data.availableTo} onChange={e => set("availableTo", e.target.value)} />
         </div>
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={labelStyle}>Địa chỉ giao xe *</label>
@@ -242,6 +251,7 @@ const Step3: React.FC<{ carInfo: CarInfo; imageCount: number; agreed: boolean; o
           ["Hộp số", carInfo.transmission === "auto" ? "Tự động" : carInfo.transmission === "manual" ? "Số sàn" : ""],
           ["Nhiên liệu", carInfo.fuelType], ["Thành phố", carInfo.city],
           ["Giá/ngày", carInfo.pricePerDay ? `${Number(carInfo.pricePerDay).toLocaleString("vi")} đ` : ""],
+          ["Từ ngày", carInfo.availableFrom], ["Đến ngày", carInfo.availableTo],
         ].map(([label, value]) => value ? (
           <div key={label} style={{ display: "flex", gap: 8 }}>
             <span style={{ fontSize: 13, color: "#6E7A72", minWidth: 100 }}>{label}:</span>
@@ -298,7 +308,7 @@ const OwnerRegisterSteps: React.FC = () => {
   const [carInfo, setCarInfo] = useState<CarInfo>({
     brand: "", model: "", year: "", licensePlate: "", color: "",
     seats: "", transmission: "", fuelType: "", address: "", city: "",
-    description: "", pricePerDay: "",
+    description: "", pricePerDay: "", availableFrom: "", availableTo: "",
   });
   const [images, setImages] = useState<Record<string, string>>({});
   const [agreed, setAgreed] = useState(false);
@@ -306,7 +316,7 @@ const OwnerRegisterSteps: React.FC = () => {
   const imageCount = Object.keys(images).length;
 
   const canNext = () => {
-    if (step === 0) return carInfo.brand && carInfo.model && carInfo.year && carInfo.licensePlate && carInfo.seats && carInfo.city && carInfo.pricePerDay;
+    if (step === 0) return carInfo.brand && carInfo.model && carInfo.year && carInfo.licensePlate && carInfo.seats && carInfo.city && carInfo.pricePerDay && carInfo.availableFrom && carInfo.availableTo;
     if (step === 1) return imageCount >= 4;
     if (step === 2) return agreed && imageCount >= 4;
     return false;

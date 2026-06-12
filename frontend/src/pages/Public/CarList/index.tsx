@@ -319,7 +319,7 @@ const CarListPage: React.FC = () => {
                       </div>
 
                       <Link
-                        to={`/cars/${item.vehicle.vehicle_id}`}
+                        to={`/cars/${item.vehicle.vehicle_id}?startDate=${filterStartDate}&endDate=${filterEndDate}`}
                         className="block text-center bg-[#006C4C] hover:bg-[#005a3e] text-white font-bold py-2 rounded-lg text-sm transition-colors mb-3"
                       >
                         Xem chi tiết
