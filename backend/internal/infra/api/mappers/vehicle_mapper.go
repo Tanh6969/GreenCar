@@ -87,6 +87,20 @@ func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailR
 		Pricing:  toVehiclePricingResponses(detail.Pricing),
 		Reviews:  toReviewResponses(detail.Reviews),
 		Meta:     toVehicleMetaResponse(detail.Meta),
+		Owner:    toOwnerPublicResponse(detail.OwnerInfo),
+	}
+}
+
+func toOwnerPublicResponse(owner *entities.OwnerPublic) *dto.OwnerPublicResponse {
+	if owner == nil || owner.UserID == 0 {
+		return nil
+	}
+	return &dto.OwnerPublicResponse{
+		UserID:    owner.UserID,
+		Name:      owner.Name,
+		Phone:     owner.Phone,
+		TripCount: owner.TripCount,
+		AvgRating: owner.AvgRating,
 	}
 }
 

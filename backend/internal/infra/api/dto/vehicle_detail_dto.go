@@ -25,6 +25,7 @@ type VehicleDetailResponse struct {
 	Pricing  []*VehiclePricingResponse `json:"pricing"`
 	Reviews  []*ReviewResponse         `json:"reviews"`
 	Meta     *VehicleMetaResponse      `json:"meta"`
+	Owner    *OwnerPublicResponse      `json:"owner,omitempty"`
 }
 
 // VehicleMetaResponse contains computed metadata for a vehicle detail page.
@@ -32,6 +33,15 @@ type VehicleMetaResponse struct {
 	AvgRating   float64 `json:"avg_rating"`
 	ReviewCount int     `json:"review_count"`
 	Available   bool    `json:"available"`
+}
+
+// OwnerPublicResponse represents the owner's public information.
+type OwnerPublicResponse struct {
+	UserID    int     `json:"user_id"`
+	Name      string  `json:"name"`
+	Phone     string  `json:"phone"`
+	TripCount int     `json:"trip_count"`
+	AvgRating float64 `json:"avg_rating"`
 }
 
 // VehicleModelResponse represents a vehicle model.
