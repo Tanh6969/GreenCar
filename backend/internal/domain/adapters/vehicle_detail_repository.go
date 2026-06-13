@@ -7,4 +7,5 @@ import "greencar/internal/domain/entities"
 type VehicleDetailRepository interface {
 	GetByVehicleID(id int) (*entities.VehicleDetail, error)
 	ListCards(limit, offset int) ([]*entities.VehicleCard, error)
+	ListByOwnerID(ownerID int) ([]*entities.VehicleCard, error)
 }

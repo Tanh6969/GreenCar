@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../../services/api";
+import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 
 interface MyRegistration {
   id: number;
@@ -16,6 +17,13 @@ interface MyRegistration {
   created_at: string;
 }
 
+interface VehicleCardResponse {
+  vehicle: { id: number; status: string; license_plate: string; available_from?: string; available_to?: string };
+  model: { vehicle_model_id: number; name: string; brand: string };
+  location: { city: string; address: string };
+  image_url: string;
+}
+
 const STATUS_MAP = {
   pending: { label: "Chờ xem xét", color: "#F59E0B", bg: "#FEF3C7", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline", marginBottom: -2}}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
   reviewing: { label: "Đang xem xét", color: "#3B82F6", bg: "#EFF6FF", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display: "inline", marginBottom: -2}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
@@ -25,22 +33,47 @@ const STATUS_MAP = {
 
 const MyVehiclesPage: React.FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"vehicles" | "registrations">("vehicles");
+  
   const [items, setItems] = useState<MyRegistration[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleCardResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settingVehicleId, setSettingVehicleId] = useState<number | null>(null);
+  const [availableFrom, setAvailableFrom] = useState("");
+  const [availableTo, setAvailableTo] = useState("");
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeTab]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await apiClient<MyRegistration[]>("/owner/my-registrations");
-      setItems(data || []);
+      if (activeTab === "registrations") {
+        const data = await apiClient<MyRegistration[]>("/owner/my-registrations");
+        setItems(data || []);
+      } else {
+        const data = await apiClient<VehicleCardResponse[]>("/owner/vehicles");
+        setVehicles(data || []);
+      }
     } catch {
-      setItems(MOCK_MY);
+      if (activeTab === "registrations") setItems(MOCK_MY);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateVehicleStatus = async (id: number, status: string, from?: string, to?: string) => {
+    try {
+      await apiClient(`/owner/vehicles/${id}/status`, "PUT", { 
+        status, 
+        available_from: from || null,
+        available_to: to || null
+      });
+      loadData();
+      setSettingVehicleId(null);
+    } catch (error) {
+      alert("Không thể cập nhật trạng thái");
     }
   };
 
@@ -57,14 +90,39 @@ const MyVehiclesPage: React.FC = () => {
           </button>
         </div>
 
+        <div style={{ display: "flex", gap: 32, borderBottom: "1px solid #E5EBE8", marginBottom: 32 }}>
+          <button
+            onClick={() => setActiveTab("vehicles")}
+            style={{
+              padding: "0 0 12px", background: "none", border: "none",
+              borderBottom: activeTab === "vehicles" ? "3px solid #006C4C" : "3px solid transparent",
+              color: activeTab === "vehicles" ? "#191C1E" : "#6E7A72",
+              fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s"
+            }}
+          >
+            Xe đang hoạt động
+          </button>
+          <button
+            onClick={() => setActiveTab("registrations")}
+            style={{
+              padding: "0 0 12px", background: "none", border: "none",
+              borderBottom: activeTab === "registrations" ? "3px solid #006C4C" : "3px solid transparent",
+              color: activeTab === "registrations" ? "#191C1E" : "#6E7A72",
+              fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s"
+            }}
+          >
+            Đơn đăng ký
+          </button>
+        </div>
+
         {loading ? (
           <div style={{ textAlign: "center", padding: 60, color: "#6E7A72" }}>Đang tải...</div>
-        ) : items.length === 0 ? (
+        ) : (activeTab === "vehicles" ? vehicles.length === 0 : items.length === 0) ? (
           <div style={{ textAlign: "center", padding: 80, background: "#fff", borderRadius: 20, border: "1px solid #E5EBE8" }}>
             <div style={{ marginBottom: 16, color: "var(--green)", display: "flex", justifyContent: "center" }}>
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
             </div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 12px", color: "#191C1E" }}>Chưa có xe nào</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 12px", color: "#191C1E" }}>Chưa có {activeTab === "vehicles" ? "xe nào" : "đơn đăng ký nào"}</h2>
             <p style={{ color: "#6E7A72", margin: "0 0 28px" }}>Đăng ký xe đầu tiên của bạn và bắt đầu tạo thu nhập!</p>
             <button onClick={() => navigate("/owner/register")} className="btn btn-primary btn-lg">
               Đăng ký cho thuê xe →
@@ -72,7 +130,83 @@ const MyVehiclesPage: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {items.map(item => {
+            {activeTab === "vehicles" ? vehicles.map(v => (
+              <div key={v.vehicle.id} style={{
+                background: "#fff", borderRadius: 16, padding: 24,
+                border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
+                transition: "box-shadow 0.2s",
+              }}>
+                {(MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url) ? (
+                  <img src={MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url} alt="xe" style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 12, flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: 140, height: 100, borderRadius: 12, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#BDCAC1", flexShrink: 0 }}>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                  </div>
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h3 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 4px", color: "#191C1E" }}>
+                        {v.model.brand} {v.model.name}
+                      </h3>
+                      <p style={{ fontSize: 14, color: "#6E7A72", margin: "0 0 12px" }}>
+                        {v.vehicle.license_plate} · 📍 {v.location.city}
+                      </p>
+                    </div>
+                    <span style={{ 
+                      padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
+                      background: v.vehicle.status === "available" ? "#ECFDF5" : "#FEF2F2", 
+                      color: v.vehicle.status === "available" ? "#10B981" : "#EF4444" 
+                    }}>
+                      {v.vehicle.status === "available" ? "Sẵn sàng cho thuê" : "Tạm ngưng / Bảo trì"}
+                    </span>
+                  </div>
+                  
+                  {/* Statistics block to mimic Mioto */}
+                  <div style={{ display: "flex", gap: 32, marginTop: 16, paddingBottom: 16, borderBottom: "1px dashed #E5EBE8" }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Số chuyến</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>0</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Doanh thu</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>0đ</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Đánh giá</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>Chưa có</div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                    {v.vehicle.status === "booked" ? (
+                      <button 
+                        onClick={() => updateVehicleStatus(v.vehicle.id, "available")}
+                        style={{ 
+                          padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700,
+                          border: "1px solid #EF4444", background: "#fff", color: "#EF4444",
+                          cursor: "pointer"
+                        }}>
+                        Khách đã trả xe
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          setSettingVehicleId(v.vehicle.id);
+                          setAvailableFrom(v.vehicle.available_from ? v.vehicle.available_from.split("T")[0] : "");
+                          setAvailableTo(v.vehicle.available_to ? v.vehicle.available_to.split("T")[0] : "");
+                        }}
+                        style={{ 
+                          padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
+                          background: "#006C4C", color: "#fff", cursor: "pointer"
+                        }}>
+                        Thiết lập thời gian cho thuê
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )) : items.map(item => {
               const s = STATUS_MAP[item.status];
               const coverImg = item.images?.find(i => i.type === "front")?.url;
               return (
@@ -173,6 +307,70 @@ const MyVehiclesPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {settingVehicleId && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", zIndex: 1000,
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
+          <div style={{
+            background: "#fff", padding: 24, borderRadius: 16, width: "100%", maxWidth: 400,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 16px", color: "#191C1E" }}>Thiết lập thời gian cho thuê</h3>
+            <p style={{ fontSize: 14, color: "#6E7A72", margin: "0 0 20px" }}>
+              Hãy chọn khoảng thời gian bạn muốn hiển thị xe này trên nền tảng để khách hàng có thể đặt.
+            </p>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#191C1E", marginBottom: 6 }}>Từ ngày</label>
+              <input 
+                type="date" 
+                value={availableFrom}
+                onChange={e => setAvailableFrom(e.target.value)}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #E5EBE8", borderRadius: 8 }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#191C1E", marginBottom: 6 }}>Đến ngày</label>
+              <input 
+                type="date" 
+                value={availableTo}
+                onChange={e => setAvailableTo(e.target.value)}
+                style={{ width: "100%", padding: "10px 12px", border: "1px solid #E5EBE8", borderRadius: 8 }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button 
+                onClick={() => setSettingVehicleId(null)}
+                style={{ 
+                  flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 600,
+                  border: "1px solid #BDCAC1", background: "#fff", color: "#3E4943", cursor: "pointer"
+                }}>
+                Hủy
+              </button>
+              <button 
+                onClick={() => {
+                  if (!availableFrom || !availableTo) {
+                    alert("Vui lòng chọn ngày bắt đầu và kết thúc.");
+                    return;
+                  }
+                  updateVehicleStatus(settingVehicleId, "available", availableFrom, availableTo);
+                  alert("Đã lưu thời gian cho thuê! Xe của bạn giờ đây đã sẵn sàng.");
+                }}
+                style={{ 
+                  flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 600,
+                  border: "none", background: "#006C4C", color: "#fff", cursor: "pointer"
+                }}>
+                Lưu thời gian
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

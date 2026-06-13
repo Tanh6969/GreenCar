@@ -30,7 +30,7 @@ func scanBookingDetail(scan func(...any) error) (entities.Booking, error) {
 		&b.StartTime, &b.EndTime, &actualStart, &actualEnd,
 		&b.PlannedKM, &actualKM, &b.DepositAmount, &overtimeFee, &overKMFee,
 		&b.TotalPrice, &b.Status, &paymentMethod, &b.CreatedAt,
-		&b.VehicleBrand, &b.VehicleName, &b.LicensePlate,
+		&b.VehicleModelID, &b.VehicleBrand, &b.VehicleName, &b.LicensePlate,
 		&b.CustomerName, &b.CustomerPhone,
 	)
 	if err != nil {
@@ -50,6 +50,7 @@ SELECT b.booking_id, b.user_id, b.vehicle_id, b.rental_plan_id,
   b.start_time, b.end_time, b.actual_start_time, b.actual_end_time,
   b.planned_km, b.actual_km, b.deposit_amount, b.overtime_fee, b.over_km_fee,
   b.total_price, b.status, b.payment_method, b.created_at,
+  COALESCE(vm.vehicle_model_id, 0) AS vehicle_model_id,
   COALESCE(vm.brand, '') AS vehicle_brand,
   COALESCE(vm.name, '')  AS vehicle_name,
   COALESCE(v.license_plate, '') AS license_plate,

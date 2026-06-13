@@ -25,7 +25,13 @@ type VehicleDetailResponse struct {
 	Pricing  []*VehiclePricingResponse `json:"pricing"`
 	Reviews  []*ReviewResponse         `json:"reviews"`
 	Meta     *VehicleMetaResponse      `json:"meta"`
-	Owner    *OwnerPublicResponse      `json:"owner,omitempty"`
+	Owner          *OwnerPublicResponse      `json:"owner,omitempty"`
+	ActiveBookings []*TimeRangeResponse      `json:"active_bookings"`
+}
+
+type TimeRangeResponse struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 }
 
 // VehicleMetaResponse contains computed metadata for a vehicle detail page.

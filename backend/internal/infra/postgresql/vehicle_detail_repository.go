@@ -19,7 +19,7 @@ func NewVehicleDetailRepository(db *database.DB) adapters.VehicleDetailRepositor
 
 func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.VehicleCard, error) {
 	query := `
-		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id,
+		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
 		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url
@@ -42,7 +42,50 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		var loc entities.Location
 		var imageURL string
 		err := rows.Scan(
-			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID,
+			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
+			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
+			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
+			&imageURL,
+		)
+		if err != nil {
+			return nil, err
+		}
+		cards = append(cards, &entities.VehicleCard{
+			Vehicle:  &v,
+			Model:    &m,
+			Location: &loc,
+			ImageURL: imageURL,
+		})
+	}
+	return cards, rows.Err()
+}
+
+func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.VehicleCard, error) {
+	query := `
+		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
+		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
+		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
+		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url
+		FROM vehicles v
+		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
+		JOIN locations l ON l.location_id = v.location_id
+		WHERE v.owner_id = $1
+		ORDER BY v.vehicle_id`
+
+	rows, err := r.db.Query(query, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cards []*entities.VehicleCard
+	for rows.Next() {
+		var v entities.Vehicle
+		var m entities.VehicleModel
+		var loc entities.Location
+		var imageURL string
+		err := rows.Scan(
+			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
 			&imageURL,
@@ -64,9 +107,9 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 	// Load vehicle (with owner_id)
 	var v entities.Vehicle
 	if err := r.db.QueryRow(
-		`SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, COALESCE(owner_id,0) FROM vehicles WHERE vehicle_id = $1`,
+		`SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, COALESCE(owner_id,0), available_from, available_to FROM vehicles WHERE vehicle_id = $1`,
 		id,
-	).Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID); err != nil {
+	).Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo); err != nil {
 		return nil, err
 	}
 
@@ -210,6 +253,28 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			return nil, err
 		}
 		reviews = append(reviews, &rview)
+	}
+
+	// Load active bookings (time ranges)
+	activeBookings := make([]*entities.TimeRange, 0)
+	bookingRows, err := r.db.Query(
+		`SELECT start_time, end_time FROM bookings 
+		 WHERE vehicle_id = $1 AND status IN ('pending', 'confirmed', 'active', 'running')`, 
+		id,
+	)
+	if err == nil {
+		defer bookingRows.Close()
+		for bookingRows.Next() {
+			importTime := true
+			_ = importTime
+			var start, end time.Time
+			if err := bookingRows.Scan(&start, &end); err == nil {
+				activeBookings = append(activeBookings, &entities.TimeRange{
+					StartTime: start.Format(time.RFC3339),
+					EndTime:   end.Format(time.RFC3339),
+				})
+			}
+		}
 	}
 
 	// Compute meta

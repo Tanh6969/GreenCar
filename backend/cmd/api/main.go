@@ -59,8 +59,9 @@ func main() {
 	postSvc := service.NewPostService(postRepo)
 	ownerRegSvc := service.NewOwnerRegistrationService(ownerRegRepo)
 	chatSvc := service.NewChatService(chatRepo, bookingSvc, log)
+	reviewSvc := service.NewReviewService(repository.NewReviewRepository(db))
 
-	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, db)
+	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, reviewSvc, db)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {

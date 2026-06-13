@@ -45,6 +45,7 @@ func ToBookingResponse(b *entities.Booking) *dto.BookingResponse {
 		Status:        b.Status,
 		PaymentMethod: b.PaymentMethod,
 		CreatedAt:     createdAt,
+		VehicleModelID: b.VehicleModelID,
 		VehicleBrand:  b.VehicleBrand,
 		VehicleName:   b.VehicleName,
 		LicensePlate:  b.LicensePlate,

@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"greencar/internal/domain/entities"
+	"greencar/internal/infra/api/middlewares"
 	"greencar/internal/infra/api/response"
 	"greencar/internal/service"
 	"greencar/pkg/logger"
@@ -29,8 +30,12 @@ func (h *OwnerRegistrationHandler) Create(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	userID := r.Context().Value("user_id").(int64)
-	reg.UserID = int(userID)
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	reg.UserID = int(payload.UserId)
 
 	if err := h.svc.Create(&reg); err != nil {
 		h.log.Error("failed to create owner registration: %v", err)
@@ -42,8 +47,12 @@ func (h *OwnerRegistrationHandler) Create(w http.ResponseWriter, r *http.Request
 }
 
 func (h *OwnerRegistrationHandler) GetMyRegistrations(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("user_id").(int64)
-	regs, err := h.svc.GetMyRegistrations(int(userID))
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	regs, err := h.svc.GetMyRegistrations(int(payload.UserId))
 	if err != nil {
 		h.log.Error("failed to get my registrations: %v", err)
 		response.WriteError(w, http.StatusInternalServerError, "failed to get registrations")

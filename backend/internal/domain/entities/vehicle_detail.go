@@ -10,8 +10,15 @@ type VehicleDetail struct {
 	Specs     []*VehicleSpec    `json:"specs"`
 	Pricing   []*VehiclePricing `json:"pricing"`
 	Reviews   []*Review         `json:"reviews"`
-	Meta      *VehicleMeta      `json:"meta"`
-	OwnerInfo *OwnerPublic      `json:"owner"`
+	Meta           *VehicleMeta      `json:"meta"`
+	OwnerInfo      *OwnerPublic      `json:"owner"`
+	ActiveBookings []*TimeRange      `json:"active_bookings"`
+}
+
+// TimeRange represents a simple start and end time.
+type TimeRange struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
 }
 
 // VehicleMeta contains computed metadata for the vehicle detail page.

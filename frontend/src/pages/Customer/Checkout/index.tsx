@@ -99,13 +99,18 @@ const CheckoutPage: React.FC = () => {
     setEndLocal(toLocal(start.toISOString()));
   }, [startLocal, hours]);
 
+  const queryAddress = params.get("address") || "";
+
   const [form, setForm] = useState({
     name: user?.name ?? "",
     phone: user?.phone ?? "",
     licenseNo: user?.license_no ?? "",
     email: user?.email ?? "",
   });
-  const [note, setNote] = useState("");
+  
+  const [note, setNote] = useState(
+    queryAddress ? `Xin chào, vui lòng giao xe tại địa chỉ: ${queryAddress}` : ""
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {

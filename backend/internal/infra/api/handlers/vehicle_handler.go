@@ -9,6 +9,7 @@ import (
 	"greencar/internal/domain/entities"
 	"greencar/internal/infra/api/dto"
 	"greencar/internal/infra/api/mappers"
+	"greencar/internal/infra/api/middlewares"
 	"greencar/internal/infra/api/response"
 	"greencar/internal/service"
 	"greencar/pkg/logger"
@@ -232,3 +233,78 @@ func DeleteVehicleHandler(vehicleSvc *service.VehicleService, log *logger.Logger
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+// ListOwnerVehiclesHandler returns lightweight vehicle cards for the authenticated owner.
+func ListOwnerVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		cards, err := vehicleSvc.ListVehicleCardsByOwnerID(int(payload.UserId))
+		if err != nil {
+			log.Warn("list owner vehicles: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to list vehicles")
+			return
+		}
+		
+		out := make([]*dto.VehicleCardResponse, 0, len(cards))
+		for _, c := range cards {
+			out = append(out, mappers.ToVehicleCardResponse(c))
+		}
+		response.WriteJSON(w, http.StatusOK, out)
+	}
+}
+
+// UpdateVehicleStatusHandler allows the owner to change their vehicle status (available, maintenance).
+func UpdateVehicleStatusHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
+			return
+		}
+
+		var req struct {
+			Status        string  `json:"status"`
+			AvailableFrom *string `json:"available_from"`
+			AvailableTo   *string `json:"available_to"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+
+		v, err := vehicleSvc.GetVehicle(id)
+		if err != nil || v.OwnerID != int(payload.UserId) {
+			response.WriteError(w, http.StatusForbidden, "not allowed to update this vehicle")
+			return
+		}
+
+		v.Status = req.Status
+		if req.AvailableFrom != nil {
+			v.AvailableFrom = req.AvailableFrom
+		}
+		if req.AvailableTo != nil {
+			v.AvailableTo = req.AvailableTo
+		}
+		
+		if err := vehicleSvc.UpdateVehicle(v); err != nil {
+			log.Warn("update vehicle status %d: %v", id, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to update vehicle status")
+			return
+		}
+
+		response.WriteJSON(w, http.StatusOK, map[string]string{"message": "status updated successfully"})
+	}
+}
+

@@ -22,6 +22,7 @@ type BookingResponse struct {
 	PaymentMethod string     `json:"payment_method,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
 	// Enriched from JOIN
+	VehicleModelID int    `json:"vehicle_model_id,omitempty"`
 	VehicleBrand  string `json:"vehicle_brand,omitempty"`
 	VehicleName   string `json:"vehicle_name,omitempty"`
 	LicensePlate  string `json:"license_plate,omitempty"`

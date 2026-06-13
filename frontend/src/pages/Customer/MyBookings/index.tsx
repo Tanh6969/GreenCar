@@ -4,6 +4,7 @@ import { bookingService } from "../../../services/booking.service";
 import { useAuth } from "../../../hooks/useAuth";
 import { formatCurrency } from "../../../utils/formatters";
 import { Booking } from "../../../types/booking.type";
+import { apiClient } from "../../../services/api";
 
 type BookingStatus = Booking["status"];
 
@@ -36,11 +37,16 @@ function StatusBadge({ status }: { status: BookingStatus }) {
   );
 }
 
-function BookingCard({ booking }: { booking: Booking }) {
+function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Booking) => void }) {
   const carLabel = booking.vehicle_brand && booking.vehicle_name
     ? `${booking.vehicle_brand} ${booking.vehicle_name}`
     : `Xe #${booking.vehicle_id}`;
   const plate = booking.license_plate ?? "";
+
+  const isPastEndTime = new Date(booking.end_time).getTime() < Date.now();
+  const effectiveStatus = (booking.status === "active" || booking.status === "running") && isPastEndTime 
+    ? "completed" 
+    : booking.status;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -49,7 +55,7 @@ function BookingCard({ booking }: { booking: Booking }) {
         <span className="font-mono text-sm font-semibold text-[#006C4C] tracking-wide">
           {formatRef(booking.booking_id)}
         </span>
-        <StatusBadge status={booking.status} />
+        <StatusBadge status={effectiveStatus} />
       </div>
 
       {/* Car info */}
@@ -71,7 +77,7 @@ function BookingCard({ booking }: { booking: Booking }) {
       </div>
 
       {/* Pricing row */}
-      <div className="flex items-end justify-between">
+      <div className="flex items-end justify-between mt-2">
         <div>
           <p className="text-xs text-gray-500">Đặt cọc đã thanh toán</p>
           <p className="text-base font-bold text-[#006C4C]">{formatCurrency(booking.deposit_amount)}</p>
@@ -81,6 +87,17 @@ function BookingCard({ booking }: { booking: Booking }) {
           <p className="text-base font-bold text-gray-800">{formatCurrency(booking.total_price)}</p>
         </div>
       </div>
+
+      {effectiveStatus === "completed" && (
+        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+          <button 
+            onClick={() => onReview(booking)}
+            className="px-5 py-2 bg-[#006C4C] text-white text-sm font-medium rounded-full hover:bg-[#004832] transition-colors"
+          >
+            Đánh giá
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -90,6 +107,12 @@ const MyBookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
+
+  // Review modal state
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [rating, setRating] = useState<number>(5);
+  const [comment, setComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -103,6 +126,27 @@ const MyBookingsPage: React.FC = () => {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user]);
+
+  const handleSubmitReview = async () => {
+    if (!reviewBooking) return;
+    try {
+      setSubmittingReview(true);
+      await apiClient("/reviews", "POST", {
+        vehicle_model_id: reviewBooking.vehicle_model_id,
+        booking_id: reviewBooking.booking_id,
+        rating,
+        comment
+      });
+      alert("Đánh giá thành công!");
+      setReviewBooking(null);
+      setRating(5);
+      setComment("");
+    } catch (err) {
+      alert("Lỗi khi gửi đánh giá, vui lòng thử lại.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -144,11 +188,67 @@ const MyBookingsPage: React.FC = () => {
           <div className="flex flex-col gap-4">
             <p className="text-sm text-gray-500">{bookings.length} đơn thuê</p>
             {bookings.map(booking => (
-              <BookingCard key={booking.booking_id} booking={booking} />
+              <BookingCard key={booking.booking_id} booking={booking} onReview={setReviewBooking} />
             ))}
           </div>
         )}
       </div>
+
+      {reviewBooking && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative">
+            <button 
+              onClick={() => setReviewBooking(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold mb-4">Đánh giá xe</h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Số sao (1-5)</label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button 
+                    key={star} 
+                    onClick={() => setRating(star)}
+                    className={`text-2xl ${rating >= star ? "text-yellow-400" : "text-gray-300"}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bình luận</label>
+              <textarea 
+                className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#006C4C]"
+                rows={4}
+                placeholder="Chia sẻ trải nghiệm của bạn..."
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setReviewBooking(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={handleSubmitReview}
+                disabled={submittingReview}
+                className="px-5 py-2 bg-[#006C4C] text-white rounded-full text-sm font-medium hover:bg-[#004832] transition-colors disabled:opacity-50"
+              >
+                {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

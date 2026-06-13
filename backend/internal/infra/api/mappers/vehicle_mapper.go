@@ -17,6 +17,9 @@ func ToVehicleResponse(v *entities.Vehicle) *dto.VehicleResponse {
 		BatteryLevel:  v.BatteryLevel,
 		BatteryHealth: v.BatteryHealth,
 		LocationID:    v.LocationID,
+		OwnerID:       v.OwnerID,
+		AvailableFrom: v.AvailableFrom,
+		AvailableTo:   v.AvailableTo,
 	}
 }
 
@@ -84,11 +87,26 @@ func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailR
 		Images:   toVehicleImageResponses(detail.Images),
 		Features: toVehicleFeatureResponses(detail.Features),
 		Specs:    toVehicleSpecResponses(detail.Specs),
-		Pricing:  toVehiclePricingResponses(detail.Pricing),
-		Reviews:  toReviewResponses(detail.Reviews),
-		Meta:     toVehicleMetaResponse(detail.Meta),
-		Owner:    toOwnerPublicResponse(detail.OwnerInfo),
+		Pricing:        toVehiclePricingResponses(detail.Pricing),
+		Reviews:        toReviewResponses(detail.Reviews),
+		Meta:           toVehicleMetaResponse(detail.Meta),
+		Owner:          toOwnerPublicResponse(detail.OwnerInfo),
+		ActiveBookings: toTimeRangeResponses(detail.ActiveBookings),
 	}
+}
+
+func toTimeRangeResponses(bookings []*entities.TimeRange) []*dto.TimeRangeResponse {
+	if bookings == nil {
+		return nil
+	}
+	res := make([]*dto.TimeRangeResponse, len(bookings))
+	for i, b := range bookings {
+		res[i] = &dto.TimeRangeResponse{
+			StartTime: b.StartTime,
+			EndTime:   b.EndTime,
+		}
+	}
+	return res
 }
 
 func toOwnerPublicResponse(owner *entities.OwnerPublic) *dto.OwnerPublicResponse {

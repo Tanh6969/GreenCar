@@ -28,6 +28,9 @@ export interface Vehicle {
   battery_level: number;
   battery_health: number;
   location_id: number;
+  owner_id?: number;
+  available_from?: string;
+  available_to?: string;
 }
 
 export interface VehicleImage {

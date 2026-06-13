@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { vehicleService } from "../../../services/vehicle.service";
+import { useAuth } from "../../../hooks/useAuth";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -25,7 +26,16 @@ const IcShield = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="non
 const IcLeaf   = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round"><path d="M2 22l10-10"/><path d="M13.5 21.5C18 21.5 21 17.5 21 12c0-5.5-4-9-9-9C7 3 3 7 3 12c0 3 1.5 5.5 4 7l6.5 2.5z"/></svg>;
 
 interface DetailData {
-  vehicle: { vehicle_id: number; license_plate: string; status: string; battery_level: number; battery_health: number };
+  vehicle: { 
+    vehicle_id: number; 
+    license_plate: string; 
+    status: string; 
+    battery_level: number; 
+    battery_health: number;
+    available_from?: string;
+    available_to?: string;
+    owner_id?: number;
+  };
   model: { vehicle_model_id: number; name: string; brand: string; seats: number; horsepower: number; range_km: number; trunk_capacity: number; airbags: number; vehicle_type: string; transmission: string };
   location?: { name: string; city: string; address: string; latitude: number; longitude: number };
   images: { image_id: number; image_url: string }[];
@@ -35,6 +45,7 @@ interface DetailData {
   reviews: { review_id: number; user_id: number; reviewer_name: string; rating: number; comment: string; created_at: string }[];
   owner?: { user_id: number; name: string; phone: string; trip_count: number; avg_rating: number };
   meta?: { avg_rating: number; review_count: number };
+  active_bookings?: { start_time: string; end_time: string }[];
 }
 
 const PLAN_LABELS: Record<number, { label: string; sub: string }> = {
@@ -52,6 +63,7 @@ const IcCheck = () => (
 const CarDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [data, setData] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState(3);
@@ -59,6 +71,7 @@ const CarDetailPage: React.FC = () => {
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
   const [modalDeliveryType, setModalDeliveryType] = useState("custom");
+  const [customAddress, setCustomAddress] = useState("");
   const [deliveryOption, setDeliveryOption] = useState<"self" | "custom" | "airport">("self");
   const [showLightbox, setShowLightbox] = useState(false);
 
@@ -100,8 +113,42 @@ const CarDetailPage: React.FC = () => {
     );
   }
 
-  const { vehicle, model, location, images, specs, features, pricing } = data;
-  const available = vehicle.status === "available";
+  const { vehicle, model, location, images, specs, features, pricing, active_bookings } = data;
+  
+  // Overlap check
+  let isOverlapping = false;
+  let isOutsideAvailability = false;
+  let overlappingRange: { start: string; end: string } | null = null;
+  const userStart = new Date(startDate);
+  const userEnd = new Date(endDate);
+  
+  if (active_bookings) {
+    for (const b of active_bookings) {
+      const bStart = new Date(b.start_time);
+      const bEnd = new Date(b.end_time);
+      if (userStart < bEnd && userEnd > bStart) {
+        isOverlapping = true;
+        overlappingRange = {
+          start: bStart.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+          end: bEnd.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+        };
+        break;
+      }
+    }
+  }
+
+  // Check if owner set specific availability window
+  if (vehicle?.available_from && vehicle?.available_to) {
+    const availStart = new Date(vehicle.available_from);
+    const availEnd = new Date(vehicle.available_to);
+    if (userStart < availStart || userEnd > availEnd) {
+      isOutsideAvailability = true;
+    }
+  }
+
+  const isStatusAllowed = vehicle?.status === "available" || vehicle?.status === "booked";
+  const isOwner = user?.user_id && vehicle?.owner_id === user.user_id;
+  const available = isStatusAllowed && !isOverlapping && !isOutsideAvailability && !isOwner;
   
   // Calculate pricing based on selected plan
   const selectedPrice = pricing.find(p => p.rental_plan_id === selectedPlan)?.price ?? 0;
@@ -273,7 +320,7 @@ const CarDetailPage: React.FC = () => {
           {/* rental time */}
           <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
             <h3 className="font-bold text-[#191C1E] text-lg mb-4">Thời gian thuê xe</h3>
-            <div className="grid grid-cols-2 gap-4 border border-[#E5EBE8] rounded-xl p-4">
+            <div className={`grid grid-cols-2 gap-4 border ${isOverlapping ? "border-[#EF4444] bg-[#FEF2F2]" : "border-[#E5EBE8]"} rounded-xl p-4`}>
               <div>
                 <p className="text-sm text-[#6E7A72] mb-1">Nhận xe</p>
                 <input 
@@ -293,6 +340,44 @@ const CarDetailPage: React.FC = () => {
                 />
               </div>
             </div>
+
+            {vehicle?.available_from && vehicle?.available_to && (
+              <div className="mt-3 text-sm text-[#006C4C] font-medium bg-[#ECFDF5] p-3 rounded-lg border border-[#A7F3D0]">
+                <span className="font-bold">Lịch xe hoạt động: </span>
+                Từ {new Date(vehicle.available_from).toLocaleDateString("vi-VN")} đến {new Date(vehicle.available_to).toLocaleDateString("vi-VN")}
+              </div>
+            )}
+            {/* Show overlapping error if user selected overlapping dates */}
+            {isOverlapping && overlappingRange && (
+              <p className="mt-3 text-[#EF4444] font-bold text-sm bg-[#FEF2F2] p-2 rounded-lg border border-[#FCA5A5]">
+                ⚠ Thời gian bạn chọn bị trùng: Xe đã được đặt từ {overlappingRange.start} đến {overlappingRange.end}. Vui lòng chọn thời gian khác!
+              </p>
+            )}
+            {/* Show outside availability error */}
+            {isOutsideAvailability && vehicle?.available_from && vehicle?.available_to && (
+              <p className="mt-3 text-[#EAB308] font-bold text-sm bg-[#FEFCE8] p-2 rounded-lg border border-[#FEF08A]">
+                ⚠ Chủ xe chỉ nhận đặt xe trong khoảng từ {new Date(vehicle.available_from).toLocaleDateString("vi-VN")} đến {new Date(vehicle.available_to).toLocaleDateString("vi-VN")}. Vui lòng chọn lại ngày!
+              </p>
+            )}
+            {/* Show all booked dates so user knows upfront */}
+            {active_bookings && active_bookings.length > 0 && (
+              <div className="mt-3">
+                <p className="text-sm text-[#EF4444] mb-1">Xe đã được thuê:</p>
+                <div className="flex flex-col">
+                  {active_bookings.map((b, idx) => {
+                    const s = new Date(b.start_time);
+                    const e = new Date(b.end_time);
+                    const sStr = `${s.getHours().toString().padStart(2, '0')}h${s.getMinutes().toString().padStart(2, '0')}, ${s.toLocaleDateString("vi-VN")}`;
+                    const eStr = `${e.getHours().toString().padStart(2, '0')}h${e.getMinutes().toString().padStart(2, '0')}, ${e.toLocaleDateString("vi-VN")}`;
+                    return (
+                      <p key={idx} className="text-[#EF4444] text-sm">
+                        - Từ {sStr} đến {eStr}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* location map */}
@@ -328,7 +413,13 @@ const CarDetailPage: React.FC = () => {
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-bold text-[#191C1E]">Tôi muốn được giao xe tận nơi</span>
                     </div>
-                    <p className="text-sm text-[#6E7A72]">Chủ xe sẽ giao và nhận xe đến tận nhà hoặc địa chỉ mà bạn lựa chọn trên ứng dụng.</p>
+                    <p className="text-sm text-[#6E7A72]">
+                      {deliveryOption === "custom" && customAddress 
+                        ? `Địa chỉ nhận xe: ${customAddress}`
+                        : deliveryOption === "airport" 
+                          ? "Giao xe sân bay Nội Bài" 
+                          : "Chủ xe sẽ giao và nhận xe đến tận nhà hoặc địa chỉ mà bạn lựa chọn trên ứng dụng."}
+                    </p>
                   </div>
                 </label>
               </div>
@@ -558,13 +649,21 @@ const CarDetailPage: React.FC = () => {
               {/* CTA */}
               <button
                 disabled={!available}
-                onClick={() => navigate(`/customer/checkout?vehicle=${vehicle.vehicle_id}&plan=${selectedPlan}&startDate=${startDate}&endDate=${endDate}&delivery=${deliveryOption}`)}
+                onClick={() => {
+                  let url = `/customer/checkout?vehicle=${vehicle.vehicle_id}&plan=${selectedPlan}&startDate=${startDate}&endDate=${endDate}&delivery=${deliveryOption}`;
+                  if (deliveryOption === "custom" && customAddress) {
+                    url += `&address=${encodeURIComponent(customAddress)}`;
+                  } else if (deliveryOption === "airport") {
+                    url += `&address=${encodeURIComponent("Sân bay Nội Bài")}`;
+                  }
+                  navigate(url);
+                }}
                 className={`w-full py-3.5 flex items-center justify-center gap-2 rounded-xl font-bold text-base transition-all
                   ${available
                     ? "bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white shadow-md hover:shadow-lg"
                     : "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"}`}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                {available ? "Chọn thuê" : "Xe đã được đặt"}
+                {isOwner ? "Đây là xe của bạn" : (available ? "Chọn thuê" : "Không thể đặt")}
               </button>
 
               <p className="text-center text-xs text-[#6E7A72]">
@@ -693,24 +792,20 @@ const CarDetailPage: React.FC = () => {
                   <div className="flex-1">
                     <input 
                       type="text" 
+                      value={customAddress}
+                      onChange={(e) => {
+                        setCustomAddress(e.target.value);
+                        setModalDeliveryType("custom");
+                      }}
                       placeholder="Nhập địa chỉ tùy chỉnh" 
                       className="w-full text-sm text-[#191C1E] placeholder:text-[#9CA3AF] focus:outline-none bg-transparent"
                       onClick={() => setModalDeliveryType("custom")}
-                      onChange={() => setModalDeliveryType("custom")}
                     />
                   </div>
                 </label>
               </div>
 
-              <div>
-                <h4 className="font-bold text-[#191C1E] text-base mb-3">Địa chỉ của tôi</h4>
-                <label className="flex items-center gap-3 p-4 border border-[#E5EBE8] rounded-xl cursor-pointer hover:border-[#BDCAC1] transition-colors" onClick={() => setModalDeliveryType("my_address")}>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${modalDeliveryType === "my_address" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
-                    {modalDeliveryType === "my_address" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
-                  </div>
-                  <span className="text-sm text-[#6E7A72]">Nhập địa chỉ của tôi</span>
-                </label>
-              </div>
+              {/* Removed 'Nhập địa chỉ của tôi' because user does not have address field */}
 
               <div>
                 <h4 className="font-bold text-[#191C1E] text-base mb-3">Giao xe sân bay</h4>

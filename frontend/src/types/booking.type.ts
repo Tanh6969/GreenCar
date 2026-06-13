@@ -33,6 +33,7 @@ export interface Booking {
   payment_method: string;
   created_at: string;
   // Enriched from JOIN (may be absent on create response)
+  vehicle_model_id?: number;
   vehicle_brand?: string;
   vehicle_name?: string;
   license_plate?: string;

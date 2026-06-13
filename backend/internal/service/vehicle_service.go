@@ -63,3 +63,8 @@ func (s *VehicleService) GetVehicleDetail(id int) (*entities.VehicleDetail, erro
 func (s *VehicleService) ListVehicleCards(limit, offset int) ([]*entities.VehicleCard, error) {
 	return s.detailRepo.ListCards(limit, offset)
 }
+
+// ListVehicleCardsByOwnerID returns lightweight vehicle cards for a specific owner.
+func (s *VehicleService) ListVehicleCardsByOwnerID(ownerID int) ([]*entities.VehicleCard, error) {
+	return s.detailRepo.ListByOwnerID(ownerID)
+}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useVehicles } from "../../../hooks/useVehicles";
+import { useAuth } from "../../../hooks/useAuth";
 import { pricing } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
@@ -55,6 +56,7 @@ const SORT_OPTIONS = [
 
 const CarListPage: React.FC = () => {
   const { vehicles, loading } = useVehicles();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
 
   const [selectedTypes,  setSelectedTypes]  = useState<string[]>([]);
@@ -92,6 +94,11 @@ const CarListPage: React.FC = () => {
   const filtered = useMemo(() => {
     let list = [...vehicles];
 
+    // Hide user's own vehicles
+    if (user?.user_id) {
+      list = list.filter(v => v.vehicle.owner_id !== user.user_id);
+    }
+
     if (filterLocation)
       list = list.filter(v => v.location.location_id === filterLocation);
     if (onlyAvailable)
@@ -116,7 +123,7 @@ const CarListPage: React.FC = () => {
     });
 
     return list;
-  }, [vehicles, filterLocation, onlyAvailable, selectedTypes, selectedBrands, minRange, searchQuery, sortBy]);
+  }, [vehicles, filterLocation, onlyAvailable, selectedTypes, selectedBrands, minRange, searchQuery, sortBy, user?.user_id]);
 
   const toggleType = (t: string) =>
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);

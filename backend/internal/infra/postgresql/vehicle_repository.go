@@ -20,11 +20,11 @@ func NewVehicleRepository(db *database.DB) adapters.VehicleRepository {
 
 func (r *vehicleRepository) GetByID(id int) (*entities.Vehicle, error) {
 	var v entities.Vehicle
-	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id 
+	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, owner_id, available_from, available_to 
 		FROM vehicles WHERE vehicle_id = $1`
 	err := r.db.QueryRow(query, id).Scan(
 		&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status,
-		&v.BatteryLevel, &v.BatteryHealth, &v.LocationID,
+		&v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 	)
 	if err != nil {
 		return nil, err
@@ -40,9 +40,9 @@ func (r *vehicleRepository) Create(v *entities.Vehicle) error {
 }
 
 func (r *vehicleRepository) Update(v *entities.Vehicle) error {
-	query := `UPDATE vehicles SET vehicle_model_id = $1, license_plate = $2, status = $3, battery_level = $4, battery_health = $5, location_id = $6 
-		WHERE vehicle_id = $7`
-	_, err := r.db.Exec(query, v.VehicleModelID, v.LicensePlate, v.Status, v.BatteryLevel, v.BatteryHealth, v.LocationID, v.VehicleID)
+	query := `UPDATE vehicles SET vehicle_model_id = $1, license_plate = $2, status = $3, battery_level = $4, battery_health = $5, location_id = $6, available_from = $7, available_to = $8
+		WHERE vehicle_id = $9`
+	_, err := r.db.Exec(query, v.VehicleModelID, v.LicensePlate, v.Status, v.BatteryLevel, v.BatteryHealth, v.LocationID, v.AvailableFrom, v.AvailableTo, v.VehicleID)
 	return err
 }
 

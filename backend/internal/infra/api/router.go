@@ -15,7 +15,19 @@ import (
 )
 
 // NewRouter creates an HTTP handler with all API routes wired.
-func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, ownerRegSvc *service.OwnerRegistrationService, chatSvc *service.ChatService, db *database.DB) http.Handler {
+func NewRouter(
+	userSvc *service.UserService,
+	vehicleSvc *service.VehicleService,
+	bookingSvc *service.BookingService,
+	log *logger.Logger,
+	authSvc *service.AuthService,
+	maker token.Maker,
+	postSvc *service.PostService,
+	ownerRegSvc *service.OwnerRegistrationService,
+	chatSvc *service.ChatService,
+	reviewSvc *service.ReviewService,
+	db *database.DB,
+) http.Handler {
 	r := chi.NewRouter()
 
 	// Global middleware
@@ -127,12 +139,19 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 		routes.RegisterBookingRoutes(r, bookingSvc, log)
 	})
 
+	r.Route("/reviews", func(r chi.Router) {
+		r.Use(auth)
+		r.Post("/", handlers.CreateReviewHandler(reviewSvc, log))
+	})
+
 	// Owner registration routes
 	ownerRegHandler := handlers.NewOwnerRegistrationHandler(ownerRegSvc, log)
 	r.Route("/owner", func(r chi.Router) {
 		r.Use(auth)
 		r.Post("/registrations", ownerRegHandler.Create)
 		r.Get("/my-registrations", ownerRegHandler.GetMyRegistrations)
+		r.Get("/vehicles", handlers.ListOwnerVehiclesHandler(vehicleSvc, log))
+		r.Put("/vehicles/{id}/status", handlers.UpdateVehicleStatusHandler(vehicleSvc, log))
 	})
 
 	// Authenticated user blog routes
