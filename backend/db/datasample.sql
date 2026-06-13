@@ -15,6 +15,7 @@ BEGIN;
 
 -- Xóa dữ liệu cũ và reset sequence (an toàn, chỉ dùng cho dev/test)
 TRUNCATE TABLE
+  messages, conversations,
   reviews, payments, bookings,
   pricing, rental_plans,
   vehicle_model_features, vehicle_specs, vehicle_features,
@@ -27,14 +28,16 @@ RESTART IDENTITY CASCADE;
 -- =============================================================
 INSERT INTO roles (role_name) VALUES
   ('admin'),
-  ('customer');
--- role_id: 1=admin, 2=customer
+  ('customer'),
+  ('owner');
+-- role_id: 1=admin, 2=customer, 3=owner
 
 -- =============================================================
 -- 2. USERS  (12 người dùng + thêm 5 người dùng)
 -- =============================================================
 INSERT INTO users (name, email, password, phone, license_no, role_id, created_at) VALUES
   ('Admin GreenCar',   'admin@greencar.vn',       '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0900000001', 'B2-ADMIN01', 1, '2026-01-01 08:00:00'),
+  ('GreenCar System',  'system@greencar.vn',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0900000002', 'B2-SYSTEM',  3, '2026-01-01 08:00:00'),
   ('Nguyễn Văn An',    'nguyenvanan@gmail.com',   '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234502', 'B2-023452',  2, '2026-01-10 09:15:00'),
   ('Trần Thị Bình',    'tranthib@gmail.com',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234503', 'B2-023453',  2, '2026-01-12 10:30:00'),
   ('Lê Hoàng Cường',   'lehcuong@gmail.com',      '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0901234504', 'B2-023454',  2, '2026-01-15 14:00:00'),
@@ -58,7 +61,7 @@ INSERT INTO users (name, email, password, phone, license_no, role_id, created_at
   ('Vũ Nhật Quang',    'vnquang@gmail.com',       '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999003', 'B2-NEW003',  2, '2026-03-12 11:00:00'),
   ('Lê Hải Yến',       'lhyen@gmail.com',         '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999004', 'B2-NEW004',  2, '2026-03-13 14:00:00'),
   ('Đinh Tuấn Kiệt',   'dtkiet@gmail.com',        '$2a$10$KfPTpvPZXzXEEbjRBRVDFuxYNPFPt.iXA5LF2sNpW.Kx3Q.U9wfiO', '0909999005', 'B2-NEW005',  2, '2026-03-14 15:30:00');
--- user_id: 1=admin, 2-12=KH Hà Nội, 13-17=KH TP.HCM, 18-22=KH Mới
+-- user_id: 1=admin, 2=GreenCar System(owner), 3-13=KH Hà Nội, 14-18=KH TP.HCM, 19-23=KH Mới
 
 -- =============================================================
 -- 3. LOCATIONS  (7 Hà Nội + 6 TP.HCM = 13 địa điểm)
@@ -144,20 +147,27 @@ INSERT INTO vehicles (vehicle_model_id, license_plate, status, battery_level, ba
   -- VinFast VF 9
   (15, '30H-44501', 'available',   100, 100, 6),  -- v22
   -- ── TP.HCM ──────────────────────────────────────────────
-  (1,  '51H-12301', 'available',    90,  96, 8),  -- v23  VF e34        Q1
-  (2,  '51A-44501', 'available',   100, 100, 8),  -- v24  Accent EV     Q1
-  (5,  '51E-77301', 'available',    95,  99, 9),  -- v25  IONIQ 5       Q3
-  (5,  '51E-77302', 'available',    88,  97,11),  -- v26  IONIQ 5       Tân Bình
-  (8,  '51T-33401', 'available',   100, 100, 9),  -- v27  Tesla Model 3 Q3
-  (8,  '51T-33402', 'available',    97, 100,10),  -- v28  Tesla Model 3 Bình Thạnh
-  (3,  '51K-11201', 'available',   100, 100,12),  -- v29  VW ID.4       Phú Nhuận
-  (4,  '51F-55601', 'booked',       93,  98,13),  -- v30  Ford Mach-E   Thủ Đức
-  (7,  '51H-44601', 'available',    91,  95,11),  -- v31  VF 8          Tân Bình
-  (9,  '51T-99801', 'available',   100, 100, 8),  -- v32  Tesla Model S Q1
-  (11, '51P-22301', 'available',    99, 100,12),  -- v33  Polestar 2    Phú Nhuận
-  (12, '51D-66701', 'available',   100, 100, 8),  -- v34  Audi e-tron   Q1
-  (13, '51L-11201', 'available',   100, 100, 9),  -- v35  Lucid Air     Q3
-  (15, '51H-44901', 'available',   100, 100,13);  -- v36  VF 9          Thủ Đức
+  (1,  '51H-12301', 'available',    90,  96, 8),  -- v23
+  (2,  '51A-44501', 'available',   100, 100, 8),  -- v24
+  (5,  '51E-77301', 'available',    95,  99, 9),  -- v25
+  (5,  '51E-77302', 'available',    88,  97,11),  -- v26
+  (8,  '51T-33401', 'available',   100, 100, 9),  -- v27
+  (8,  '51T-33402', 'available',    97, 100,10),  -- v28
+  (3,  '51K-11201', 'available',   100, 100,12),  -- v29
+  (4,  '51F-55601', 'booked',       93,  98,13),  -- v30
+  (7,  '51H-44601', 'available',    91,  95,11),  -- v31
+  (9,  '51T-99801', 'available',   100, 100, 8),  -- v32
+  (11, '51P-22301', 'available',    99, 100,12),  -- v33
+  (12, '51D-66701', 'available',   100, 100, 8),  -- v34
+  (13, '51L-11201', 'available',   100, 100, 9),  -- v35
+  (15, '51H-44901', 'available',   100, 100,13);  -- v36
+
+-- Gán owner_id: mặc định tất cả xe -> GreenCar System (user_id=2)
+UPDATE vehicles SET owner_id = 2;
+-- Một số xe cá nhân (demo)
+UPDATE vehicles SET owner_id = 3 WHERE vehicle_id IN (1, 2);
+UPDATE vehicles SET owner_id = 4 WHERE vehicle_id IN (5, 6);
+UPDATE vehicles SET owner_id = 5 WHERE vehicle_id IN (14, 15);
 
 -- =============================================================
 -- 6. VEHICLE IMAGES

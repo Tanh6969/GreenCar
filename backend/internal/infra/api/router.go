@@ -15,7 +15,7 @@ import (
 )
 
 // NewRouter creates an HTTP handler with all API routes wired.
-func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, ownerRegSvc *service.OwnerRegistrationService, db *database.DB) http.Handler {
+func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService, bookingSvc *service.BookingService, log *logger.Logger, authSvc *service.AuthService, maker token.Maker, postSvc *service.PostService, ownerRegSvc *service.OwnerRegistrationService, chatSvc *service.ChatService, db *database.DB) http.Handler {
 	r := chi.NewRouter()
 
 	// Global middleware
@@ -146,6 +146,14 @@ func NewRouter(userSvc *service.UserService, vehicleSvc *service.VehicleService,
 			r.Post("/submit", postHandler.SubmitPost)
 			r.Post("/withdraw", postHandler.WithdrawPost)
 		})
+	})
+	// Chat routes
+	chatHandler := handlers.NewChatHandler(chatSvc, log)
+	r.Route("/messages", func(r chi.Router) {
+		r.Use(auth)
+		r.Get("/conversations", chatHandler.GetConversations)
+		r.Get("/{bookingId}", chatHandler.GetConversationDetail)
+		r.Post("/{bookingId}", chatHandler.SendMessage)
 	})
 
 	return r

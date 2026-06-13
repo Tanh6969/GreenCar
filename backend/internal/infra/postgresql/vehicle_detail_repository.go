@@ -61,12 +61,12 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 }
 
 func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetail, error) {
-	// Load vehicle
+	// Load vehicle (with owner_id)
 	var v entities.Vehicle
 	if err := r.db.QueryRow(
-		`SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id FROM vehicles WHERE vehicle_id = $1`,
+		`SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, COALESCE(owner_id,0) FROM vehicles WHERE vehicle_id = $1`,
 		id,
-	).Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID); err != nil {
+	).Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID); err != nil {
 		return nil, err
 	}
 
@@ -86,6 +86,32 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		v.LocationID,
 	).Scan(&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude); err != nil {
 		return nil, err
+	}
+
+	// Load owner public info
+	var owner entities.OwnerPublic
+	if v.OwnerID > 0 {
+		var tripCount int
+		var avgRating float64
+		r.db.QueryRow(
+			`SELECT COUNT(*) FROM bookings b
+			 JOIN vehicles vv ON vv.vehicle_id = b.vehicle_id
+			 WHERE vv.owner_id = $1 AND b.status = 'completed'`,
+			v.OwnerID,
+		).Scan(&tripCount)
+		r.db.QueryRow(
+			`SELECT COALESCE(AVG(rv.rating),0.0)
+			 FROM reviews rv
+			 JOIN vehicles vv ON vv.vehicle_model_id = rv.vehicle_model_id
+			 WHERE vv.owner_id = $1`,
+			v.OwnerID,
+		).Scan(&avgRating)
+		r.db.QueryRow(
+			`SELECT user_id, name, phone FROM users WHERE user_id = $1`,
+			v.OwnerID,
+		).Scan(&owner.UserID, &owner.Name, &owner.Phone)
+		owner.TripCount = tripCount
+		owner.AvgRating = avgRating
 	}
 
 	// Load images
@@ -164,16 +190,23 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		pricing = append(pricing, &entities.VehiclePricing{Pricing: &p, RentalPlan: &rp})
 	}
 
-	// Load reviews
+	// Load reviews with reviewer name (JOIN users)
 	reviews := make([]*entities.Review, 0)
-	reviewRows, err := r.db.Query(`SELECT review_id, user_id, vehicle_model_id, booking_id, rating, comment, created_at FROM reviews WHERE vehicle_model_id = $1 ORDER BY created_at DESC`, v.VehicleModelID)
+	reviewRows, err := r.db.Query(
+		`SELECT rv.review_id, rv.user_id, COALESCE(u.name,''), rv.vehicle_model_id, rv.booking_id, rv.rating, rv.comment, rv.created_at
+		 FROM reviews rv
+		 LEFT JOIN users u ON u.user_id = rv.user_id
+		 WHERE rv.vehicle_model_id = $1
+		 ORDER BY rv.created_at DESC`,
+		v.VehicleModelID,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer reviewRows.Close()
 	for reviewRows.Next() {
 		var rview entities.Review
-		if err := reviewRows.Scan(&rview.ReviewID, &rview.UserID, &rview.VehicleModelID, &rview.BookingID, &rview.Rating, &rview.Comment, &rview.CreatedAt); err != nil {
+		if err := reviewRows.Scan(&rview.ReviewID, &rview.UserID, &rview.ReviewerName, &rview.VehicleModelID, &rview.BookingID, &rview.Rating, &rview.Comment, &rview.CreatedAt); err != nil {
 			return nil, err
 		}
 		reviews = append(reviews, &rview)
@@ -190,7 +223,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		avgRating = float64(total) / float64(reviewCount)
 	}
 
-	// Determine availability for the current time (vehicle is unavailable if there's an overlapping active booking)
+	// Determine availability
 	now := time.Now().UTC()
 	var available bool
 	if err := r.db.QueryRow(
@@ -221,5 +254,6 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			ReviewCount: reviewCount,
 			Available:   available,
 		},
+		OwnerInfo: &owner,
 	}, nil
 }

@@ -6,6 +6,7 @@ import "time"
 type Review struct {
 	ReviewID       int        `json:"review_id"`
 	UserID         int        `json:"user_id"`
+	ReviewerName   string     `json:"reviewer_name"`
 	VehicleModelID int        `json:"vehicle_model_id"`
 	BookingID      int        `json:"booking_id"`
 	Rating         int        `json:"rating"`

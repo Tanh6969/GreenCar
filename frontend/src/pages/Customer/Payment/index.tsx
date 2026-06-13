@@ -4,6 +4,7 @@ import { BookingContext } from "../../../context/BookingContext";
 import { bookingService } from "../../../services/booking.service";
 import { useAuth } from "../../../hooks/useAuth";
 import { formatCurrency } from "../../../utils/formatters";
+import { chatService } from "../../../services/chat.service";
 
 const StepBar: React.FC<{ step: number }> = ({ step }) => {
   const steps = ["Thông tin", "Thanh toán", "Xác nhận"];
@@ -92,6 +93,14 @@ const PaymentPage: React.FC = () => {
           over_km_fee:    0,
         });
         bookingId = booking.booking_id;
+        
+        if (pendingBooking.customerNote) {
+          try {
+            await chatService.sendMessage(bookingId, pendingBooking.customerNote);
+          } catch (chatErr) {
+            console.error("Lỗi gửi tin nhắn mặc định:", chatErr);
+          }
+        }
       }
 
       setPendingBooking(null);

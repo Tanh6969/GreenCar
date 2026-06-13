@@ -15,6 +15,8 @@ import CheckoutPage from "../pages/Customer/Checkout";
 import PaymentPage from "../pages/Customer/Payment";
 import ProfilePage from "../pages/Customer/Profile";
 import MyBookingsPage from "../pages/Customer/MyBookings";
+import MessagesPage from "../pages/Customer/Messages";
+import MessageDetailPage from "../pages/Customer/Messages/Detail";
 import LoginPage from "../pages/Auth/Login";
 import RegisterPage from "../pages/Auth/Register";
 import AdminLoginPage from "../pages/Auth/AdminLogin";
@@ -116,6 +118,26 @@ const AppRouter: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <MyBookingsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/messages"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <MessagesPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/messages/:bookingId"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <MessageDetailPage />
             </MainLayout>
           </ProtectedRoute>
         }

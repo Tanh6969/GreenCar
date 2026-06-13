@@ -10,6 +10,7 @@ type User struct {
 	Password  string     `json:"-"`
 	Phone     string     `json:"phone"`
 	LicenseNo string     `json:"license_no"`
+	CCCD      string     `json:"cccd"`
 	RoleID    int        `json:"role_id"`
 	CreatedAt *time.Time `json:"created_at"`
 }

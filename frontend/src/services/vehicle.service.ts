@@ -21,8 +21,11 @@ interface ApiPricing {
   rental_plan: { id: number; name: string; duration_type: string; max_km: number; overtime_price: number; over_km_price: number };
 }
 interface ApiReview {
-  id: number; user_id: number; model_id: number; booking_id: number;
+  id: number; user_id: number; reviewer_name?: string; model_id: number; booking_id: number;
   rating: number; comment: string; created_at: string;
+}
+interface ApiOwner {
+  user_id: number; name: string; phone: string; trip_count: number; avg_rating: number;
 }
 interface ApiMeta { avg_rating: number; review_count: number; available: boolean; }
 
@@ -45,6 +48,7 @@ interface VehicleDetailApiResponse {
   pricing:  ApiPricing[];
   reviews:  ApiReview[];
   meta:     ApiMeta;
+  owner?:   ApiOwner;
 }
 
 // ── mappers ───────────────────────────────────────────────────
@@ -112,9 +116,13 @@ export const vehicleService = {
         overtime_price: p.rental_plan.overtime_price, over_km_price: p.rental_plan.over_km_price,
       })),
       reviews: (r.reviews ?? []).map(rv => ({
-        review_id: rv.id, user_id: rv.user_id, vehicle_model_id: rv.model_id,
+        review_id: rv.id, user_id: rv.user_id, reviewer_name: rv.reviewer_name || "Ẩn danh", vehicle_model_id: rv.model_id,
         booking_id: rv.booking_id, rating: rv.rating, comment: rv.comment, created_at: rv.created_at,
       })),
+      owner: r.owner ? {
+        user_id: r.owner.user_id, name: r.owner.name, phone: r.owner.phone,
+        trip_count: r.owner.trip_count, avg_rating: r.owner.avg_rating,
+      } : undefined,
       meta: r.meta,
     };
   },

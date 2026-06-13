@@ -9,4 +9,5 @@ type Vehicle struct {
 	BatteryLevel   int    `json:"battery_level"`
 	BatteryHealth  int    `json:"battery_health"`
 	LocationID     int    `json:"location_id"`
+	OwnerID        int    `json:"owner_id"`
 }

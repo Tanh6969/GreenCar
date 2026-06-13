@@ -105,6 +105,7 @@ const CheckoutPage: React.FC = () => {
     licenseNo: user?.license_no ?? "",
     email: user?.email ?? "",
   });
+  const [note, setNote] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -177,6 +178,7 @@ const CheckoutPage: React.FC = () => {
       startTime: startISO, endTime: endISO,
       totalPrice: totalPrice, depositAmount: deposit,
       contactInfo: { ...form },
+      customerNote: note,
     });
     navigate("/customer/payment");
   };
@@ -282,6 +284,19 @@ const CheckoutPage: React.FC = () => {
                       ${user ? "bg-[#F8F9FB] text-[#6E7A72] cursor-default" : "bg-white border-[#E5E7EB]"}`}
                   />
                 </div>
+              </div>
+
+              {/* Note for Owner */}
+              <div className="mt-4">
+                <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
+                  Lời nhắn cho chủ xe
+                </label>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Ghi chú thêm về địa điểm giao nhận, yêu cầu đặc biệt..."
+                  className="w-full border border-[#E5E7EB] rounded-xl p-3.5 text-sm text-[#191C1E] bg-white transition-colors focus:outline-none focus:border-[#006C4C] min-h-[80px]"
+                />
               </div>
             </div>
 

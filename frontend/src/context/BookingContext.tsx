@@ -30,6 +30,7 @@ export interface PendingBooking {
     licenseNo: string;
     email: string;
   };
+  customerNote?: string;
 }
 
 interface BookingContextValue {

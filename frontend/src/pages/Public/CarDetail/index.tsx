@@ -32,6 +32,9 @@ interface DetailData {
   specs: { spec_id: number; spec_name: string; spec_value: string }[];
   features: { feature_id: number; feature_name: string }[];
   pricing: { pricing_id: number; rental_plan_id: number; price: number }[];
+  reviews: { review_id: number; user_id: number; reviewer_name: string; rating: number; comment: string; created_at: string }[];
+  owner?: { user_id: number; name: string; phone: string; trip_count: number; avg_rating: number };
+  meta?: { avg_rating: number; review_count: number };
 }
 
 const PLAN_LABELS: Record<number, { label: string; sub: string }> = {
@@ -72,7 +75,7 @@ const CarDetailPage: React.FC = () => {
   useEffect(() => {
     if (!id) return;
     vehicleService.getVehicleDetail(Number(id)).then((d) => {
-      setData(d as DetailData);
+      setData(d as unknown as DetailData);
       setLoading(false);
     });
   }, [id]);
@@ -267,17 +270,6 @@ const CarDetailPage: React.FC = () => {
             </div>
           )}
 
-          {/* eco badge */}
-          <div className="bg-gradient-to-r from-[#F0FDF4] to-[#dcfce7] border border-[#bbf7d0] rounded-xl p-5 flex items-center gap-4 shadow-sm">
-            <div className="flex-shrink-0"><IcLeaf /></div>
-            <div>
-              <p className="font-bold text-[#006C4C]">Eco Impact</p>
-              <p className="text-sm text-[#3E4943]">
-                Thuê xe điện này tiết kiệm ~{Math.round(model.range_km * 0.21 / 100)} kg CO₂ mỗi 100km so với xe xăng.
-              </p>
-            </div>
-          </div>
-
           {/* rental time */}
           <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
             <h3 className="font-bold text-[#191C1E] text-lg mb-4">Thời gian thuê xe</h3>
@@ -422,6 +414,82 @@ const CarDetailPage: React.FC = () => {
               An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer">Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
             </p>
           </div>
+
+          {/* ── OWNER BLOCK ── */}
+          {(data as any).owner && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Chủ xe</h3>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-[#E8F5F0] flex items-center justify-center text-2xl font-bold text-[#006C4C] flex-shrink-0">
+                  {(data as any).owner.name?.charAt(0) ?? "G"}
+                </div>
+                <div>
+                  <p className="font-bold text-[#191C1E] text-base">{(data as any).owner.name}</p>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-[#6E7A72]">
+                    <span className="flex items-center gap-1">
+                      <span className="text-yellow-400">★</span>
+                      <span className="font-semibold text-[#191C1E]">{(data as any).owner.avg_rating?.toFixed(1) ?? "5.0"}</span>
+                    </span>
+                    <span>•</span>
+                    <span><strong className="text-[#191C1E]">{(data as any).owner.trip_count ?? 0}</strong> chuyến</span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3 mt-4 text-center">
+                <div className="bg-[#F0FDF4] rounded-xl p-3">
+                  <p className="font-bold text-[#006C4C] text-base">100%</p>
+                  <p className="text-xs text-[#6E7A72] mt-0.5">Tỉ lệ phản hồi</p>
+                </div>
+                <div className="bg-[#F0FDF4] rounded-xl p-3">
+                  <p className="font-bold text-[#006C4C] text-base">100%</p>
+                  <p className="text-xs text-[#6E7A72] mt-0.5">Tỉ lệ đồng ý</p>
+                </div>
+                <div className="bg-[#F0FDF4] rounded-xl p-3">
+                  <p className="font-bold text-[#006C4C] text-base">&lt;1h</p>
+                  <p className="text-xs text-[#6E7A72] mt-0.5">Phản hồi trong</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── REVIEWS BLOCK ── */}
+          {(data as any).reviews?.length > 0 && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-[#191C1E] text-lg">Đánh giá từ khách thuê</h3>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-yellow-400 text-lg">★</span>
+                  <span className="font-bold text-[#191C1E]">
+                    {(data as any).meta?.avg_rating?.toFixed(1) ?? "5.0"}
+                  </span>
+                  <span className="text-[#6E7A72] text-sm">({(data as any).reviews.length} đánh giá)</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                {(data as any).reviews.slice(0, 5).map((rv: any) => (
+                  <div key={rv.review_id} className="flex gap-3 pb-4 border-b border-[#F0F0F0] last:border-0 last:pb-0">
+                    <div className="w-10 h-10 rounded-full bg-[#E8F5F0] flex items-center justify-center text-base font-bold text-[#006C4C] flex-shrink-0">
+                      {rv.reviewer_name?.charAt(0) ?? "?"}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="font-semibold text-[#191C1E] text-sm">{rv.reviewer_name || "Ẩn danh"}</p>
+                        <div className="flex items-center gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <span key={s} className={s <= rv.rating ? "text-yellow-400" : "text-[#E5E7EB]"}>★</span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-[#6E7A72] mt-0.5">
+                        {rv.created_at ? new Date(rv.created_at).toLocaleDateString("vi-VN") : ""}
+                      </p>
+                      <p className="text-sm text-[#3E4943] mt-2 leading-relaxed">{rv.comment}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── RIGHT: booking card ── */}
