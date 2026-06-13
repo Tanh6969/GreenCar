@@ -9,7 +9,7 @@ interface ApiBooking {
   deposit_amount: number; overtime_fee: number; over_km_fee: number; total_price: number;
   status: string; payment_method?: string; created_at: string;
   vehicle_model_id?: number; vehicle_brand?: string; vehicle_name?: string; license_plate?: string;
-  customer_name?: string; customer_phone?: string;
+  customer_name?: string; customer_phone?: string; has_reviewed?: boolean;
 }
 
 function toBooking(b: ApiBooking): Booking {
@@ -37,6 +37,7 @@ function toBooking(b: ApiBooking): Booking {
     license_plate:  b.license_plate,
     customer_name:  b.customer_name,
     customer_phone: b.customer_phone,
+    has_reviewed:   b.has_reviewed,
   };
 }
 

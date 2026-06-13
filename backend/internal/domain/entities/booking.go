@@ -28,4 +28,5 @@ type Booking struct {
 	LicensePlate  string     `json:"license_plate,omitempty"`
 	CustomerName  string     `json:"customer_name,omitempty"`
 	CustomerPhone string     `json:"customer_phone,omitempty"`
+	HasReviewed   bool       `json:"has_reviewed"`
 }

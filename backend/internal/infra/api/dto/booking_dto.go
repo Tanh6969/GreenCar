@@ -28,6 +28,7 @@ type BookingResponse struct {
 	LicensePlate  string `json:"license_plate,omitempty"`
 	CustomerName  string `json:"customer_name,omitempty"`
 	CustomerPhone string `json:"customer_phone,omitempty"`
+	HasReviewed   bool   `json:"has_reviewed"`
 }
 
 // CreateBookingRequest is the request payload to create a booking.

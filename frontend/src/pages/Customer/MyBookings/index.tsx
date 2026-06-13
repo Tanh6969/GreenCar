@@ -88,7 +88,7 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
         </div>
       </div>
 
-      {effectiveStatus === "completed" && (
+      {effectiveStatus === "completed" && !booking.has_reviewed && (
         <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
           <button 
             onClick={() => onReview(booking)}
@@ -96,6 +96,13 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
           >
             Đánh giá
           </button>
+        </div>
+      )}
+      {effectiveStatus === "completed" && booking.has_reviewed && (
+        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+          <span className="text-sm font-medium text-gray-500 italic">
+            Đã đánh giá
+          </span>
         </div>
       )}
     </div>
@@ -109,6 +116,7 @@ const MyBookingsPage: React.FC = () => {
   const [error, setError]       = useState<string | null>(null);
 
   // Review modal state
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState("");
@@ -145,8 +153,19 @@ const MyBookingsPage: React.FC = () => {
       alert("Lỗi khi gửi đánh giá, vui lòng thử lại.");
     } finally {
       setSubmittingReview(false);
+      // Reload bookings to get updated has_reviewed status
+      if (user) {
+        bookingService.getBookingsByUser(user.user_id).then(setBookings);
+      }
     }
   };
+
+  const filteredBookings = bookings.filter(b => {
+    if (filterStatus === "all") return true;
+    const isCompleted = new Date(b.end_time) < new Date() || b.status === "completed";
+    const effectiveStatus = isCompleted ? "completed" : b.status;
+    return effectiveStatus === filterStatus;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,10 +205,42 @@ const MyBookingsPage: React.FC = () => {
 
         {!loading && !error && bookings.length > 0 && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-500">{bookings.length} đơn thuê</p>
-            {bookings.map(booking => (
-              <BookingCard key={booking.booking_id} booking={booking} onReview={setReviewBooking} />
-            ))}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+              <p className="text-sm text-gray-500">{filteredBookings.length} đơn thuê</p>
+              
+              <div className="flex gap-2 bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
+                {[
+                  { value: "all", label: "Tất cả" },
+                  { value: "pending", label: "Chờ duyệt" },
+                  { value: "confirmed", label: "Sắp tới" },
+                  { value: "active", label: "Đang thuê" },
+                  { value: "completed", label: "Hoàn thành" },
+                  { value: "cancelled", label: "Đã hủy" }
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setFilterStatus(opt.value)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                      filterStatus === opt.value 
+                        ? "bg-[#006C4C] text-white" 
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredBookings.length === 0 ? (
+              <div className="py-12 text-center text-gray-500">
+                Không có đơn thuê nào khớp với bộ lọc.
+              </div>
+            ) : (
+              filteredBookings.map(booking => (
+                <BookingCard key={booking.booking_id} booking={booking} onReview={setReviewBooking} />
+              ))
+            )}
           </div>
         )}
       </div>

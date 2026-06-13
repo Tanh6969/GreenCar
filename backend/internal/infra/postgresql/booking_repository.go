@@ -31,7 +31,7 @@ func scanBookingDetail(scan func(...any) error) (entities.Booking, error) {
 		&b.PlannedKM, &actualKM, &b.DepositAmount, &overtimeFee, &overKMFee,
 		&b.TotalPrice, &b.Status, &paymentMethod, &b.CreatedAt,
 		&b.VehicleModelID, &b.VehicleBrand, &b.VehicleName, &b.LicensePlate,
-		&b.CustomerName, &b.CustomerPhone,
+		&b.CustomerName, &b.CustomerPhone, &b.HasReviewed,
 	)
 	if err != nil {
 		return b, err
@@ -55,7 +55,8 @@ SELECT b.booking_id, b.user_id, b.vehicle_id, b.rental_plan_id,
   COALESCE(vm.name, '')  AS vehicle_name,
   COALESCE(v.license_plate, '') AS license_plate,
   COALESCE(u.name, '')   AS customer_name,
-  COALESCE(u.phone, '')  AS customer_phone
+  COALESCE(u.phone, '')  AS customer_phone,
+  EXISTS(SELECT 1 FROM reviews r WHERE r.booking_id = b.booking_id) AS has_reviewed
 FROM bookings b
 LEFT JOIN vehicles v       ON v.vehicle_id        = b.vehicle_id
 LEFT JOIN vehicle_models vm ON vm.vehicle_model_id = v.vehicle_model_id

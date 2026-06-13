@@ -51,6 +51,7 @@ func ToBookingResponse(b *entities.Booking) *dto.BookingResponse {
 		LicensePlate:  b.LicensePlate,
 		CustomerName:  b.CustomerName,
 		CustomerPhone: b.CustomerPhone,
+		HasReviewed:   b.HasReviewed,
 	}
 }
 
