@@ -4,6 +4,7 @@ import { BookingContext } from "../../../context/BookingContext";
 import { homepageTestimonials, locations, pricing } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES, PREMIUM_IMAGES } from "../../../data/localImages";
 import { useVehicles } from "../../../hooks/useVehicles";
+import { useAuth } from "../../../hooks/useAuth";
 import { formatCurrency } from "../../../utils/formatters";
 import { VehicleCardData } from "../../../types/vehicle.type";
 
@@ -289,10 +290,15 @@ const SearchWidget: React.FC = () => {
 /* ── main page ────────────────────────────────────────────── */
 const HomePage: React.FC = () => {
   const { vehicles, loading } = useVehicles();
+  const { user } = useAuth();
 
-  const available   = dedupeByModel(vehicles.filter(v => v.vehicle.status === "available"));
-  const luxury      = dedupeByModel(vehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
-  const recommended = dedupeByModel(vehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
+  const filteredVehicles = user?.user_id 
+    ? vehicles.filter(v => v.vehicle.owner_id !== user.user_id) 
+    : vehicles;
+
+  const available   = dedupeByModel(filteredVehicles.filter(v => v.vehicle.status === "available"));
+  const luxury      = dedupeByModel(filteredVehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
+  const recommended = dedupeByModel(filteredVehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
 
   return (
     <div className="w-full">

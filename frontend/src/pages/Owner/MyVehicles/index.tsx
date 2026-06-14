@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../../services/api";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
+import fallbackImg from "../../../assets/images/Premium EV Experience.png";
 
 interface MyRegistration {
   id: number;
@@ -136,8 +137,16 @@ const MyVehiclesPage: React.FC = () => {
                 border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
                 transition: "box-shadow 0.2s",
               }}>
-                {(MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url) ? (
-                  <img src={MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url} alt="xe" style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 12, flexShrink: 0 }} />
+                {(MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url || fallbackImg) ? (
+                  <img src={MODEL_LOCAL_IMAGES[v.model.vehicle_model_id] || v.image_url || fallbackImg} alt="xe" 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== fallbackImg) {
+                        target.src = fallbackImg;
+                      }
+                    }}
+                    style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 12, flexShrink: 0, backgroundColor: "#f3f4f6" }} 
+                  />
                 ) : (
                   <div style={{ width: 140, height: 100, borderRadius: 12, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#BDCAC1", flexShrink: 0 }}>
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
@@ -203,6 +212,15 @@ const MyVehiclesPage: React.FC = () => {
                         Thiết lập thời gian cho thuê
                       </button>
                     )}
+                    <button 
+                      onClick={() => navigate(`/cars/${v.vehicle.id}`)}
+                      style={{ 
+                        padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "1px solid #E5EBE8",
+                        background: "#fff", color: "#191C1E", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                      }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      Xem trên hệ thống
+                    </button>
                   </div>
                 </div>
               </div>
@@ -215,8 +233,16 @@ const MyVehiclesPage: React.FC = () => {
                   border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
                   transition: "box-shadow 0.2s",
                 }}>
-                  {coverImg ? (
-                    <img src={coverImg} alt="xe" style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 12, flexShrink: 0 }} />
+                  {coverImg || fallbackImg ? (
+                    <img src={coverImg || fallbackImg} alt="xe" 
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== fallbackImg) {
+                          target.src = fallbackImg;
+                        }
+                      }}
+                      style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 12, flexShrink: 0, backgroundColor: "#f3f4f6" }} 
+                    />
                   ) : (
                     <div style={{ width: 140, height: 100, borderRadius: 12, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", color: "#BDCAC1", flexShrink: 0 }}>
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>

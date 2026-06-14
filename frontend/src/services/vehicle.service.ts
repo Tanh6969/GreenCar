@@ -5,7 +5,7 @@ import { VehicleCardData } from "../types/vehicle.type";
 
 interface ApiVehicle {
   id: number; model_id: number; license_plate: string; status: string;
-  battery_level: number; battery_health: number; location_id: number;
+  battery_level: number; battery_health: number; location_id: number; owner_id?: number;
 }
 interface ApiModel {
   id: number; name: string; brand: string; seats: number; horsepower: number;
@@ -60,7 +60,7 @@ function mapCard(r: VehicleCardApiResponse): VehicleCardData {
       license_plate: r.vehicle.license_plate,
       status: r.vehicle.status as "available" | "booked" | "maintenance",
       battery_level: r.vehicle.battery_level, battery_health: r.vehicle.battery_health,
-      location_id: r.vehicle.location_id,
+      location_id: r.vehicle.location_id, owner_id: r.vehicle.owner_id,
     },
     model: {
       vehicle_model_id: r.model.id, name: r.model.name, brand: r.model.brand,
@@ -91,7 +91,7 @@ export const vehicleService = {
         license_plate: r.vehicle.license_plate,
         status: r.vehicle.status as "available" | "booked" | "maintenance",
         battery_level: r.vehicle.battery_level, battery_health: r.vehicle.battery_health,
-        location_id: r.vehicle.location_id,
+        location_id: r.vehicle.location_id, owner_id: r.vehicle.owner_id,
       },
       model: {
         vehicle_model_id: r.model.id, name: r.model.name, brand: r.model.brand,

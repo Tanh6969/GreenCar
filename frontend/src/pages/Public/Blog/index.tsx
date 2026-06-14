@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import { blogService } from "../../../services/blog.service";
 import { BlogPost } from "../../../types/blog.type";
 import { User } from "../../../types/user.type";
+import fb1 from "../../../assets/images/Lucid Air Dream.png";
+import fb2 from "../../../assets/images/Rivian R1S.png";
+import fb3 from "../../../assets/images/Audi e-tron GT.png";
+import fb4 from "../../../assets/images/Electric SUV.png";
+
+const fallbacks = [fb1, fb2, fb3, fb4];
 
 type PostWithAuthor = BlogPost & { author?: User };
 
@@ -44,8 +50,15 @@ const BlogListPage: React.FC = () => {
               onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-lg)"; (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--shadow-md)"; (e.currentTarget as HTMLDivElement).style.transform = "none"; }}
             >
-              <img src={featured.cover_image} alt={featured.title}
-                style={{ width: "100%", height: 360, objectFit: "cover", display: "block" }} />
+              <img src={featured.cover_image || fallbacks[featured.post_id % 4]} alt={featured.title}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  const fb = fallbacks[featured.post_id % 4];
+                  if (target.src !== fb) {
+                    target.src = fb;
+                  }
+                }}
+                style={{ width: "100%", height: 360, objectFit: "cover", display: "block", backgroundColor: "#f3f4f6" }} />
               <div style={{ padding: "36px 40px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                 <span style={{
                   display: "inline-block", padding: "4px 12px", background: "var(--green-light)",
@@ -59,7 +72,7 @@ const BlogListPage: React.FC = () => {
                   {featured.excerpt}
                 </p>
                 <div style={{ fontSize: 13, color: "var(--text-muted)", display: "flex", gap: 12, alignItems: "center" }}>
-                  <span>✍️ {featured.author?.name ?? "Ẩn danh"}</span>
+                  <span>✍️ Admin GreenCar</span>
                   <span>·</span>
                   <span>{featured.published_at ? new Date(featured.published_at).toLocaleDateString("vi-VN") : ""}</span>
                 </div>
@@ -76,7 +89,16 @@ const BlogListPage: React.FC = () => {
               {rest.map(post => (
                 <Link key={post.post_id} to={`/blog/${post.slug}`} style={{ display: "block" }}>
                   <div className="car-card" style={{ height: "100%" }}>
-                    <img src={post.cover_image} alt={post.title} className="car-card-img" />
+                    <img src={post.cover_image || fallbacks[post.post_id % 4]} alt={post.title} className="car-card-img" 
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const fb = fallbacks[post.post_id % 4];
+                        if (target.src !== fb) {
+                          target.src = fb;
+                        }
+                      }}
+                      style={{ backgroundColor: "#f3f4f6" }}
+                    />
                     <div style={{ padding: "16px 20px 20px" }}>
                       <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", margin: "0 0 8px", lineHeight: 1.4 }}>
                         {post.title}
@@ -85,7 +107,7 @@ const BlogListPage: React.FC = () => {
                         {post.excerpt}
                       </p>
                       <div style={{ fontSize: 12, color: "var(--text-muted)", display: "flex", gap: 8 }}>
-                        <span>✍️ {post.author?.name ?? "Ẩn danh"}</span>
+                        <span>✍️ Admin GreenCar</span>
                         <span>·</span>
                         <span>{post.published_at ? new Date(post.published_at).toLocaleDateString("vi-VN") : ""}</span>
                       </div>

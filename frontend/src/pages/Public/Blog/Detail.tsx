@@ -4,6 +4,12 @@ import { blogService } from "../../../services/blog.service";
 import { BlogPost } from "../../../types/blog.type";
 import { BlogCategory } from "../../../types/blog.type";
 import { User } from "../../../types/user.type";
+import fb1 from "../../../assets/images/Lucid Air Dream.png";
+import fb2 from "../../../assets/images/Rivian R1S.png";
+import fb3 from "../../../assets/images/Audi e-tron GT.png";
+import fb4 from "../../../assets/images/Electric SUV.png";
+
+const fallbacks = [fb1, fb2, fb3, fb4];
 
 type PostDetail = BlogPost & { author?: User; category?: BlogCategory };
 
@@ -48,8 +54,15 @@ const BlogDetailPage: React.FC = () => {
       </div>
 
       {/* Cover */}
-      <img src={post.cover_image} alt={post.title}
-        style={{ width: "100%", height: 400, objectFit: "cover", borderRadius: 14, marginBottom: 32, display: "block" }} />
+      <img src={post.cover_image || fallbacks[post.post_id % 4]} alt={post.title}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          const fb = fallbacks[post.post_id % 4];
+          if (target.src !== fb) {
+            target.src = fb;
+          }
+        }}
+        style={{ width: "100%", height: 400, objectFit: "cover", borderRadius: 14, marginBottom: 32, display: "block", backgroundColor: "#f3f4f6" }} />
 
       {/* Meta */}
       {post.category && (
@@ -72,27 +85,30 @@ const BlogDetailPage: React.FC = () => {
           display: "flex", alignItems: "center", justifyContent: "center",
           color: "#fff", fontWeight: 800, fontSize: 16, flexShrink: 0
         }}>
-          {(post.author?.name ?? "?").split(" ").at(-1)![0].toUpperCase()}
+          G
         </div>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text)" }}>{post.author?.name ?? "Ẩn danh"}</div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text)" }}>Admin GreenCar</div>
           <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
             {post.published_at ? `Đăng ngày ${new Date(post.published_at).toLocaleDateString("vi-VN")}` : ""}
           </div>
         </div>
       </div>
 
-      {/* Content — render newlines as paragraphs, ## as headings */}
-      <div style={{ fontSize: 15, lineHeight: 1.8, color: "var(--text-mid)" }}>
-        {post.content.split("\n").map((line, i) => {
-          if (line.startsWith("## ")) return <h2 key={i} style={{ fontSize: 20, fontWeight: 700, color: "var(--text)", margin: "28px 0 10px" }}>{line.slice(3)}</h2>;
-          if (line.startsWith("**") && line.endsWith("**")) return <p key={i} style={{ fontWeight: 700, color: "var(--text)", margin: "12px 0 4px" }}>{line.slice(2, -2)}</p>;
-          if (line.startsWith("- ")) return <li key={i} style={{ marginLeft: 20 }}>{line.slice(2)}</li>;
-          if (line.startsWith("|")) return <p key={i} style={{ fontFamily: "monospace", fontSize: 13, background: "#f8f9fb", padding: "2px 8px", borderRadius: 4 }}>{line}</p>;
-          if (line === "") return <br key={i} />;
-          return <p key={i} style={{ margin: "8px 0" }}>{line}</p>;
-        })}
-      </div>
+      {/* Content — Render as HTML */}
+      <style>{`
+        .blog-content p { margin-bottom: 1.25em; }
+        .blog-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2em; margin-bottom: 0.75em; color: #191C1E; }
+        .blog-content h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5em; margin-bottom: 0.75em; color: #191C1E; }
+        .blog-content ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1.25em; }
+        .blog-content strong { font-weight: 700; color: #191C1E; }
+        .blog-content a { color: #006C4C; text-decoration: underline; }
+      `}</style>
+      <div 
+        className="blog-content"
+        style={{ fontSize: 17, lineHeight: 1.9, color: "#3E4943" }}
+        dangerouslySetInnerHTML={{ __html: post.content }} 
+      />
 
       <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid var(--border)" }}>
         <Link to="/blog" className="btn btn-ghost">← Quay lại Blog</Link>

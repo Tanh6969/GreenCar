@@ -381,7 +381,7 @@ const CarDetailPage: React.FC = () => {
           </div>
 
           {/* location map */}
-          {location && location.latitude && location.longitude && (
+          {!isOwner && location && location.latitude && location.longitude && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
               <h3 className="font-bold text-[#191C1E] text-lg mb-4">Địa điểm giao nhận xe</h3>
               
@@ -442,72 +442,80 @@ const CarDetailPage: React.FC = () => {
           )}
 
           {/* insurance */}
-          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-            <h3 className="font-bold text-[#191C1E] mb-2 text-lg flex items-center gap-2">
-              <IcShield /> Bảo hiểm thuê xe
-            </h3>
-            <p className="text-sm text-[#3E4943] mb-2">Chuyến đi có mua bảo hiểm. Khách thuê bồi thường tối đa 2.000.000 VNĐ trong trường hợp có sự cố ngoài ý muốn.</p>
-            <button onClick={() => setShowInsuranceModal(true)} className="text-sm font-bold text-[#191C1E] hover:text-[#006C4C] underline-offset-2 underline">Xem thêm &gt;</button>
-          </div>
+          {!isOwner && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-2 text-lg flex items-center gap-2">
+                <IcShield /> Bảo hiểm thuê xe
+              </h3>
+              <p className="text-sm text-[#3E4943] mb-2">Chuyến đi có mua bảo hiểm. Khách thuê bồi thường tối đa 2.000.000 VNĐ trong trường hợp có sự cố ngoài ý muốn.</p>
+              <button onClick={() => setShowInsuranceModal(true)} className="text-sm font-bold text-[#191C1E] hover:text-[#006C4C] underline-offset-2 underline">Xem thêm &gt;</button>
+            </div>
+          )}
 
           {/* terms and conditions */}
-          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-            <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Điều khoản</h3>
-            <div className="text-sm text-[#3E4943] flex flex-col gap-2">
-              <p className="font-medium">Quy định khác:</p>
-              <ul className="list-disc pl-5 space-y-1 text-[#6E7A72]">
-                <li>Sử dụng xe đúng mục đích.</li>
-                <li>Không sử dụng xe thuê vào mục đích phi pháp, trái pháp luật.</li>
-                <li>Không sử dụng xe thuê để cầm cố, thế chấp.</li>
-                <li>Không hút thuốc, nhả kẹo cao su, xả rác trong xe.</li>
-                <li>Không chở hàng quốc cấm dễ cháy nổ.</li>
-                <li>Không chở hoa quả, thực phẩm nặng mùi trong xe.</li>
-                <li>Khi trả xe, nếu xe bẩn hoặc có mùi trong xe, khách hàng vui lòng vệ sinh xe sạch sẽ hoặc gửi phụ thu phí vệ sinh xe.</li>
-              </ul>
-              <p className="text-xs text-[#006C4C] mt-2 font-semibold cursor-pointer">Trân trọng cảm ơn, chúc quý khách hàng có những chuyến đi tuyệt vời!</p>
+          {!isOwner && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Điều khoản</h3>
+              <div className="text-sm text-[#3E4943] flex flex-col gap-2">
+                <p className="font-medium">Quy định khác:</p>
+                <ul className="list-disc pl-5 space-y-1 text-[#6E7A72]">
+                  <li>Sử dụng xe đúng mục đích.</li>
+                  <li>Không sử dụng xe thuê vào mục đích phi pháp, trái pháp luật.</li>
+                  <li>Không sử dụng xe thuê để cầm cố, thế chấp.</li>
+                  <li>Không hút thuốc, nhả kẹo cao su, xả rác trong xe.</li>
+                  <li>Không chở hàng quốc cấm dễ cháy nổ.</li>
+                  <li>Không chở hoa quả, thực phẩm nặng mùi trong xe.</li>
+                  <li>Khi trả xe, nếu xe bẩn hoặc có mùi trong xe, khách hàng vui lòng vệ sinh xe sạch sẽ hoặc gửi phụ thu phí vệ sinh xe.</li>
+                </ul>
+                <p className="text-xs text-[#006C4C] mt-2 font-semibold cursor-pointer">Trân trọng cảm ơn, chúc quý khách hàng có những chuyến đi tuyệt vời!</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* extra fees */}
-          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-            <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Phụ phí có thể phát sinh</h3>
-            <div className="flex flex-col gap-4">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold text-[#191C1E]">Phí vượt giới hạn</span>
-                  <span className="font-semibold text-[#10B981]">3.000đ /km</span>
+          {!isOwner && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Phụ phí có thể phát sinh</h3>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-[#191C1E]">Phí vượt giới hạn</span>
+                    <span className="font-semibold text-[#10B981]">3.000đ /km</span>
+                  </div>
+                  <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu di chuyển vượt quá <strong className="text-[#3E4943]">350 km</strong> khi thuê xe <strong className="text-[#3E4943]">1 ngày</strong>.</p>
                 </div>
-                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu di chuyển vượt quá <strong className="text-[#3E4943]">350 km</strong> khi thuê xe <strong className="text-[#3E4943]">1 ngày</strong>.</p>
-              </div>
-              <div className="h-px bg-[#E5EBE8] w-full"></div>
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold text-[#191C1E]">Phí quá giờ</span>
-                  <span className="font-semibold text-[#10B981]">70.000đ /giờ</span>
+                <div className="h-px bg-[#E5EBE8] w-full"></div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-[#191C1E]">Phí quá giờ</span>
+                    <span className="font-semibold text-[#10B981]">70.000đ /giờ</span>
+                  </div>
+                  <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu hoàn trả xe trễ giờ. Trường hợp trễ quá <strong className="text-[#3E4943]">3 giờ</strong> phụ phí thêm 1 ngày thuê.</p>
                 </div>
-                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu hoàn trả xe trễ giờ. Trường hợp trễ quá <strong className="text-[#3E4943]">3 giờ</strong> phụ phí thêm 1 ngày thuê.</p>
-              </div>
-              <div className="h-px bg-[#E5EBE8] w-full"></div>
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-semibold text-[#191C1E]">Phụ phí khác</span>
-                  <span className="font-semibold text-[#10B981]">Thỏa thuận</span>
+                <div className="h-px bg-[#E5EBE8] w-full"></div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="font-semibold text-[#191C1E]">Phụ phí khác</span>
+                    <span className="font-semibold text-[#10B981]">Thỏa thuận</span>
+                  </div>
+                  <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu xe không đảm bảo vệ sinh hoặc bị ám mùi (hút thuốc, sầu riêng, hải sản...).</p>
                 </div>
-                <p className="text-sm text-[#6E7A72]">Phụ phí phát sinh nếu xe không đảm bảo vệ sinh hoặc bị ám mùi (hút thuốc, sầu riêng, hải sản...).</p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* cancellation policy */}
-          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-            <h3 className="font-bold text-[#191C1E] mb-3 text-lg">Chính sách hủy chuyến</h3>
-            <p className="text-sm text-[#3E4943]">
-              An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer">Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
-            </p>
-          </div>
+          {!isOwner && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
+              <h3 className="font-bold text-[#191C1E] mb-3 text-lg">Chính sách hủy chuyến</h3>
+              <p className="text-sm text-[#3E4943]">
+                An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer">Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
+              </p>
+            </div>
+          )}
 
           {/* ── OWNER BLOCK ── */}
-          {(data as any).owner && (
+          {!isOwner && (data as any).owner && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
               <h3 className="font-bold text-[#191C1E] mb-4 text-lg">Chủ xe</h3>
               <div className="flex items-center gap-4">
@@ -584,7 +592,8 @@ const CarDetailPage: React.FC = () => {
         </div>
 
         {/* ── RIGHT: booking card ── */}
-        <div className="w-full lg:w-[360px] flex-shrink-0 sticky top-[84px]">
+        {!isOwner && (
+          <div className="w-full lg:w-[360px] flex-shrink-0 sticky top-[84px]">
           <div className="bg-white rounded-2xl border border-[#BDCAC1] shadow-lg overflow-hidden">
             {/* card header */}
             <div className="bg-[#0F172A] p-5">
@@ -678,6 +687,7 @@ const CarDetailPage: React.FC = () => {
             ← Xem thêm xe khác
           </Link>
         </div>
+        )}
       </div>
 
 
