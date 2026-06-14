@@ -42,7 +42,15 @@ const MessageDetailPage: React.FC = () => {
   }, [bookingId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth"
+        });
+      }
+    }
   }, [messages]);
 
   const handleSend = async (e: React.FormEvent) => {
