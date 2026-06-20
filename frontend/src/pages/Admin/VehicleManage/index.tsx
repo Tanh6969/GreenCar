@@ -104,7 +104,7 @@ const VehicleManagePage: React.FC = () => {
       battery_level: c.vehicle.battery_level,
       battery_health: c.vehicle.battery_health,
       location_id:   c.vehicle.location_id,
-      image_url:     c.image?.image_url ?? "",
+      image_url:     c.image_url ?? "",
     });
     setFormErr("");
     setOpen(true);

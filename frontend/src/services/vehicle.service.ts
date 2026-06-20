@@ -34,6 +34,8 @@ interface VehicleCardApiResponse {
   model:    ApiModel;
   location: ApiLocation;
   image_url: string;
+  price_24h: number;
+  price_4h: number;
 }
 
 interface ApiFeature { feature_id: number; feature_name: string; }
@@ -72,7 +74,9 @@ function mapCard(r: VehicleCardApiResponse): VehicleCardData {
       location_id: r.location.id, name: r.location.name, address: r.location.address,
       city: r.location.city, latitude: r.location.latitude, longitude: r.location.longitude,
     },
-    image: r.image_url ? { image_id: 0, vehicle_model_id: r.model.id, image_url: r.image_url } : undefined,
+    image_url: r.image_url,
+    price_24h: r.price_24h,
+    price_4h: r.price_4h,
   };
 }
 

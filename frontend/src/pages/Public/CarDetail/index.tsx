@@ -319,24 +319,25 @@ const CarDetailPage: React.FC = () => {
 
           {/* rental time */}
           <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
-            <h3 className="font-bold text-[#191C1E] text-lg mb-4">Thời gian thuê xe</h3>
-            <div className={`grid grid-cols-2 gap-4 border ${isOverlapping ? "border-[#EF4444] bg-[#FEF2F2]" : "border-[#E5EBE8]"} rounded-xl p-4`}>
+            <h3 className="font-bold text-[#191C1E] text-lg mb-4">Lịch trình chuyến đi</h3>
+            <p className="text-sm text-[#6E7A72] mb-3">Vui lòng chọn thời gian bạn muốn thuê xe:</p>
+            <div className={`grid grid-cols-2 gap-4 border ${isOverlapping ? "border-[#EF4444] bg-[#FEF2F2]" : "border-[#BDCAC1] bg-[#F8F9FB]"} rounded-xl p-4`}>
               <div>
-                <p className="text-sm text-[#6E7A72] mb-1">Nhận xe</p>
+                <p className="text-sm text-[#3E4943] font-semibold mb-1">Nhận xe</p>
                 <input 
                   type="datetime-local" 
                   value={startDate} 
-                  readOnly
-                  className="font-bold text-[#191C1E] border-none p-0 focus:ring-0 cursor-default"
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="font-bold text-[#191C1E] bg-transparent border-none p-0 focus:ring-0 w-full"
                 />
               </div>
               <div>
-                <p className="text-sm text-[#6E7A72] mb-1">Trả xe</p>
+                <p className="text-sm text-[#3E4943] font-semibold mb-1">Trả xe</p>
                 <input 
                   type="datetime-local" 
                   value={endDate} 
-                  readOnly
-                  className="font-bold text-[#191C1E] border-none p-0 focus:ring-0 cursor-default"
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="font-bold text-[#191C1E] bg-transparent border-none p-0 focus:ring-0 w-full"
                 />
               </div>
             </div>
@@ -381,7 +382,7 @@ const CarDetailPage: React.FC = () => {
           </div>
 
           {/* location map */}
-          {!isOwner && location && location.latitude && location.longitude && (
+          {!isOwner && location && !!location.latitude && !!location.longitude && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
               <h3 className="font-bold text-[#191C1E] text-lg mb-4">Địa điểm giao nhận xe</h3>
               

@@ -72,6 +72,8 @@ func ToVehicleCardResponse(c *entities.VehicleCard) *dto.VehicleCardResponse {
 		Model:    toVehicleModelResponse(c.Model),
 		Location: toLocationResponse(c.Location),
 		ImageURL: c.ImageURL,
+		Price24h: c.Price24h,
+		Price4h:  c.Price4h,
 	}
 }
 

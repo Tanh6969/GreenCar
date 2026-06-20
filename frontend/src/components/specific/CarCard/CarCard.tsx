@@ -10,12 +10,12 @@ interface Props {
 }
 
 const CarCard: React.FC<Props> = ({ data, price4h, price24h }) => {
-  const { model, vehicle, location, image } = data;
+  const { model, vehicle, location, image_url } = data;
 
   return (
     <article className="car-card">
-      {image?.image_url ? (
-        <img src={image.image_url} alt={model.name} className="car-card-img" />
+      {image_url ? (
+        <img src={image_url} alt={model.name} className="car-card-img" />
       ) : (
         <div className="car-img-placeholder">🚗</div>
       )}

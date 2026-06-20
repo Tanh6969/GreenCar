@@ -60,5 +60,7 @@ export interface VehicleCardData {
   vehicle: Vehicle;
   model: VehicleModel;
   location: Location;
-  image?: VehicleImage;
+  image_url?: string;
+  price_24h: number;
+  price_4h: number;
 }

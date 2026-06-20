@@ -22,11 +22,13 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
 		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
-		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url
+		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h
 		FROM vehicles v
 		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
 		JOIN locations l ON l.location_id = v.location_id
-		ORDER BY v.vehicle_id
+		ORDER BY v.vehicle_id DESC
 		LIMIT $1 OFFSET $2`
 
 	rows, err := r.db.Query(query, limit, offset)
@@ -41,11 +43,12 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		var m entities.VehicleModel
 		var loc entities.Location
 		var imageURL string
+		var price24h, price4h float64
 		err := rows.Scan(
 			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
-			&imageURL,
+			&imageURL, &price24h, &price4h,
 		)
 		if err != nil {
 			return nil, err
@@ -55,6 +58,8 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 			Model:    &m,
 			Location: &loc,
 			ImageURL: imageURL,
+			Price24h: price24h,
+			Price4h:  price4h,
 		})
 	}
 	return cards, rows.Err()
@@ -65,7 +70,9 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
 		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
-		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url
+		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h
 		FROM vehicles v
 		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
 		JOIN locations l ON l.location_id = v.location_id
@@ -84,11 +91,12 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		var m entities.VehicleModel
 		var loc entities.Location
 		var imageURL string
+		var price24h, price4h float64
 		err := rows.Scan(
 			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
-			&imageURL,
+			&imageURL, &price24h, &price4h,
 		)
 		if err != nil {
 			return nil, err
@@ -98,6 +106,8 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 			Model:    &m,
 			Location: &loc,
 			ImageURL: imageURL,
+			Price24h: price24h,
+			Price4h:  price4h,
 		})
 	}
 	return cards, rows.Err()

@@ -20,9 +20,11 @@ type OwnerRegistration struct {
 	PricePerDay  float64   `json:"price_per_day"`
 	Description  string    `json:"description"`
 	Images       []Image   `json:"images"`
-	Status       string    `json:"status"` // pending, reviewing, approved, rejected
-	RejectReason string    `json:"reject_reason,omitempty"`
-	CreatedAt    time.Time `json:"created_at"`
+	Status        string    `json:"status"` // pending, reviewing, approved, rejected
+	RejectReason  string    `json:"reject_reason,omitempty"`
+	AvailableFrom string    `json:"availableFrom"`
+	AvailableTo   string    `json:"availableTo"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Image struct {

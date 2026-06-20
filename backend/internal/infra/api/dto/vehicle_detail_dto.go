@@ -6,6 +6,8 @@ type VehicleCardResponse struct {
 	Model    *VehicleModelResponse `json:"model"`
 	Location *LocationResponse     `json:"location"`
 	ImageURL string                `json:"image_url"`
+	Price24h float64               `json:"price_24h"`
+	Price4h  float64               `json:"price_4h"`
 }
 
 // VehicleFeatureResponse represents a feature.

@@ -80,7 +80,7 @@ const LUXURY_MODEL_IDS = [9, 10, 11, 12, 13, 14];
 const BRANDS = ["TESLA", "VINFAST", "HYUNDAI", "RIVIAN", "LUCID", "POLESTAR"];
 
 function getImage(data: VehicleCardData): string | undefined {
-  return MODEL_LOCAL_IMAGES[data.model.vehicle_model_id] ?? data.image?.image_url;
+  return MODEL_LOCAL_IMAGES[data.model.vehicle_model_id] ?? data.image_url;
 }
 
 function dedupeByModel(list: VehicleCardData[]): VehicleCardData[] {

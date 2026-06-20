@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useVehicles } from "../../../hooks/useVehicles";
 import { useAuth } from "../../../hooks/useAuth";
-import { pricing } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
 
@@ -48,6 +47,7 @@ const RANGE_OPTIONS = [
   { label: "600km+",  min: 600 },
 ];
 const SORT_OPTIONS = [
+  { value: "newest",      label: "Mới nhất" },
   { value: "price_asc",   label: "Giá: Thấp → Cao"  },
   { value: "price_desc",  label: "Giá: Cao → Thấp"  },
   { value: "range_desc",  label: "Phạm vi: Xa nhất"  },
@@ -63,7 +63,7 @@ const CarListPage: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minRange,       setMinRange]       = useState(0);
   const [onlyAvailable,  setOnlyAvailable]  = useState(false);
-  const [sortBy,         setSortBy]         = useState("price_asc");
+  const [sortBy,         setSortBy]         = useState("newest");
   const [searchQuery,    setSearchQuery]    = useState("");
   const [filterLocation, setFilterLocation] = useState<number | null>(null);
   const [filterStartDate, setFilterStartDate] = useState("");
@@ -84,12 +84,6 @@ const CarListPage: React.FC = () => {
     Array.from(new Set(vehicles.map(v => v.model.brand))).sort(),
     [vehicles]
   );
-
-  const getPrice24h = (modelId: number) =>
-    pricing.find(p => p.vehicle_model_id === modelId && p.rental_plan_id === 3)?.price ?? 0;
-
-  const getPrice4h = (modelId: number) =>
-    pricing.find(p => p.vehicle_model_id === modelId && p.rental_plan_id === 1)?.price ?? 0;
 
   const filtered = useMemo(() => {
     let list = [...vehicles];
@@ -115,8 +109,9 @@ const CarListPage: React.FC = () => {
       );
 
     list.sort((a, b) => {
-      if (sortBy === "price_asc")  return getPrice24h(a.model.vehicle_model_id) - getPrice24h(b.model.vehicle_model_id);
-      if (sortBy === "price_desc") return getPrice24h(b.model.vehicle_model_id) - getPrice24h(a.model.vehicle_model_id);
+      if (sortBy === "newest")     return b.vehicle.vehicle_id - a.vehicle.vehicle_id;
+      if (sortBy === "price_asc")  return a.price_24h - b.price_24h;
+      if (sortBy === "price_desc") return b.price_24h - a.price_24h;
       if (sortBy === "range_desc") return b.model.range_km - a.model.range_km;
       if (sortBy === "power_desc") return b.model.horsepower - a.model.horsepower;
       return 0;
@@ -272,16 +267,14 @@ const CarListPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map(item => {
-                const p4h  = getPrice4h(item.model.vehicle_model_id);
-                const p24h = getPrice24h(item.model.vehicle_model_id);
                 const available = item.vehicle.status === "available";
 
                 return (
                   <article key={item.vehicle.vehicle_id}
                     className="bg-white rounded-xl overflow-hidden border border-[#BDCAC1] shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
                     <div className="relative">
-                      {(MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image?.image_url) ? (
-                        <img src={MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image?.image_url} alt={item.model.name}
+                      {(MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image_url) ? (
+                        <img src={MODEL_LOCAL_IMAGES[item.model.vehicle_model_id] ?? item.image_url} alt={item.model.name}
                           className="w-full h-48 object-cover" />
                       ) : (
                         <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center"><IcCarPlaceholder /></div>
@@ -302,7 +295,7 @@ const CarListPage: React.FC = () => {
                       <div className="flex justify-between items-start gap-2 mb-3">
                         <h4 className="font-bold text-[#191C1E] text-[15px] leading-tight">{item.model.name}</h4>
                         <div className="text-right shrink-0">
-                          <p className="text-[#006C4C] font-bold text-sm leading-tight">{formatCurrency(p24h)}</p>
+                          <p className="text-[#006C4C] font-bold text-sm leading-tight">{formatCurrency(item.price_24h)}</p>
                           <p className="text-[10px] text-[#6E7A72]">/ngày</p>
                         </div>
                       </div>
@@ -322,7 +315,7 @@ const CarListPage: React.FC = () => {
 
                       {/* price 4h + link */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[11px] text-[#6E7A72]">{formatCurrency(p4h)}/4h · {item.model.vehicle_type}</span>
+                        <span className="text-[11px] text-[#6E7A72]">{formatCurrency(item.price_4h)}/4h · {item.model.vehicle_type}</span>
                       </div>
 
                       <Link
