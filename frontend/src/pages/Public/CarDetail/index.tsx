@@ -193,8 +193,8 @@ const CarDetailPage: React.FC = () => {
               ${available ? "bg-[#006C4C] text-white" : "bg-[#E5E7EB] text-[#6E7A72]"}`}>
               {available ? "✓ Còn trống" : "✗ Đã đặt"}
             </span>
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-               <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-opacity backdrop-blur-sm">
+            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 transition-colors flex items-center justify-center">
+               <span className="opacity-0 group-hover:opacity-100 bg-white/60 text-[#191C1E] px-5 py-2.5 rounded-full text-sm font-semibold transition-opacity backdrop-blur-sm">
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="inline mr-2 -mt-0.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
                  Xem ảnh lớn
                </span>
@@ -597,11 +597,11 @@ const CarDetailPage: React.FC = () => {
           <div className="w-full lg:w-[360px] flex-shrink-0 sticky top-[84px]">
           <div className="bg-white rounded-2xl border border-[#BDCAC1] shadow-lg overflow-hidden">
             {/* card header */}
-            <div className="bg-[#0F172A] p-5">
+            <div className="bg-[#F8FAFC] p-5">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-white font-bold text-lg">{model.brand} {model.name}</p>
-                  <p className="text-[#94A3B8] text-sm mt-0.5">{model.vehicle_type} • {model.seats} chỗ</p>
+                  <p className="text-[#191C1E] font-bold text-lg">{model.brand} {model.name}</p>
+                  <p className="text-[#475569] text-sm mt-0.5">{model.vehicle_type} • {model.seats} chỗ</p>
                 </div>
                 <span className={`text-[10px] font-bold px-2 py-1 rounded
                   ${available ? "bg-[#10B981] text-white" : "bg-[#6B7280] text-white"}`}>
@@ -695,7 +695,7 @@ const CarDetailPage: React.FC = () => {
 
       {/* INSURANCE MODAL */}
       {showInsuranceModal && (
-        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-black/40 p-4" onClick={() => setShowInsuranceModal(false)}>
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-white/40 p-4" onClick={() => setShowInsuranceModal(false)}>
           <div className="bg-white w-full sm:w-[500px] rounded-2xl flex flex-col max-h-[90vh] shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-5 border-b border-[#E5EBE8]">
               <h3 className="font-bold text-lg text-[#006C4C]">Bảo hiểm thuê xe tự lái</h3>
@@ -747,8 +747,8 @@ const CarDetailPage: React.FC = () => {
       )}
       {/* LIGHTBOX MODAL */}
       {showLightbox && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4" onClick={() => setShowLightbox(false)}>
-          <button className="absolute top-6 right-6 text-white hover:text-gray-300" onClick={() => setShowLightbox(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-white/95 p-4" onClick={() => setShowLightbox(false)}>
+          <button className="absolute top-6 right-6 text-[#191C1E] hover:text-[#334155]" onClick={() => setShowLightbox(false)}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
           

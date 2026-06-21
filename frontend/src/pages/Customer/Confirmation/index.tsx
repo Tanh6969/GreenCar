@@ -62,7 +62,7 @@ const ConfirmationPage: React.FC = () => {
             {vehicleInfo.imageUrl
               ? <img src={vehicleInfo.imageUrl} alt={vehicleInfo.name} className="w-full h-full object-cover" />
               : <div className="w-full h-full flex items-center justify-center text-6xl">🚗</div>}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
             <div className="absolute bottom-4 left-4 text-white">
               <p className="font-black text-lg">{vehicleInfo.brand} {vehicleInfo.name}</p>
               <p className="text-xs opacity-80 font-mono">{vehicleInfo.licensePlate}</p>

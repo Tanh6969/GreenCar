@@ -8,8 +8,6 @@ import { useAuth } from "../../../hooks/useAuth";
 import { formatCurrency } from "../../../utils/formatters";
 import { VehicleCardData } from "../../../types/vehicle.type";
 
-import heroBg from "../../../assets/images/Premium EV Experience.png";
-
 // ── icons ──────────────────────────────────────────────────────
 const IcCar = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
@@ -111,9 +109,7 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
   return (
     <Link
       to={`/cars/${vehicle.vehicle_id}`}
-      className={`flex-shrink-0 w-60 rounded-2xl overflow-hidden border transition-all duration-200
-        hover:-translate-y-1 hover:shadow-xl group snap-start
-        ${isLuxury ? "bg-[#0F172A] border-[#334155]" : "bg-white border-[#E5E7EB]"}`}
+      className="flex-shrink-0 w-60 rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-xl group snap-start"
     >
       <div className="relative overflow-hidden">
         {img ? (
@@ -131,25 +127,23 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
       </div>
 
       <div className="p-3.5">
-        <p className={`text-xs font-bold uppercase tracking-wider mb-0.5
-          ${isLuxury ? "text-[#4FBD91]" : "text-[#006C4C]"}`}>{model.brand}</p>
-        <h4 className={`font-bold text-base leading-tight mb-2
-          ${isLuxury ? "text-white" : "text-[#191C1E]"}`}>{model.name}</h4>
+        <p className={`text-xs font-bold uppercase tracking-wider mb-0.5 text-[#006C4C]`}>{model.brand}</p>
+        <h4 className="font-bold text-base leading-tight mb-2 text-[#191C1E]">{model.name}</h4>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcBolt size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.range_km} km
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md bg-[#F8FAFC] text-[#334155]`}>
+            <IcBolt size={12} color="#4FBD91" />{model.range_km} km
           </span>
-          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcSpeed size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.horsepower} hp
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md bg-[#F8FAFC] text-[#334155]`}>
+            <IcSpeed size={12} color="#4FBD91" />{model.horsepower} hp
           </span>
-          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md ${isLuxury ? "bg-[#1E293B] text-[#94A3B8]" : "bg-[#F0FDF4] text-[#3E4943]"}`}>
-            <IcSeat size={12} color={isLuxury ? "#4FBD91" : "#006C4C"} />{model.seats} chỗ
+          <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-md bg-[#F8FAFC] text-[#334155]`}>
+            <IcSeat size={12} color="#4FBD91" />{model.seats} chỗ
           </span>
         </div>
 
         <div className={`border-t pt-2.5 flex justify-between items-end
-          ${isLuxury ? "border-[#334155]" : "border-[#F3F4F6]"}`}>
+          border-[#E5E7EB]`}>
           <div>
             <div className="text-[#006C4C] font-bold text-lg">{formatCurrency(price24h)}</div>
             <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</div>
@@ -186,28 +180,24 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
   if (cars.length === 0) return null;
 
   return (
-    <section id={id} className={`py-12 ${dark ? "bg-[#0F172A]" : "bg-white"}`}>
+    <section id={id} className="py-12 bg-white">
       <div className="max-w-[1440px] mx-auto px-6">
         <div className="flex items-end justify-between mb-5">
           <div>
-            <p className={`text-sm font-bold uppercase tracking-[0.15em] mb-1
-              ${dark ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>{subtitle}</p>
-            <h2 className={`text-3xl font-bold ${dark ? "text-white" : "text-[#191C1E]"}`}>{title}</h2>
+            <p className="text-sm font-bold uppercase tracking-[0.15em] mb-1 text-[#006C4C]">{subtitle}</p>
+            <h2 className="text-3xl font-bold text-[#191C1E]">{title}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => scroll("left")}
-              className={`w-8 h-8 rounded-full border flex items-center justify-center text-sm transition-colors
-                ${dark ? "border-[#334155] text-white hover:bg-[#1E293B]" : "border-[#BDCAC1] text-[#3E4943] hover:bg-[#F3F4F6]"}`}>
+              className="w-8 h-8 rounded-full border border-[#BDCAC1] text-[#3E4943] flex items-center justify-center text-sm transition-colors hover:bg-[#F3F4F6]">
               ‹
             </button>
             <button onClick={() => scroll("right")}
-              className={`w-8 h-8 rounded-full border flex items-center justify-center text-sm transition-colors
-                ${dark ? "border-[#334155] text-white hover:bg-[#1E293B]" : "border-[#BDCAC1] text-[#3E4943] hover:bg-[#F3F4F6]"}`}>
+              className="w-8 h-8 rounded-full border border-[#BDCAC1] text-[#3E4943] flex items-center justify-center text-sm transition-colors hover:bg-[#F3F4F6]">
               ›
             </button>
             <Link to="/cars"
-              className={`ml-2 text-base font-semibold transition-colors hidden sm:block
-                ${dark ? "text-[#4FBD91] hover:text-white" : "text-[#006C4C] hover:text-[#004832]"}`}>
+              className="ml-2 text-base font-semibold transition-colors hidden sm:block text-[#006C4C] hover:text-[#004832]">
               Xem tất cả →
             </Link>
           </div>
@@ -304,9 +294,9 @@ const HomePage: React.FC = () => {
     <div className="w-full">
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section className="relative h-[600px] flex items-center overflow-hidden">
-        <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent" />
+      <section className="relative h-[600px] flex items-center overflow-hidden bg-black">
+        <div className="absolute inset-0 bg-black" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
 
         <div className="relative z-10 max-w-[1440px] mx-auto px-6 w-full grid lg:grid-cols-[1fr_400px] gap-10 items-center">
           <div>
@@ -407,13 +397,13 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* ── PREMIUM DARK ──────────────────────────────────────── */}
-      <section className="bg-[#0F172A] py-14">
+      <section className="bg-white py-14">
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#4FBD91] mb-1">Cao cấp</p>
-              <h2 className="text-3xl font-bold text-white">Dòng Xe Sang Premium</h2>
-              <p className="text-[#64748B] text-sm mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#006C4C] mb-1">Cao cấp</p>
+              <h2 className="text-3xl font-bold text-black">Dòng Xe Sang Premium</h2>
+              <p className="text-[#475569] text-sm mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
             </div>
             <Link to="/cars" className="text-base font-semibold text-[#4FBD91] hover:text-white transition-colors hidden sm:block">
               Xem tất cả →
@@ -427,7 +417,7 @@ const HomePage: React.FC = () => {
               { img: PREMIUM_IMAGES.lucidAir,   brand: "Lucid",  name: "Air Grand Touring", price: "3.800.000", range: "760km", accel: "3.0s" },
             ].map(car => (
               <div key={car.name}
-                className="bg-[#1E293B] rounded-2xl overflow-hidden border border-[#334155] hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
+                className="bg-white rounded-2xl overflow-hidden border border-[#E5E7EB] hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
                 <div className="relative overflow-hidden group">
                   <img src={car.img} alt={car.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
                   <span className="absolute top-3 right-3 bg-[#006C4C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide">
@@ -435,19 +425,19 @@ const HomePage: React.FC = () => {
                   </span>
                 </div>
                 <div className="p-5">
-                  <p className="text-[#64748B] text-sm mb-0.5">{car.brand}</p>
-                  <p className="text-white font-bold text-lg mb-1">{car.name}</p>
-                  <p className="text-[#4FBD91] font-bold text-2xl mb-4">
-                    {car.price}đ<span className="text-[#64748B] text-sm font-normal">/ngày</span>
+                  <p className="text-[#475569] text-sm mb-0.5">{car.brand}</p>
+                  <p className="text-[#191C1E] font-bold text-lg mb-1">{car.name}</p>
+                  <p className="text-[#006C4C] font-bold text-2xl mb-4">
+                    {car.price}đ<span className="text-[#475569] text-sm font-normal">/ngày</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#334155] text-sm">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#E5E7EB] text-sm">
                     <div className="flex items-center gap-1.5">
                       <IcBolt size={16} color="#4FBD91" />
-                      <span className="text-white font-semibold">{car.range}</span>
+                      <span className="text-[#191C1E] font-semibold">{car.range}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <IcTimer size={16} color="#4FBD91" />
-                      <span className="text-white font-semibold">0–100: {car.accel}</span>
+                      <span className="text-[#191C1E] font-semibold">0–100: {car.accel}</span>
                     </div>
                   </div>
                 </div>

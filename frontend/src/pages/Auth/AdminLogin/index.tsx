@@ -37,20 +37,20 @@ const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center px-4">
       <div className="w-full max-w-[420px]">
 
         {/* Logo */}
         <div className="flex items-center gap-3 mb-10 justify-center">
           <Logo size="large" showText={true} />
-          <span className="text-xs font-bold text-[#94A3B8] bg-[#1E293B] px-2 py-1 rounded-full">
+          <span className="text-xs font-bold text-[#334155] bg-[#E5E7EB] px-2 py-1 rounded-full">
             ADMIN
           </span>
         </div>
 
-        <div className="bg-[#1E293B] rounded-2xl border border-[#334155] p-8 shadow-2xl">
-          <h1 className="text-xl font-bold text-white mb-1">Đăng nhập quản trị</h1>
-          <p className="text-sm text-[#94A3B8] mb-7">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-8 shadow-2xl">
+          <h1 className="text-xl font-bold text-[#191C1E] mb-1">Đăng nhập quản trị</h1>
+          <p className="text-sm text-[#475569] mb-7">
             Chỉ dành cho tài khoản quản trị viên.
           </p>
 
@@ -73,8 +73,8 @@ const AdminLoginPage: React.FC = () => {
                 placeholder="admin@greencar.vn"
                 autoComplete="email"
                 disabled={loading}
-                className="w-full bg-[#0F172A] border border-[#334155] rounded-xl px-4 py-3
-                  text-white placeholder-[#475569] text-sm outline-none
+                className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3
+                  text-[#191C1E] placeholder-[#94A3B8] text-sm outline-none
                   focus:border-[#006C4C] focus:ring-2 focus:ring-[#006C4C]/20 transition-all
                   disabled:opacity-50"
               />
@@ -92,8 +92,8 @@ const AdminLoginPage: React.FC = () => {
                   placeholder="Nhập mật khẩu"
                   autoComplete="current-password"
                   disabled={loading}
-                  className="w-full bg-[#0F172A] border border-[#334155] rounded-xl px-4 py-3 pr-12
-                    text-white placeholder-[#475569] text-sm outline-none
+                  className="w-full bg-white border border-[#E5E7EB] rounded-xl px-4 py-3 pr-12
+                    text-[#191C1E] placeholder-[#94A3B8] text-sm outline-none
                     focus:border-[#006C4C] focus:ring-2 focus:ring-[#006C4C]/20 transition-all
                     disabled:opacity-50"
                 />
