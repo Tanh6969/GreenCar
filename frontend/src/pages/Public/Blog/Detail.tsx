@@ -39,7 +39,7 @@ const BlogDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 780, padding: "40px 24px 80px" }}>
+    <div className="container" style={{ maxWidth: 1024, padding: "40px 24px 80px" }}>
       {/* Breadcrumb */}
       <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24, display: "flex", gap: 6, alignItems: "center" }}>
         <Link to="/" style={{ color: "var(--green)" }}>Trang chủ</Link>
@@ -62,7 +62,7 @@ const BlogDetailPage: React.FC = () => {
             target.src = fb;
           }
         }}
-        style={{ width: "100%", height: 400, objectFit: "cover", borderRadius: 14, marginBottom: 32, display: "block", backgroundColor: "#f3f4f6" }} />
+        style={{ width: "100%", height: 500, objectFit: "cover", borderRadius: 16, marginBottom: 32, display: "block", backgroundColor: "#f3f4f6" }} />
 
       {/* Meta */}
       {post.category && (
@@ -75,7 +75,7 @@ const BlogDetailPage: React.FC = () => {
         </span>
       )}
 
-      <h1 style={{ fontSize: 30, fontWeight: 900, color: "var(--text)", margin: "0 0 16px", lineHeight: 1.25 }}>
+      <h1 style={{ fontSize: 36, fontWeight: 900, color: "var(--text)", margin: "0 0 16px", lineHeight: 1.3 }}>
         {post.title}
       </h1>
 

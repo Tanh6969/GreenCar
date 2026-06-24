@@ -269,7 +269,8 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 	activeBookings := make([]*entities.TimeRange, 0)
 	bookingRows, err := r.db.Query(
 		`SELECT start_time, end_time FROM bookings 
-		 WHERE vehicle_id = $1 AND status IN ('pending', 'confirmed', 'active', 'running')`, 
+		 WHERE vehicle_id = $1 AND status IN ('pending', 'confirmed', 'active', 'running')
+		 AND end_time > NOW()`, 
 		id,
 	)
 	if err == nil {

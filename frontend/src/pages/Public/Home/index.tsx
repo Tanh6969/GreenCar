@@ -117,6 +117,7 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         ) : (
           <div className="w-full h-36 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center">
             <IcCar size={48} color="#4FBD91" />
+          </div>
         )}
       </div>
 
