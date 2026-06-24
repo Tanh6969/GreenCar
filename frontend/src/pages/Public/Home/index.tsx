@@ -1,7 +1,7 @@
 import React, { useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookingContext } from "../../../context/BookingContext";
-import { homepageTestimonials, locations, pricing } from "../../../data/mockData";
+import { homepageTestimonials, locations } from "../../../data/mockData";
 import { MODEL_LOCAL_IMAGES, PREMIUM_IMAGES } from "../../../data/localImages";
 import { useVehicles } from "../../../hooks/useVehicles";
 import { useAuth } from "../../../hooks/useAuth";
@@ -205,9 +205,7 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
 
         <div ref={rowRef} className="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2 snap-x">
           {cars.map(item => {
-            const p4h  = pricing.find(p => p.vehicle_model_id === item.model.vehicle_model_id && p.rental_plan_id === 1)?.price ?? 0;
-            const p24h = pricing.find(p => p.vehicle_model_id === item.model.vehicle_model_id && p.rental_plan_id === 3)?.price ?? 0;
-            return <ScrollCard key={item.vehicle.vehicle_id} data={item} price4h={p4h} price24h={p24h} />;
+            return <ScrollCard key={item.vehicle.vehicle_id} data={item} price4h={item.price_4h} price24h={item.price_24h} />;
           })}
         </div>
 

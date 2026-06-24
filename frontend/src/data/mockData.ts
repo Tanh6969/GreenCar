@@ -30,7 +30,13 @@ export const locations: Location[] = [
   { location_id: 4, name: "Tây Hồ",      address: "Quận Tây Hồ",      city: "Hà Nội", latitude: 21.058, longitude: 105.823 },
   { location_id: 5, name: "Thanh Xuân",  address: "Quận Thanh Xuân",  city: "Hà Nội", latitude: 20.995, longitude: 105.815 },
   { location_id: 6, name: "Hoàng Mai",   address: "Quận Hoàng Mai",   city: "Hà Nội", latitude: 20.978, longitude: 105.842 },
-  { location_id: 7, name: "Long Biên",   address: "Quận Long Biên",   city: "Hà Nội", latitude: 21.040, longitude: 105.882 }
+  { location_id: 7, name: "Long Biên",   address: "Quận Long Biên",   city: "Hà Nội", latitude: 21.040, longitude: 105.882 },
+  { location_id: 8, name: "Quận 1",      address: "88 Lê Lợi, Quận 1", city: "TP.HCM", latitude: 10.7769, longitude: 106.7009 },
+  { location_id: 9, name: "Quận 3",      address: "145 Võ Văn Tần, Quận 3", city: "TP.HCM", latitude: 10.7794, longitude: 106.6874 },
+  { location_id: 10, name: "Bình Thạnh", address: "320 Đinh Bộ Lĩnh, Bình Thạnh", city: "TP.HCM", latitude: 10.8143, longitude: 106.7100 },
+  { location_id: 11, name: "Tân Bình",   address: "210 Hoàng Văn Thụ, Tân Bình", city: "TP.HCM", latitude: 10.8017, longitude: 106.6524 },
+  { location_id: 12, name: "Phú Nhuận",  address: "77 Phan Đình Phùng, Phú Nhuận", city: "TP.HCM", latitude: 10.7998, longitude: 106.6827 },
+  { location_id: 13, name: "Thủ Đức",    address: "36 Võ Văn Ngân, TP. Thủ Đức", city: "TP.HCM", latitude: 10.8479, longitude: 106.7540 }
 ];
 
 export const vehicleModels: VehicleModel[] = [

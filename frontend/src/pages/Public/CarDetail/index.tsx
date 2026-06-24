@@ -74,6 +74,7 @@ const CarDetailPage: React.FC = () => {
   const [customAddress, setCustomAddress] = useState("");
   const [deliveryOption, setDeliveryOption] = useState<"self" | "custom" | "airport">("self");
   const [showLightbox, setShowLightbox] = useState(false);
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
 
   const [searchParams] = useSearchParams();
   const defaultStart = searchParams.get("startDate") ? `${searchParams.get("startDate")}T21:00` : "2026-06-13T21:00";
@@ -231,92 +232,6 @@ const CarDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* EV key specs */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {([
-              { icon: <IcBolt />,   label: "Phạm vi",  val: `${model.range_km} km` },
-              { icon: <IcPower />,  label: "Công suất", val: `${model.horsepower} hp` },
-              { icon: <IcSeat />,   label: "Số chỗ",   val: `${model.seats} chỗ` },
-              { icon: <IcShield />, label: "Túi khí",  val: `${model.airbags} túi` },
-            ] as { icon: React.ReactNode; label: string; val: string }[]).map(s => (
-              <div key={s.label} className="bg-white rounded-xl border border-[#BDCAC1] p-4 text-center shadow-sm">
-                <div className="flex justify-center mb-1">{s.icon}</div>
-                <div className="text-[10px] text-[#6E7A72] uppercase tracking-wide">{s.label}</div>
-                <div className="font-bold text-[#191C1E] text-sm mt-0.5">{s.val}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* battery + transmission */}
-          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm flex flex-col gap-4">
-            <h3 className="font-bold text-[#191C1E]">Pin & Truyền động</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-[#6E7A72] mb-1">Mức pin hiện tại</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#006C4C] rounded-full transition-all"
-                      style={{ width: `${vehicle.battery_level}%` }} />
-                  </div>
-                  <span className="font-bold text-[#006C4C] w-10 text-right">{vehicle.battery_level}%</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-[#6E7A72] mb-1">Sức khỏe pin</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                    <div className="h-full bg-[#4FBD91] rounded-full"
-                      style={{ width: `${vehicle.battery_health}%` }} />
-                  </div>
-                  <span className="font-bold text-[#4FBD91] w-10 text-right">{vehicle.battery_health}%</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-[#6E7A72]">Hộp số</p>
-                <p className="font-semibold text-[#191C1E]">{model.transmission}</p>
-              </div>
-              <div>
-                <p className="text-[#6E7A72]">Loại xe</p>
-                <p className="font-semibold text-[#191C1E]">{model.vehicle_type}</p>
-              </div>
-              <div>
-                <p className="text-[#6E7A72]">Cốp xe</p>
-                <p className="font-semibold text-[#191C1E]">{model.trunk_capacity} L</p>
-              </div>
-            </div>
-          </div>
-
-          {/* specs */}
-          {specs.length > 0 && (
-            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm">
-              <h3 className="font-bold text-[#191C1E] mb-4">Thông số kỹ thuật</h3>
-              <div className="flex flex-col gap-2">
-                {specs.map(s => (
-                  <div key={s.spec_id} className="flex justify-between items-center py-2 border-b border-[#F3F4F6] last:border-0 text-sm">
-                    <span className="text-[#6E7A72]">{s.spec_name}</span>
-                    <span className="font-semibold text-[#191C1E]">{s.spec_value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* features */}
-          {features.length > 0 && (
-            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm">
-              <h3 className="font-bold text-[#191C1E] mb-4">Tính năng nổi bật</h3>
-              <div className="flex flex-wrap gap-2">
-                {features.map(f => (
-                  <span key={f.feature_id}
-                    className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#bbf7d0] text-[#006C4C] text-sm font-medium px-3 py-1.5 rounded-full">
-                    <IcCheck />
-                    {f.feature_name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* rental time */}
           <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
             <h3 className="font-bold text-[#191C1E] text-lg mb-4">Lịch trình chuyến đi</h3>
@@ -442,6 +357,92 @@ const CarDetailPage: React.FC = () => {
             </div>
           )}
 
+          {/* EV key specs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {([
+              { icon: <IcBolt />,   label: "Phạm vi",  val: `${model.range_km} km` },
+              { icon: <IcPower />,  label: "Công suất", val: `${model.horsepower} hp` },
+              { icon: <IcSeat />,   label: "Số chỗ",   val: `${model.seats} chỗ` },
+              { icon: <IcShield />, label: "Túi khí",  val: `${model.airbags} túi` },
+            ] as { icon: React.ReactNode; label: string; val: string }[]).map(s => (
+              <div key={s.label} className="bg-white rounded-xl border border-[#BDCAC1] p-4 text-center shadow-sm">
+                <div className="flex justify-center mb-1">{s.icon}</div>
+                <div className="text-[10px] text-[#6E7A72] uppercase tracking-wide">{s.label}</div>
+                <div className="font-bold text-[#191C1E] text-sm mt-0.5">{s.val}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* battery + transmission */}
+          <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm flex flex-col gap-4">
+            <h3 className="font-bold text-[#191C1E]">Pin & Truyền động</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-[#6E7A72] mb-1">Mức pin hiện tại</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#006C4C] rounded-full transition-all"
+                      style={{ width: `${vehicle.battery_level}%` }} />
+                  </div>
+                  <span className="font-bold text-[#006C4C] w-10 text-right">{vehicle.battery_level}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[#6E7A72] mb-1">Sức khỏe pin</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                    <div className="h-full bg-[#4FBD91] rounded-full"
+                      style={{ width: `${vehicle.battery_health}%` }} />
+                  </div>
+                  <span className="font-bold text-[#4FBD91] w-10 text-right">{vehicle.battery_health}%</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[#6E7A72]">Hộp số</p>
+                <p className="font-semibold text-[#191C1E]">{model.transmission}</p>
+              </div>
+              <div>
+                <p className="text-[#6E7A72]">Loại xe</p>
+                <p className="font-semibold text-[#191C1E]">{model.vehicle_type}</p>
+              </div>
+              <div>
+                <p className="text-[#6E7A72]">Cốp xe</p>
+                <p className="font-semibold text-[#191C1E]">{model.trunk_capacity} L</p>
+              </div>
+            </div>
+          </div>
+
+          {/* specs */}
+          {specs.length > 0 && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm">
+              <h3 className="font-bold text-[#191C1E] mb-4">Thông số kỹ thuật</h3>
+              <div className="flex flex-col gap-2">
+                {specs.map(s => (
+                  <div key={s.spec_id} className="flex justify-between items-center py-2 border-b border-[#F3F4F6] last:border-0 text-sm">
+                    <span className="text-[#6E7A72]">{s.spec_name}</span>
+                    <span className="font-semibold text-[#191C1E]">{s.spec_value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* features */}
+          {features.length > 0 && (
+            <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm">
+              <h3 className="font-bold text-[#191C1E] mb-4">Tính năng nổi bật</h3>
+              <div className="flex flex-wrap gap-2">
+                {features.map(f => (
+                  <span key={f.feature_id}
+                    className="flex items-center gap-1.5 bg-[#F0FDF4] border border-[#bbf7d0] text-[#006C4C] text-sm font-medium px-3 py-1.5 rounded-full">
+                    <IcCheck />
+                    {f.feature_name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* insurance */}
           {!isOwner && (
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
@@ -510,7 +511,7 @@ const CarDetailPage: React.FC = () => {
             <div className="bg-white rounded-xl border border-[#BDCAC1] p-5 shadow-sm mt-2">
               <h3 className="font-bold text-[#191C1E] mb-3 text-lg">Chính sách hủy chuyến</h3>
               <p className="text-sm text-[#3E4943]">
-                An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer">Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
+                An tâm thuê xe, không lo bị phạt với <span className="font-semibold text-[#006C4C] cursor-pointer hover:underline" onClick={() => setShowCancellationModal(true)}>Chính sách hủy chuyến của GreenCar!</span> Miễn phí hủy trong vòng 24 giờ sau khi đặt thành công.
               </p>
             </div>
           )}
@@ -741,6 +742,46 @@ const CarDetailPage: React.FC = () => {
                 <li>Tại thời điểm xảy ra sự cố, khách thuê gọi đến trung tâm bồi thường của nhà bảo hiểm (MIC - 1900 55 88 91), đọc số hợp đồng bảo hiểm và làm theo hướng dẫn tổng đài.</li>
                 <li>Giám định viên bảo hiểm liên hệ khách thuê để hướng dẫn xử lí, xác minh thông tin.</li>
               </ol>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CANCELLATION POLICY MODAL */}
+      {showCancellationModal && (
+        <div className="fixed inset-0 z-[9999] flex justify-center items-center bg-white/40 p-4" onClick={() => setShowCancellationModal(false)}>
+          <div className="bg-white w-full sm:w-[500px] rounded-2xl flex flex-col max-h-[90vh] shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-[#E5EBE8]">
+              <h3 className="font-bold text-lg text-[#006C4C]">Chính sách hủy chuyến của GreenCar</h3>
+              <button onClick={() => setShowCancellationModal(false)} className="text-[#6E7A72] hover:bg-[#F3F4F6] rounded-full p-2">✕</button>
+            </div>
+            <div className="p-5 overflow-y-auto text-[#3E4943] text-sm leading-relaxed flex flex-col gap-4">
+              <p>GreenCar hỗ trợ khách hàng thay đổi kế hoạch với chính sách hủy chuyến minh bạch và linh hoạt nhằm đảm bảo quyền lợi cho cả người thuê lẫn chủ xe.</p>
+              
+              <div className="bg-[#F0FDF4] p-4 rounded-xl border border-[#bbf7d0]">
+                <h4 className="font-bold text-base text-[#006C4C] mb-2 flex items-center gap-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Hủy chuyến Miễn Phí
+                </h4>
+                <ul className="list-disc pl-5 space-y-1 text-[#3E4943]">
+                  <li>Trong vòng <strong>24 giờ</strong> kể từ lúc đặt xe và thanh toán thành công.</li>
+                  <li>HOẶC trước thời điểm nhận xe ít nhất <strong>48 giờ</strong>.</li>
+                </ul>
+                <p className="mt-2 text-[#006C4C] font-semibold text-xs">» Bạn sẽ được hoàn lại 100% số tiền đã thanh toán.</p>
+              </div>
+
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">I. Hủy chuyến sát giờ (Phạt phí)</h4>
+              <p>Nếu bạn hủy chuyến trong vòng <strong>48 giờ</strong> trước thời điểm nhận xe, bạn sẽ phải chịu phí hủy chuyến tương đương <strong>30% giá trị hợp đồng</strong> (nhưng không thấp hơn giá trị 1 ngày thuê xe). Số tiền còn lại sẽ được hoàn trả vào tài khoản của bạn.</p>
+
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">II. Chủ xe hủy chuyến</h4>
+              <p>Trong trường hợp hãn hữu chủ xe (hoặc GreenCar) không thể giao xe và buộc phải hủy chuyến của bạn, bạn sẽ được:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Hoàn lại 100% số tiền đã thanh toán.</li>
+                <li>Nhận ngay một <strong className="text-[#006C4C]">voucher giảm giá 10%</strong> (tối đa 500k) cho chuyến đi tiếp theo thay cho lời xin lỗi.</li>
+              </ul>
+
+              <h4 className="font-bold text-base text-[#191C1E] mt-2">III. Không nhận xe (No-show)</h4>
+              <p>Nếu đến giờ nhận xe mà bạn không có mặt và không có bất kỳ thông báo nào cho chủ xe/GreenCar, hợp đồng sẽ tự động bị hủy và bạn sẽ <strong>không được hoàn tiền</strong> cọc/tiền thuê xe.</p>
             </div>
           </div>
         </div>
