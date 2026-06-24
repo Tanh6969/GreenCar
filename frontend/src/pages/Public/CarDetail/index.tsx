@@ -77,12 +77,34 @@ const CarDetailPage: React.FC = () => {
   const [showCancellationModal, setShowCancellationModal] = useState(false);
 
   const [searchParams] = useSearchParams();
-  const defaultStart = searchParams.get("startDate") ? `${searchParams.get("startDate")}T21:00` : "2026-06-13T21:00";
-  const defaultEnd = searchParams.get("endDate") ? `${searchParams.get("endDate")}T20:00` : "2026-06-14T20:00";
 
-  // Mock available dates
-  const [startDate, setStartDate] = useState(defaultStart);
-  const [endDate, setEndDate] = useState(defaultEnd);
+  const getLocalDateStr = (date: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
+  };
+
+  const [startDate, setStartDate] = useState(() => {
+    const s = searchParams.get("startDate");
+    if (s) return `${s}T09:00`;
+    const now = new Date();
+    now.setHours(now.getHours() + 1, 0, 0, 0);
+    return getLocalDateStr(now);
+  });
+
+  const [endDate, setEndDate] = useState(() => {
+    const e = searchParams.get("endDate");
+    if (e) return `${e}T20:00`;
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 25, 0, 0, 0);
+    return getLocalDateStr(tomorrow);
+  });
+
+  useEffect(() => {
+    const s = searchParams.get("startDate");
+    const e = searchParams.get("endDate");
+    if (s) setStartDate(`${s}T09:00`);
+    if (e) setEndDate(`${e}T20:00`);
+  }, [searchParams]);
 
   const [deliveryFee, setDeliveryFee] = useState(0);
 
@@ -154,13 +176,15 @@ const CarDetailPage: React.FC = () => {
   // Calculate pricing based on selected plan
   const selectedPrice = pricing.find(p => p.rental_plan_id === selectedPlan)?.price ?? 0;
   
-  const baseImg = MODEL_LOCAL_IMAGES[model.vehicle_model_id] ?? images[0]?.image_url;
-  const galleryImages = [
-    baseImg,
-    "/images/extra_1.png",
-    "/images/extra_2.png",
-    "/images/extra_3.png"
-  ].filter(Boolean) as string[];
+  let galleryImages = images.map(img => img.image_url);
+  if (galleryImages.length <= 1 && MODEL_LOCAL_IMAGES[model.vehicle_model_id]) {
+    galleryImages = [
+      MODEL_LOCAL_IMAGES[model.vehicle_model_id],
+      "/images/extra_1.png",
+      "/images/extra_2.png",
+      "/images/extra_3.png"
+    ];
+  }
 
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
