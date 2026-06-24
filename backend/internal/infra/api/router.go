@@ -152,6 +152,7 @@ func NewRouter(
 		r.Get("/my-registrations", ownerRegHandler.GetMyRegistrations)
 		r.Get("/vehicles", handlers.ListOwnerVehiclesHandler(vehicleSvc, log))
 		r.Put("/vehicles/{id}/status", handlers.UpdateVehicleStatusHandler(vehicleSvc, log))
+		r.Get("/bookings", handlers.GetOwnerBookingsHandler(bookingSvc, log))
 	})
 
 	// Authenticated user blog routes

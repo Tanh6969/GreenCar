@@ -55,6 +55,11 @@ func (s *BookingService) ListBookingsByUser(userID, limit, offset int) ([]*entit
 	return s.repo.ListByUser(userID, limit, offset)
 }
 
+// ListBookingsByOwner returns bookings for vehicles owned by a specific owner.
+func (s *BookingService) ListBookingsByOwner(ownerID, limit, offset int) ([]*entities.Booking, error) {
+	return s.repo.ListByOwner(ownerID, limit, offset)
+}
+
 // UpdateBooking updates an existing booking.
 func (s *BookingService) UpdateBooking(b *entities.Booking) error {
 	return s.repo.Update(b)

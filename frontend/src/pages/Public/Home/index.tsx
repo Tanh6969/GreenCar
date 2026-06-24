@@ -104,7 +104,6 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
   const { model, vehicle, location } = data;
   const isLuxury = LUXURY_MODEL_IDS.includes(model.vehicle_model_id);
   const img = getImage(data);
-  const available = vehicle.status === "available";
 
   return (
     <Link
@@ -118,12 +117,7 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         ) : (
           <div className="w-full h-36 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center">
             <IcCar size={48} color="#4FBD91" />
-          </div>
         )}
-        <span className={`absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full
-          ${available ? "bg-[#006C4C] text-white" : "bg-[#9CA3AF] text-white"}`}>
-          {available ? "Còn trống" : "Đã đặt"}
-        </span>
       </div>
 
       <div className="p-3.5">
@@ -293,8 +287,10 @@ const HomePage: React.FC = () => {
 
       {/* ── HERO ──────────────────────────────────────────────── */}
       <section className="relative h-[600px] flex items-center overflow-hidden bg-black">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
+        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
+          <source src="/videos/xemau.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
 
         <div className="relative z-10 max-w-[1440px] mx-auto px-6 w-full grid lg:grid-cols-[1fr_400px] gap-10 items-center">
           <div>
@@ -395,13 +391,13 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* ── PREMIUM DARK ──────────────────────────────────────── */}
-      <section className="bg-white py-14">
+      <section className="bg-[#0B0F19] py-14">
         <div className="max-w-[1440px] mx-auto px-6">
           <div className="flex items-end justify-between mb-8">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#006C4C] mb-1">Cao cấp</p>
-              <h2 className="text-3xl font-bold text-black">Dòng Xe Sang Premium</h2>
-              <p className="text-[#475569] text-sm mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
+              <p className="text-sm font-bold uppercase tracking-[0.15em] text-[#4FBD91] mb-1">Cao cấp</p>
+              <h2 className="text-3xl font-bold text-white">Dòng Xe Sang Premium</h2>
+              <p className="text-[#94A3B8] text-sm mt-1">Trải nghiệm cao cấp nhất — dành cho dịp đặc biệt.</p>
             </div>
             <Link to="/cars" className="text-base font-semibold text-[#4FBD91] hover:text-white transition-colors hidden sm:block">
               Xem tất cả →
@@ -415,7 +411,7 @@ const HomePage: React.FC = () => {
               { img: PREMIUM_IMAGES.lucidAir,   brand: "Lucid",  name: "Air Grand Touring", price: "3.800.000", range: "760km", accel: "3.0s" },
             ].map(car => (
               <div key={car.name}
-                className="bg-white rounded-2xl overflow-hidden border border-[#E5E7EB] hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
+                className="bg-[#131A2B] rounded-2xl overflow-hidden border border-white/10 hover:-translate-y-1 hover:shadow-2xl hover:border-white/20 transition-all duration-200">
                 <div className="relative overflow-hidden group">
                   <img src={car.img} alt={car.name} className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300" />
                   <span className="absolute top-3 right-3 bg-[#006C4C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wide">
@@ -423,19 +419,19 @@ const HomePage: React.FC = () => {
                   </span>
                 </div>
                 <div className="p-5">
-                  <p className="text-[#475569] text-sm mb-0.5">{car.brand}</p>
-                  <p className="text-[#191C1E] font-bold text-lg mb-1">{car.name}</p>
-                  <p className="text-[#006C4C] font-bold text-2xl mb-4">
-                    {car.price}đ<span className="text-[#475569] text-sm font-normal">/ngày</span>
+                  <p className="text-[#94A3B8] text-sm mb-0.5">{car.brand}</p>
+                  <p className="text-white font-bold text-lg mb-1">{car.name}</p>
+                  <p className="text-[#4FBD91] font-bold text-2xl mb-4">
+                    {car.price}đ<span className="text-[#94A3B8] text-sm font-normal">/ngày</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-[#E5E7EB] text-sm">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-4 border-t border-white/10 text-sm">
                     <div className="flex items-center gap-1.5">
                       <IcBolt size={16} color="#4FBD91" />
-                      <span className="text-[#191C1E] font-semibold">{car.range}</span>
+                      <span className="text-white font-semibold">{car.range}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <IcTimer size={16} color="#4FBD91" />
-                      <span className="text-[#191C1E] font-semibold">0–100: {car.accel}</span>
+                      <span className="text-white font-semibold">0–100: {car.accel}</span>
                     </div>
                   </div>
                 </div>

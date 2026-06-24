@@ -126,6 +126,39 @@ func GetMyBookingsHandler(bookingSvc *service.BookingService, log *logger.Logger
 	}
 }
 
+// GetOwnerBookingsHandler returns bookings for vehicles owned by the authenticated owner.
+func GetOwnerBookingsHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "not authenticated")
+			return
+		}
+
+		q := r.URL.Query()
+		limit := 50
+		offset := 0
+		if l := q.Get("limit"); l != "" {
+			if v, err := strconv.Atoi(l); err == nil && v > 0 {
+				limit = v
+			}
+		}
+		if o := q.Get("offset"); o != "" {
+			if v, err := strconv.Atoi(o); err == nil && v >= 0 {
+				offset = v
+			}
+		}
+
+		bookings, err := bookingSvc.ListBookingsByOwner(int(payload.UserId), limit, offset)
+		if err != nil {
+			log.Warn("list owner bookings: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to list owner bookings")
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponses(bookings))
+	}
+}
+
 // SetBookingStatusHandler allows admin to change only the status of a booking.
 func SetBookingStatusHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

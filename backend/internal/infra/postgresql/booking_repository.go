@@ -115,6 +115,15 @@ func (r *bookingRepository) ListByUser(userID int, limit, offset int) ([]*entiti
 	return scanBookings(rows)
 }
 
+func (r *bookingRepository) ListByOwner(ownerID int, limit, offset int) ([]*entities.Booking, error) {
+	rows, err := r.db.Query(selectBookingDetail+` WHERE v.owner_id=$1 ORDER BY b.booking_id DESC LIMIT $2 OFFSET $3`, ownerID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanBookings(rows)
+}
+
 func scanBookings(rows *sql.Rows) ([]*entities.Booking, error) {
 	var bookings []*entities.Booking
 	for rows.Next() {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../../../services/api";
+import { bookingService } from "../../../services/booking.service";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import fallbackImg from "../../../assets/images/Premium EV Experience.png";
 
@@ -34,10 +35,11 @@ const STATUS_MAP = {
 
 const MyVehiclesPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"vehicles" | "registrations">("vehicles");
+  const [activeTab, setActiveTab] = useState<"vehicles" | "registrations" | "bookings">("vehicles");
   
   const [items, setItems] = useState<MyRegistration[]>([]);
   const [vehicles, setVehicles] = useState<VehicleCardResponse[]>([]);
+  const [ownerBookings, setOwnerBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [settingVehicleId, setSettingVehicleId] = useState<number | null>(null);
   const [availableFrom, setAvailableFrom] = useState("");
@@ -53,11 +55,15 @@ const MyVehiclesPage: React.FC = () => {
       if (activeTab === "registrations") {
         const data = await apiClient<MyRegistration[]>("/owner/my-registrations");
         setItems(data || []);
+      } else if (activeTab === "bookings") {
+        const data = await bookingService.getOwnerBookings();
+        setOwnerBookings(data || []);
       } else {
         const data = await apiClient<VehicleCardResponse[]>("/owner/vehicles");
         setVehicles(data || []);
       }
     } catch {
+
       if (activeTab === "registrations") setItems(MOCK_MY);
     } finally {
       setLoading(false);
@@ -104,6 +110,17 @@ const MyVehiclesPage: React.FC = () => {
             Xe đang hoạt động
           </button>
           <button
+            onClick={() => setActiveTab("bookings")}
+            style={{
+              padding: "0 0 12px", background: "none", border: "none",
+              borderBottom: activeTab === "bookings" ? "3px solid #006C4C" : "3px solid transparent",
+              color: activeTab === "bookings" ? "#191C1E" : "#6E7A72",
+              fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s"
+            }}
+          >
+            Đơn đặt xe
+          </button>
+          <button
             onClick={() => setActiveTab("registrations")}
             style={{
               padding: "0 0 12px", background: "none", border: "none",
@@ -118,12 +135,12 @@ const MyVehiclesPage: React.FC = () => {
 
         {loading ? (
           <div style={{ textAlign: "center", padding: 60, color: "#6E7A72" }}>Đang tải...</div>
-        ) : (activeTab === "vehicles" ? vehicles.length === 0 : items.length === 0) ? (
+        ) : (activeTab === "vehicles" ? vehicles.length === 0 : activeTab === "bookings" ? ownerBookings.length === 0 : items.length === 0) ? (
           <div style={{ textAlign: "center", padding: 80, background: "#fff", borderRadius: 20, border: "1px solid #E5EBE8" }}>
             <div style={{ marginBottom: 16, color: "var(--green)", display: "flex", justifyContent: "center" }}>
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
             </div>
-            <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 12px", color: "#191C1E" }}>Chưa có {activeTab === "vehicles" ? "xe nào" : "đơn đăng ký nào"}</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 12px", color: "#191C1E" }}>Chưa có {activeTab === "vehicles" ? "xe nào" : activeTab === "bookings" ? "đơn đặt xe nào" : "đơn đăng ký nào"}</h2>
             <p style={{ color: "#6E7A72", margin: "0 0 28px" }}>Đăng ký xe đầu tiên của bạn và bắt đầu tạo thu nhập!</p>
             <button onClick={() => navigate("/owner/register")} className="btn btn-primary btn-lg">
               Đăng ký cho thuê xe →
@@ -167,7 +184,7 @@ const MyVehiclesPage: React.FC = () => {
                       background: v.vehicle.status === "available" ? "#ECFDF5" : "#FEF2F2", 
                       color: v.vehicle.status === "available" ? "#10B981" : "#EF4444" 
                     }}>
-                      {v.vehicle.status === "available" ? "Sẵn sàng cho thuê" : "Tạm ngưng / Bảo trì"}
+                      {v.vehicle.status === "available" ? "Đang hoạt động" : "Tạm ngưng"}
                     </span>
                   </div>
                   
@@ -188,17 +205,6 @@ const MyVehiclesPage: React.FC = () => {
                   </div>
 
                   <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                    {v.vehicle.status === "booked" ? (
-                      <button 
-                        onClick={() => updateVehicleStatus(v.vehicle.id, "available")}
-                        style={{ 
-                          padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700,
-                          border: "1px solid #EF4444", background: "#fff", color: "#EF4444",
-                          cursor: "pointer"
-                        }}>
-                        Khách đã trả xe
-                      </button>
-                    ) : (
                       <button 
                         onClick={() => {
                           setSettingVehicleId(v.vehicle.id);
@@ -211,7 +217,6 @@ const MyVehiclesPage: React.FC = () => {
                         }}>
                         Thiết lập thời gian cho thuê
                       </button>
-                    )}
                     <button 
                       onClick={() => navigate(`/cars/${v.vehicle.id}`)}
                       style={{ 
@@ -224,7 +229,64 @@ const MyVehiclesPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )) : items.map(item => {
+            )) : activeTab === "bookings" ? ownerBookings.map((b: any) => {
+              const start = new Date(b.start_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+              const end = new Date(b.end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
+              const isPastEndTime = new Date(b.end_time).getTime() < Date.now();
+              const effectiveStatus = (b.status === "active" || b.status === "running") && isPastEndTime ? "completed" : b.status;
+              let statusText = "Chờ duyệt"; let statusBg = "#FEF3C7"; let statusColor = "#F59E0B";
+              if (effectiveStatus === "confirmed") { statusText = "Đã xác nhận"; statusBg = "#EFF6FF"; statusColor = "#3B82F6"; }
+              if (effectiveStatus === "active" || effectiveStatus === "running") { statusText = "Đang cho thuê"; statusBg = "#ECFDF5"; statusColor = "#10B981"; }
+              if (effectiveStatus === "completed") { statusText = "Đã hoàn thành"; statusBg = "#F3F4F6"; statusColor = "#6B7280"; }
+              if (effectiveStatus === "cancelled") { statusText = "Đã hủy"; statusBg = "#FEF2F2"; statusColor = "#EF4444"; }
+
+              return (
+                <div key={b.booking_id} style={{
+                  background: "#fff", borderRadius: 16, padding: 24,
+                  border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
+                  transition: "box-shadow 0.2s",
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "1px dashed #E5EBE8", paddingBottom: 16, marginBottom: 16 }}>
+                      <div>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "var(--green)", background: "#ECFDF5", padding: "4px 10px", borderRadius: 8, marginRight: 8 }}>
+                          Mã đơn: GC-{String(b.booking_id).padStart(5, "0")}
+                        </span>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, margin: "10px 0 4px", color: "#191C1E" }}>
+                          {b.vehicle_brand} {b.vehicle_name} ({b.license_plate})
+                        </h3>
+                        <p style={{ fontSize: 14, color: "#6E7A72", margin: 0 }}>
+                          👤 Khách hàng: {b.customer_name} · 📞 {b.customer_phone}
+                        </p>
+                      </div>
+                      <span style={{ padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, background: statusBg, color: statusColor, whiteSpace: "nowrap" }}>
+                        {statusText}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Lịch thuê xe</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "#191C1E" }}>Nhận: <span style={{color: "var(--green)"}}>{start}</span></div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "#191C1E", marginTop: 4 }}>Trả: <span style={{color: "var(--green)"}}>{end}</span></div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Giá trị đơn</div>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#191C1E" }}>
+                          {Number(b.total_price).toLocaleString("vi")}đ
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Đã thanh toán (Cọc 30%)</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: "var(--green)" }}>
+                          {Number(b.deposit_amount).toLocaleString("vi")}đ
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }) : items.map(item => {
               const s = STATUS_MAP[item.status];
               const coverImg = item.images?.find(i => i.type === "front")?.url;
               return (

@@ -51,6 +51,7 @@ interface VehicleDetailApiResponse {
   reviews:  ApiReview[];
   meta:     ApiMeta;
   owner?:   ApiOwner;
+  active_bookings?: { start_time: string; end_time: string }[];
 }
 
 // ── mappers ───────────────────────────────────────────────────
@@ -128,6 +129,10 @@ export const vehicleService = {
         trip_count: r.owner.trip_count, avg_rating: r.owner.avg_rating,
       } : undefined,
       meta: r.meta,
+      active_bookings: (r.active_bookings ?? []).map(b => ({
+        start_time: b.start_time,
+        end_time: b.end_time,
+      })),
     };
   },
 

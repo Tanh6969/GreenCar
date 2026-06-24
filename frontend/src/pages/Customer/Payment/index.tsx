@@ -94,12 +94,15 @@ const PaymentPage: React.FC = () => {
         });
         bookingId = booking.booking_id;
         
-        if (pendingBooking.customerNote) {
-          try {
-            await chatService.sendMessage(bookingId, pendingBooking.customerNote);
-          } catch (chatErr) {
-            console.error("Lỗi gửi tin nhắn mặc định:", chatErr);
-          }
+        try {
+          const defaultMsg = `Chào bạn, tôi vừa đặt thuê xe ${vehicleInfo.name} của bạn. Lịch trình từ ${formatDT(startTime)} đến ${formatDT(endTime)}. Vui lòng chuẩn bị và giao xe đúng lịch nhé!`;
+          const finalMsg = pendingBooking.customerNote 
+            ? `${defaultMsg}\n\nGhi chú thêm của tôi: ${pendingBooking.customerNote}`
+            : defaultMsg;
+            
+          await chatService.sendMessage(bookingId, finalMsg);
+        } catch (chatErr) {
+          console.error("Lỗi gửi tin nhắn mặc định:", chatErr);
         }
       }
 

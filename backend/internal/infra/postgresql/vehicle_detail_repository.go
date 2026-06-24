@@ -330,5 +330,6 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			Available:   available,
 		},
 		OwnerInfo: &owner,
+		ActiveBookings: activeBookings,
 	}, nil
 }

@@ -95,8 +95,6 @@ const CarListPage: React.FC = () => {
 
     if (filterLocation)
       list = list.filter(v => v.location.location_id === filterLocation);
-    if (onlyAvailable)
-      list = list.filter(v => v.vehicle.status === "available");
     if (selectedTypes.length)
       list = list.filter(v => selectedTypes.includes(v.model.vehicle_type));
     if (selectedBrands.length)
@@ -118,7 +116,7 @@ const CarListPage: React.FC = () => {
     });
 
     return list;
-  }, [vehicles, filterLocation, onlyAvailable, selectedTypes, selectedBrands, minRange, searchQuery, sortBy, user?.user_id]);
+  }, [vehicles, filterLocation, selectedTypes, selectedBrands, minRange, searchQuery, sortBy, user?.user_id]);
 
   const toggleType = (t: string) =>
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
@@ -130,7 +128,6 @@ const CarListPage: React.FC = () => {
     setSelectedTypes([]);
     setSelectedBrands([]);
     setMinRange(0);
-    setOnlyAvailable(false);
     setFilterLocation(null);
     setFilterStartDate("");
     setFilterEndDate("");
@@ -173,13 +170,6 @@ const CarListPage: React.FC = () => {
             <span className="font-semibold text-[#151C27]">Bộ lọc</span>
             <button onClick={resetFilters} className="text-sm text-[#006C4C] hover:underline font-medium">Xóa tất cả</button>
           </div>
-
-          {/* available only */}
-          <label className="flex items-center gap-2.5 mb-5 cursor-pointer">
-            <input type="checkbox" checked={onlyAvailable} onChange={e => setOnlyAvailable(e.target.checked)}
-              className="w-4 h-4 accent-[#006C4C]" />
-            <span className="text-sm text-[#3E4943]">Chỉ xe còn trống</span>
-          </label>
 
           <hr className="border-[#F3F4F6] mb-5" />
 
@@ -267,8 +257,6 @@ const CarListPage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filtered.map(item => {
-                const available = item.vehicle.status === "available";
-
                 return (
                   <article key={item.vehicle.vehicle_id}
                     className="bg-white rounded-xl overflow-hidden border border-[#BDCAC1] shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-lg transition-all duration-200">
@@ -279,10 +267,6 @@ const CarListPage: React.FC = () => {
                       ) : (
                         <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center"><IcCarPlaceholder /></div>
                       )}
-                      <span className={`absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full
-                        ${available ? "bg-[#006C4C] text-white" : "bg-[#E5E7EB] text-[#6E7A72]"}`}>
-                        {available ? "Còn trống" : "Đã đặt"}
-                      </span>
                     </div>
 
                     <div className="p-4">

@@ -15,6 +15,7 @@ type BookingRepository interface {
 	Delete(id int) error
 	List(limit, offset int) ([]*entities.Booking, error)
 	ListByUser(userID int, limit, offset int) ([]*entities.Booking, error)
+	ListByOwner(ownerID int, limit, offset int) ([]*entities.Booking, error)
 	// ExistsOverlapping returns true if there is an existing booking for the same vehicle
 	// that overlaps the given time range.
 	ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error)

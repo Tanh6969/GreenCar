@@ -47,6 +47,11 @@ export const bookingService = {
     return (data ?? []).map(toBooking);
   },
 
+  async getOwnerBookings(): Promise<Booking[]> {
+    const data = await apiClient<ApiBooking[]>("/owner/bookings");
+    return (data ?? []).map(toBooking);
+  },
+
   async getAllBookings(): Promise<Booking[]> {
     const data = await apiClient<ApiBooking[]>("/admin/bookings");
     return (data ?? []).map(toBooking);

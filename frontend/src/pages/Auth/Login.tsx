@@ -132,7 +132,7 @@ const LoginPage: React.FC = () => {
           marginTop: 20, padding: "10px 14px", background: "#f0fdf4",
           border: "1px solid var(--green-border)", borderRadius: 8, fontSize: 12, color: "var(--text-muted)"
         }}>
-          <strong style={{ color: "var(--green)" }}>Demo:</strong> Admin: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>admin@greencar.vn</code> — Customer: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>nguyenvanan@gmail.com</code> — mật khẩu: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>password</code>
+          <strong style={{ color: "var(--green)" }}>Demo:</strong> Admin: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>admin@greencar.vn</code> — Customer: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>nguyenvanan@gmail.com</code> — mật khẩu: <code style={{ background: "#dcfce7", padding: "1px 5px", borderRadius: 4 }}>123456</code>
         </div>
       </div>
     </div>
