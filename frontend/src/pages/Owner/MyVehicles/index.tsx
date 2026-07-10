@@ -118,7 +118,8 @@ const MyVehiclesPage: React.FC = () => {
     try {
       if (activeTab === "registrations") {
         const data = await apiClient<MyRegistration[]>("/owner/my-registrations");
-        setItems(data || []);
+        const pendingOrRejected = (data || []).filter(item => item.status !== "approved");
+        setItems(pendingOrRejected);
       } else if (activeTab === "bookings") {
         loadOwnerBookings();
       } else {
