@@ -30,6 +30,10 @@ type BookingResponse struct {
 	LicensePlate  string `json:"license_plate,omitempty"`
 	CustomerName  string `json:"customer_name,omitempty"`
 	CustomerPhone string `json:"customer_phone,omitempty"`
+	CustomerEmail string `json:"customer_email,omitempty"`
+	CustomerLicenseNo string `json:"customer_license_no,omitempty"`
+	CustomerTripCount int    `json:"customer_trip_count,omitempty"`
+	OwnerNote     string `json:"owner_note,omitempty"`
 	HasReviewed   bool   `json:"has_reviewed"`
 }
 
@@ -72,4 +76,35 @@ type CompleteBookingRequest struct {
 	ActualKM     int     `json:"actual_km"`
 	ExtraFee     float64 `json:"extra_fee"`
 	ExtraFeeDesc string  `json:"extra_fee_desc"`
+}
+
+// ApproveBookingRequest is used by owner to approve or reject a pending booking.
+type ApproveBookingRequest struct {
+	OwnerNote string `json:"owner_note"`
+}
+
+// PricingRuleRequest is used to create/update a vehicle pricing rule.
+type PricingRuleRequest struct {
+	RuleType        string  `json:"rule_type"`
+	DiscountPercent float64 `json:"discount_percent"`
+	ExtraPercent    float64 `json:"extra_percent"`
+	MinDays         int     `json:"min_days"`
+	PromoStartDate  string  `json:"promo_start_date,omitempty"` // YYYY-MM-DD
+	PromoEndDate    string  `json:"promo_end_date,omitempty"`   // YYYY-MM-DD
+	IsActive        bool    `json:"is_active"`
+}
+
+// CalculatePriceRequest is sent by frontend to preview adjusted price.
+type CalculatePriceRequest struct {
+	VehicleID  int     `json:"vehicle_id"`
+	BasePrice  float64 `json:"base_price"`
+	StartTime  string  `json:"start_time"`
+	EndTime    string  `json:"end_time"`
+}
+
+// CalculatePriceResponse returns the adjusted price with applied rules.
+type CalculatePriceResponse struct {
+	OriginalPrice float64  `json:"original_price"`
+	FinalPrice    float64  `json:"final_price"`
+	AppliedRules  []string `json:"applied_rules"`
 }

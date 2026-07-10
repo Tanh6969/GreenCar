@@ -8,13 +8,14 @@ import { apiClient } from "../../../services/api";
 
 type BookingStatus = Booking["status"];
 
-const STATUS_CONFIG: Record<BookingStatus, { label: string; textColor: string; bgColor: string }> = {
-  pending:   { label: "Chờ xác nhận", textColor: "text-amber-700",    bgColor: "bg-amber-100" },
-  confirmed: { label: "Đã xác nhận",  textColor: "text-blue-700",     bgColor: "bg-blue-100" },
-  active:    { label: "Đang thuê",    textColor: "text-[#006C4C]",    bgColor: "bg-[#ECFDF5]" },
-  running:   { label: "Đang thuê",    textColor: "text-[#006C4C]",    bgColor: "bg-[#ECFDF5]" },
-  completed: { label: "Hoàn thành",   textColor: "text-gray-700",     bgColor: "bg-gray-100" },
-  cancelled: { label: "Đã huỷ",       textColor: "text-red-600",      bgColor: "bg-red-50" },
+const STATUS_CONFIG: Record<string, { label: string; textColor: string; bgColor: string }> = {
+  pending:         { label: "Chờ duyệt",      textColor: "text-amber-700",    bgColor: "bg-amber-100" },
+  confirmed:       { label: "Sắp tới",        textColor: "text-blue-700",     bgColor: "bg-blue-100" },
+  active:          { label: "Đang thuê",      textColor: "text-[#006C4C]",    bgColor: "bg-[#ECFDF5]" },
+  running:         { label: "Đang thuê",      textColor: "text-[#006C4C]",    bgColor: "bg-[#ECFDF5]" },
+  pending_payment: { label: "Chưa thanh toán",textColor: "text-red-700",      bgColor: "bg-red-100" },
+  completed:       { label: "Hoàn thành",     textColor: "text-gray-700",     bgColor: "bg-gray-100" },
+  cancelled:       { label: "Đã huỷ",         textColor: "text-red-600",      bgColor: "bg-red-50" },
 };
 
 function formatRef(id: number) {
@@ -43,10 +44,7 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
     : `Xe #${booking.vehicle_id}`;
   const plate = booking.license_plate ?? "";
 
-  const isPastEndTime = new Date(booking.end_time).getTime() < Date.now();
-  const effectiveStatus = (booking.status === "active" || booking.status === "running") && isPastEndTime 
-    ? "completed" 
-    : booking.status;
+  const effectiveStatus = booking.status === "paid" ? "completed" : booking.status;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -162,10 +160,23 @@ const MyBookingsPage: React.FC = () => {
 
   const filteredBookings = bookings.filter(b => {
     if (filterStatus === "all") return true;
-    const isCompleted = new Date(b.end_time) < new Date() || b.status === "completed";
-    const effectiveStatus = isCompleted ? "completed" : b.status;
+    const effectiveStatus = b.status === "paid" ? "completed" : b.status;
+    if (filterStatus === "active") return effectiveStatus === "active" || effectiveStatus === "running";
     return effectiveStatus === filterStatus;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterStatus]);
+
+  const totalPages = Math.ceil(filteredBookings.length / ITEMS_PER_PAGE);
+  const paginatedBookings = filteredBookings.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -214,6 +225,7 @@ const MyBookingsPage: React.FC = () => {
                   { value: "pending", label: "Chờ duyệt" },
                   { value: "confirmed", label: "Sắp tới" },
                   { value: "active", label: "Đang thuê" },
+                  { value: "pending_payment", label: "Chưa thanh toán" },
                   { value: "completed", label: "Hoàn thành" },
                   { value: "cancelled", label: "Đã hủy" }
                 ].map(opt => (
@@ -237,9 +249,44 @@ const MyBookingsPage: React.FC = () => {
                 Không có đơn thuê nào khớp với bộ lọc.
               </div>
             ) : (
-              filteredBookings.map(booking => (
-                <BookingCard key={booking.booking_id} booking={booking} onReview={setReviewBooking} />
-              ))
+              <>
+                {paginatedBookings.map(booking => (
+                  <BookingCard key={booking.booking_id} booking={booking} onReview={setReviewBooking} />
+                ))}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-6">
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                    >
+                      Trước
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-9 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                          currentPage === page
+                            ? "bg-[#006C4C] text-white"
+                            : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-medium disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                    >
+                      Sau
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

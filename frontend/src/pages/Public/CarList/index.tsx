@@ -267,6 +267,11 @@ const CarListPage: React.FC = () => {
                       ) : (
                         <div className="w-full h-48 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center"><IcCarPlaceholder /></div>
                       )}
+                      {(item.promo_discount ?? 0) > 0 && (
+                        <span className="absolute top-3 left-3 bg-[#EF4444] text-white text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-md z-10">
+                          🔥 GIẢM {item.promo_discount}%
+                        </span>
+                      )}
                     </div>
 
                     <div className="p-4">

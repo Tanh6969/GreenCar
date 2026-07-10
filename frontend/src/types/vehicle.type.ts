@@ -63,4 +63,6 @@ export interface VehicleCardData {
   image_url?: string;
   price_24h: number;
   price_4h: number;
+  promo_discount?: number;
+  promo_end_date?: string;
 }

@@ -27,6 +27,8 @@ interface VehicleCardResponse {
   trip_count: number;
   revenue: number;
   avg_rating: number;
+  promo_discount?: number;
+  promo_end_date?: string;
 }
 
 interface Unavailability {
@@ -47,6 +49,12 @@ const MyVehiclesPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"vehicles" | "registrations" | "bookings">("vehicles");
   const [bookingFilter, setBookingFilter] = useState<string>("all");
+  const [bookingPage, setBookingPage] = useState(1);
+  const BOOKINGS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setBookingPage(1);
+  }, [bookingFilter]);
   
   const [items, setItems] = useState<MyRegistration[]>([]);
   const [vehicles, setVehicles] = useState<VehicleCardResponse[]>([]);
@@ -70,9 +78,40 @@ const MyVehiclesPage: React.FC = () => {
   const [startODO, setStartODO] = useState<number | "">("");
   const [checklist, setChecklist] = useState({ license: false, photos: false });
 
+  // Pricing Rules
+  const [pricingVehicleId, setPricingVehicleId] = useState<number | null>(null);
+  const [pricingRules, setPricingRules] = useState<any[]>([]);
+  const [newRuleType, setNewRuleType] = useState<"weekend" | "promo">("weekend");
+  const [newRuleExtra, setNewRuleExtra] = useState<number | "">("");
+  const [newRuleDiscount, setNewRuleDiscount] = useState<number | "">("");
+  const [newPromoStart, setNewPromoStart] = useState<string>("");
+  const [newPromoEnd, setNewPromoEnd] = useState<string>("");
+
+
   useEffect(() => {
     loadData();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (pricingVehicleId) loadPricingRules(pricingVehicleId);
+  }, [pricingVehicleId]);
+
+
+
+  const filteredBookings = ownerBookings.filter((b: any) => {
+    if (bookingFilter === "all") return true;
+    if (bookingFilter === "pending") return b.status === "pending" || b.status === "confirmed";
+    if (bookingFilter === "active") return b.status === "active" || b.status === "running";
+    if (bookingFilter === "completed") return b.status === "completed" || b.status === "pending_payment";
+    if (bookingFilter === "cancelled") return b.status === "cancelled";
+    return true;
+  });
+
+  const totalBookingPages = Math.ceil(filteredBookings.length / BOOKINGS_PER_PAGE);
+  const paginatedOwnerBookings = filteredBookings.slice(
+    (bookingPage - 1) * BOOKINGS_PER_PAGE,
+    bookingPage * BOOKINGS_PER_PAGE
+  );
 
   const loadData = async () => {
     setLoading(true);
@@ -189,6 +228,37 @@ const MyVehiclesPage: React.FC = () => {
     setStartODO("");
     setSkipODO(false);
     setChecklist({ license: false, photos: false });
+  };
+
+  const loadPricingRules = async (vehicleId: number) => {
+    try {
+      const data = await apiClient<any[]>(`/owner/vehicles/${vehicleId}/pricing-rules`);
+      setPricingRules(data || []);
+    } catch { setPricingRules([]); }
+  };
+
+  const addPricingRule = async () => {
+    if (!pricingVehicleId) return;
+    const body: any = { rule_type: newRuleType, is_active: true, min_days: 0, discount_percent: 0, extra_percent: 0 };
+    if (newRuleType === "weekend") body.extra_percent = Number(newRuleExtra) || 0;
+    if (newRuleType === "promo") { 
+      body.discount_percent = Number(newRuleDiscount) || 0; 
+      body.promo_start_date = newPromoStart;
+      body.promo_end_date = newPromoEnd;
+    }
+    try {
+      await apiClient(`/owner/vehicles/${pricingVehicleId}/pricing-rules`, "POST", body);
+      loadPricingRules(pricingVehicleId);
+      setNewRuleExtra(""); setNewRuleDiscount(""); setNewPromoStart(""); setNewPromoEnd("");
+    } catch (err: any) { alert(err.message || "Lỗi khi thêm quy tắc"); }
+  };
+
+  const deletePricingRule = async (ruleId: number) => {
+    if (!pricingVehicleId) return;
+    try {
+      await apiClient(`/owner/vehicles/${pricingVehicleId}/pricing-rules/${ruleId}`, "DELETE");
+      loadPricingRules(pricingVehicleId);
+    } catch (err: any) { alert(err.message || "Lỗi"); }
   };
 
   const renderStepper = (status: string) => {
@@ -381,6 +451,15 @@ const MyVehiclesPage: React.FC = () => {
                         }}>
                         Quản lý Lịch bận
                       </button>
+                      <button
+                        onClick={() => setPricingVehicleId(v.vehicle.id)}
+                        style={{ 
+                          padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "1px solid #E5EBE8",
+                          background: "#fff", color: "#191C1E", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                        }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Chiến lược giá
+                      </button>
                     <button 
                       onClick={() => navigate(`/cars/${v.vehicle.id}`)}
                       style={{ 
@@ -393,20 +472,16 @@ const MyVehiclesPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )) : activeTab === "bookings" ? ownerBookings.filter((b: any) => {
-                if (bookingFilter === "all") return true;
-                if (bookingFilter === "pending") return b.status === "pending" || b.status === "confirmed";
-                if (bookingFilter === "active") return b.status === "active" || b.status === "running";
-                if (bookingFilter === "completed") return b.status === "completed" || b.status === "pending_payment";
-                if (bookingFilter === "cancelled") return b.status === "cancelled";
-                return true;
-              }).map((b: any) => {
+            )) : activeTab === "bookings" ? (
+              <>
+                {paginatedOwnerBookings.map((b: any) => {
               const start = new Date(b.start_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
               const end = new Date(b.end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
               const isPastEndTime = new Date(b.end_time).getTime() < Date.now();
               // Do not automatically set to completed if they haven't explicitly completed it.
-              const effectiveStatus = b.status;
+              const effectiveStatus = b.status === "paid" ? "completed" : b.status;
               let statusText = "Chờ duyệt"; let statusBg = "#FEF3C7"; let statusColor = "#F59E0B";
+              if (effectiveStatus === "pending") { statusText = "Chờ duyệt"; statusBg = "#FEF3C7"; statusColor = "#F59E0B"; }
               if (effectiveStatus === "confirmed") { statusText = "Đã xác nhận"; statusBg = "#EFF6FF"; statusColor = "#3B82F6"; }
               if (effectiveStatus === "active" || effectiveStatus === "running") { statusText = "Đang cho thuê"; statusBg = "#ECFDF5"; statusColor = "#10B981"; }
               if (effectiveStatus === "pending_payment") { statusText = "Chờ thanh toán"; statusBg = "#F3F4F6"; statusColor = "#6B7280"; }
@@ -470,6 +545,61 @@ const MyVehiclesPage: React.FC = () => {
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                           Tính tiền & Nhận xe
                         </button>
+                      </div>
+                    ) : effectiveStatus === "pending" ? (
+                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8" }}>
+                        {/* Customer profile card */}
+                        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#92400E", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                            Hồ sơ khách hàng
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 13 }}>
+                            <div><span style={{color: "#6E7A72"}}>Họ tên:</span> <strong>{b.customer_name}</strong></div>
+                            <div><span style={{color: "#6E7A72"}}>SĐT:</span> <strong>{b.customer_phone}</strong></div>
+                            <div><span style={{color: "#6E7A72"}}>Email:</span> <strong>{b.customer_email || "Chưa cung cấp"}</strong></div>
+                            <div><span style={{color: "#6E7A72"}}>Bằng lái:</span> <strong style={{color: b.customer_license_no ? "#059669" : "#EF4444"}}>{b.customer_license_no ? "✓ Đã xác minh" : "✗ Chưa có"}</strong></div>
+                            <div style={{gridColumn: "span 2"}}><span style={{color: "#6E7A72"}}>Số chuyến đã thuê:</span> <strong style={{color: "#3B82F6"}}>{b.customer_trip_count || 0} chuyến</strong></div>
+                          </div>
+                        </div>
+                        {/* Reject reason input */}
+                        <div style={{ marginBottom: 12 }}>
+                          <input
+                            id={`reject-note-${b.booking_id}`}
+                            type="text"
+                            placeholder="Lý do từ chối (nếu có)..."
+                            style={{ width: "100%", padding: "10px 14px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 13, outline: "none" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+                          <button
+                            onClick={async () => {
+                              const note = (document.getElementById(`reject-note-${b.booking_id}`) as HTMLInputElement)?.value || "";
+                              if (window.confirm("Xác nhận từ chối đơn đặt xe này?")) {
+                                try {
+                                  await apiClient(`/owner/bookings/${b.booking_id}/reject`, "POST", { owner_note: note });
+                                  loadOwnerBookings();
+                                } catch (err: any) { alert(err.message || "Lỗi"); }
+                              }
+                            }}
+                            style={{ padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "1px solid #FECACA", background: "#FEF2F2", color: "#EF4444", cursor: "pointer" }}
+                          >
+                            ✗ Từ chối
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (window.confirm("Xác nhận chấp nhận đơn đặt xe này?")) {
+                                try {
+                                  await apiClient(`/owner/bookings/${b.booking_id}/approve`, "POST", {});
+                                  loadOwnerBookings();
+                                } catch (err: any) { alert(err.message || "Lỗi"); }
+                              }
+                            }}
+                            style={{ padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none", background: "#006C4C", color: "#fff", cursor: "pointer" }}
+                          >
+                            ✓ Chấp nhận
+                          </button>
+                        </div>
                       </div>
                     ) : effectiveStatus === "confirmed" ? (
                       <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8", display: "flex", justifyContent: "flex-end", gap: 12 }}>
@@ -564,7 +694,52 @@ const MyVehiclesPage: React.FC = () => {
                   </div>
                 </div>
               );
-            }) : items.map(item => {
+            })}
+              {totalBookingPages > 1 && (
+                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 24, padding: "8px 0" }}>
+                  <button
+                    disabled={bookingPage === 1}
+                    onClick={() => setBookingPage(prev => Math.max(prev - 1, 1))}
+                    style={{
+                      padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700,
+                      border: "1px solid #E5EBE8", background: bookingPage === 1 ? "#F3F4F6" : "#fff",
+                      color: bookingPage === 1 ? "#9CA3AF" : "#3E4943",
+                      cursor: bookingPage === 1 ? "not-allowed" : "pointer"
+                    }}
+                  >
+                    Trước
+                  </button>
+                  {Array.from({ length: totalBookingPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setBookingPage(page)}
+                      style={{
+                        width: 36, height: 36, borderRadius: 8, fontSize: 13, fontWeight: 700,
+                        border: page === bookingPage ? "none" : "1px solid #E5EBE8",
+                        background: page === bookingPage ? "#006C4C" : "#fff",
+                        color: page === bookingPage ? "#fff" : "#3E4943",
+                        cursor: "pointer"
+                      }}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    disabled={bookingPage === totalBookingPages}
+                    onClick={() => setBookingPage(prev => Math.min(prev + 1, totalBookingPages))}
+                    style={{
+                      padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700,
+                      border: "1px solid #E5EBE8", background: bookingPage === totalBookingPages ? "#F3F4F6" : "#fff",
+                      color: bookingPage === totalBookingPages ? "#9CA3AF" : "#3E4943",
+                      cursor: bookingPage === totalBookingPages ? "not-allowed" : "pointer"
+                    }}
+                  >
+                    Sau
+                  </button>
+                </div>
+              )}
+              </>
+            ) : items.map(item => {
               const s = STATUS_MAP[item.status];
               const coverImg = item.images?.find(i => i.type === "front")?.url;
               return (
@@ -915,7 +1090,107 @@ const MyVehiclesPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Pricing Rules Modal */}
+      {pricingVehicleId && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 20, padding: 28, width: "100%", maxWidth: 560, boxShadow: "0 20px 40px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px", color: "#006C4C" }}>⚡ Chiến lược giá linh hoạt</h3>
+                <p style={{ fontSize: 14, color: "#6E7A72", margin: 0 }}>Cài đặt giá cuối tuần & giảm giá thuê nhiều ngày</p>
+              </div>
+              <button onClick={() => setPricingVehicleId(null)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#6E7A72" }}>×</button>
+            </div>
+
+            {/* Add new rule */}
+            <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 14, padding: 20, marginBottom: 20 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E", marginBottom: 14 }}>Thêm quy tắc giá mới</div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                <button
+                  onClick={() => setNewRuleType("weekend")}
+                  style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "2px solid", borderColor: newRuleType === "weekend" ? "#006C4C" : "#E5EBE8", background: newRuleType === "weekend" ? "#ECFDF5" : "#fff", color: newRuleType === "weekend" ? "#006C4C" : "#3E4943", cursor: "pointer", transition: "all 0.2s" }}
+                >
+                  🗓️ Giá Cuối Tuần
+                </button>
+                <button
+                  onClick={() => setNewRuleType("promo")}
+                  style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "2px solid", borderColor: newRuleType === "promo" ? "#006C4C" : "#E5EBE8", background: newRuleType === "promo" ? "#ECFDF5" : "#fff", color: newRuleType === "promo" ? "#006C4C" : "#3E4943", cursor: "pointer", transition: "all 0.2s" }}
+                >
+                  🔥 Khuyến mãi theo ngày
+                </button>
+              </div>
+
+              {newRuleType === "weekend" ? (
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#3E4943", marginBottom: 6 }}>Tăng thêm (%) vào Thứ 7 & Chủ Nhật</label>
+                  <div style={{ position: "relative" }}>
+                    <input type="number" min={0} max={100} value={newRuleExtra} onChange={e => setNewRuleExtra(e.target.value ? Number(e.target.value) : "")}
+                      placeholder="VD: 15" style={{ width: "100%", padding: "10px 40px 10px 14px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14, outline: "none" }} />
+                    <span style={{ position: "absolute", right: 14, top: 10, color: "#6E7A72", fontWeight: 700 }}>%</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#6E7A72", margin: "6px 0 0" }}>Ví dụ: nhập 15 → ngày cuối tuần đắt hơn 15% so với ngày thường.</p>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ display: "flex", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#3E4943", marginBottom: 6 }}>Từ ngày</label>
+                      <input type="date" value={newPromoStart} onChange={e => setNewPromoStart(e.target.value)}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14, outline: "none" }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#3E4943", marginBottom: 6 }}>Đến ngày</label>
+                      <input type="date" value={newPromoEnd} onChange={e => setNewPromoEnd(e.target.value)}
+                        style={{ width: "100%", padding: "10px 14px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14, outline: "none" }} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#3E4943", marginBottom: 6 }}>Giảm giá (%)</label>
+                    <div style={{ position: "relative" }}>
+                      <input type="number" min={0} max={50} value={newRuleDiscount} onChange={e => setNewRuleDiscount(e.target.value ? Number(e.target.value) : "")}
+                        placeholder="VD: 10" style={{ width: "100%", padding: "10px 40px 10px 14px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14, outline: "none" }} />
+                      <span style={{ position: "absolute", right: 14, top: 10, color: "#6E7A72", fontWeight: 700 }}>%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <button onClick={addPricingRule} style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 800, border: "none", background: "#006C4C", color: "#fff", cursor: "pointer" }}>
+                + Thêm quy tắc
+              </button>
+            </div>
+
+            {/* Existing rules */}
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E", marginBottom: 12 }}>Quy tắc đang áp dụng</div>
+            {pricingRules.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "24px 0", color: "#9CA3AF", fontSize: 14, background: "#F9FAFB", borderRadius: 10 }}>
+                Chưa có quy tắc nào. Thêm quy tắc phía trên để tăng doanh thu!
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {pricingRules.map((rule: any) => (
+                  <div key={rule.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: rule.is_active ? "#ECFDF5" : "#F9FAFB", border: "1px solid", borderColor: rule.is_active ? "#A7F3D0" : "#E5EBE8", borderRadius: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E" }}>
+                        {rule.rule_type === "weekend" ? "🗓️ Giá Cuối Tuần" : "🔥 Khuyến mãi"}
+                        {!rule.is_active && <span style={{ marginLeft: 8, fontSize: 11, color: "#6E7A72" }}>(Tắt)</span>}
+                      </div>
+                      <div style={{ fontSize: 13, color: "#6E7A72", marginTop: 4 }}>
+                        {rule.rule_type === "weekend"
+                          ? `Tăng +${rule.extra_percent}% vào thứ 7 & CN`
+                          : (rule.promo_start_date && rule.promo_end_date ? `Giảm ${rule.discount_percent}% từ ${new Date(rule.promo_start_date).toLocaleDateString("vi-VN")} đến ${new Date(rule.promo_end_date).toLocaleDateString("vi-VN")}` : `Giảm ${rule.discount_percent}%`)}
+                      </div>
+                    </div>
+                    <button onClick={() => deletePricingRule(rule.id)} style={{ background: "#FEF2F2", border: "none", color: "#EF4444", padding: "6px 12px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Xóa</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
+
   );
 };
 

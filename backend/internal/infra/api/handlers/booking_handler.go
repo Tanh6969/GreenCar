@@ -51,7 +51,7 @@ func CreateBookingHandler(bookingSvc *service.BookingService, log *logger.Logger
 			return
 		}
 
-		b.Status = "confirmed"
+		b.Status = "pending"
 
 		if err := bookingSvc.CreateBooking(&b); err != nil {
 			log.Warn("create booking: %v", err)

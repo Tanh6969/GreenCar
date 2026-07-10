@@ -26,6 +26,7 @@ func NewRouter(
 	ownerRegSvc *service.OwnerRegistrationService,
 	chatSvc *service.ChatService,
 	reviewSvc *service.ReviewService,
+	pricingRuleSvc *service.PricingRuleService,
 	db *database.DB,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -158,7 +159,17 @@ func NewRouter(
 		r.Get("/bookings", handlers.GetOwnerBookingsHandler(bookingSvc, log))
 		r.Put("/bookings/{id}/status", handlers.SetBookingStatusHandler(bookingSvc, log))
 		r.Post("/bookings/{id}/complete", handlers.CompleteBookingHandler(bookingSvc, log))
+		r.Post("/bookings/{id}/approve", handlers.ApproveBookingHandler(bookingSvc, log))
+		r.Post("/bookings/{id}/reject", handlers.RejectBookingHandler(bookingSvc, log))
+		// Pricing rules
+		r.Get("/vehicles/{id}/pricing-rules", handlers.ListPricingRulesHandler(pricingRuleSvc, vehicleSvc, log))
+		r.Post("/vehicles/{id}/pricing-rules", handlers.CreatePricingRuleHandler(pricingRuleSvc, vehicleSvc, log))
+		r.Put("/vehicles/{id}/pricing-rules/{rid}", handlers.UpdatePricingRuleHandler(pricingRuleSvc, log))
+		r.Delete("/vehicles/{id}/pricing-rules/{rid}", handlers.DeletePricingRuleHandler(pricingRuleSvc, log))
 	})
+
+	// Public price calculation endpoint
+	r.Post("/calculate-price", handlers.CalculatePriceHandler(pricingRuleSvc, log))
 
 	// Authenticated user blog routes
 	r.Route("/my/posts", func(r chi.Router) {

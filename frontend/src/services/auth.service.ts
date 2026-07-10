@@ -37,7 +37,7 @@ export const authService = {
   async login(email: string, password: string): Promise<{ token: string; user: User }> {
     const res = await apiClient<LoginResponse>("/auth/login", "POST", { email, password });
     // Store token temporarily so the next call can authenticate
-    localStorage.setItem("gc_token", res.access_token);
+    sessionStorage.setItem("gc_token", res.access_token);
     const userRes = await apiClient<UserResponse>(`/users/me`);
     return { token: res.access_token, user: toUser(userRes) };
   },
@@ -50,7 +50,7 @@ export const authService = {
       phone: payload.phone,
       license_no: payload.license_no,
     });
-    localStorage.setItem("gc_token", res.access_token);
+    sessionStorage.setItem("gc_token", res.access_token);
     const userRes = await apiClient<UserResponse>(`/users/me`);
     return { token: res.access_token, user: toUser(userRes) };
   },

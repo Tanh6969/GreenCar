@@ -29,7 +29,7 @@ export interface Booking {
   overtime_fee: number;
   over_km_fee: number;
   total_price: number;
-  status: "pending" | "confirmed" | "active" | "running" | "completed" | "cancelled";
+  status: "pending" | "confirmed" | "active" | "running" | "completed" | "cancelled" | "paid" | "pending_payment";
   payment_method: string;
   created_at: string;
   // Enriched from JOIN (may be absent on create response)

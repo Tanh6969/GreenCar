@@ -52,16 +52,19 @@ func main() {
 	ownerRegRepo := repository.NewOwnerRegistrationRepository(db)
 	chatRepo := repository.NewChatRepository(db)
 
+	pricingRuleRepo := repository.NewPricingRuleRepository(db)
+
 	userSvc := service.NewUserService(userRepo)
 	vehicleSvc := service.NewVehicleService(vehicleRepo, vehicleDetailRepo)
 	bookingSvc := service.NewBookingService(bookingRepo)
-	authSvc := service.NewAuthService(userRepo, roleRepo, maker, 15*time.Minute, 24*time.Hour)
+	authSvc := service.NewAuthService(userRepo, roleRepo, maker, 24*365*10*time.Hour, 24*365*10*time.Hour)
 	postSvc := service.NewPostService(postRepo)
 	ownerRegSvc := service.NewOwnerRegistrationService(ownerRegRepo)
 	chatSvc := service.NewChatService(chatRepo, bookingSvc, log)
 	reviewSvc := service.NewReviewService(repository.NewReviewRepository(db))
+	pricingRuleSvc := service.NewPricingRuleService(pricingRuleRepo)
 
-	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, reviewSvc, db)
+	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, reviewSvc, pricingRuleSvc, db)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {

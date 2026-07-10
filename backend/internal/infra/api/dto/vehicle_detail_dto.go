@@ -11,6 +11,8 @@ type VehicleCardResponse struct {
 	TripCount int                  `json:"trip_count"`
 	Revenue   float64              `json:"revenue"`
 	AvgRating float64              `json:"avg_rating"`
+	PromoDiscount float64          `json:"promo_discount,omitempty"`
+	PromoEndDate  string           `json:"promo_end_date,omitempty"`
 }
 
 // VehicleFeatureResponse represents a feature.

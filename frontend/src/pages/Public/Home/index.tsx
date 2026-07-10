@@ -119,6 +119,11 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
             <IcCar size={48} color="#4FBD91" />
           </div>
         )}
+        {(data.promo_discount ?? 0) > 0 && (
+          <span className="absolute top-2 left-2 bg-[#EF4444] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow z-10">
+            🔥 GIẢM {data.promo_discount}%
+          </span>
+        )}
       </div>
 
       <div className="p-3.5">

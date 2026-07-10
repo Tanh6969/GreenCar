@@ -67,7 +67,7 @@ func ToVehicleCardResponse(c *entities.VehicleCard) *dto.VehicleCardResponse {
 	if c == nil {
 		return nil
 	}
-	return &dto.VehicleCardResponse{
+	res := &dto.VehicleCardResponse{
 		Vehicle:  ToVehicleResponse(c.Vehicle),
 		Model:    toVehicleModelResponse(c.Model),
 		Location: toLocationResponse(c.Location),
@@ -77,7 +77,12 @@ func ToVehicleCardResponse(c *entities.VehicleCard) *dto.VehicleCardResponse {
 		TripCount: c.TripCount,
 		Revenue:  c.Revenue,
 		AvgRating: c.AvgRating,
+		PromoDiscount: c.PromoDiscount,
 	}
+	if c.PromoEndDate != nil {
+		res.PromoEndDate = c.PromoEndDate.Format("2006-01-02")
+	}
+	return res
 }
 
 func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailResponse {

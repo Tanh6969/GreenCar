@@ -19,20 +19,20 @@ export const apiClient = async <T>(
   body?: unknown
 ): Promise<T> => {
   if (USE_MOCK) {
-    const token = localStorage.getItem("gc_token");
+    const token = sessionStorage.getItem("gc_token");
     try {
       return await mockApiCall<T>(path, method, body, token);
     } catch (err: any) {
       if (err.status === 401 && !path.startsWith("/auth/")) {
-        localStorage.removeItem("gc_token");
-        localStorage.removeItem("gc_user");
+        sessionStorage.removeItem("gc_token");
+        sessionStorage.removeItem("gc_user");
         window.location.href = "/auth/login";
       }
       throw new ApiError(err.status ?? 500, err.message);
     }
   }
 
-  const token = localStorage.getItem("gc_token");
+  const token = sessionStorage.getItem("gc_token");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -44,8 +44,8 @@ export const apiClient = async <T>(
 
   if (!response.ok) {
     if (response.status === 401 && !path.startsWith("/auth/")) {
-      localStorage.removeItem("gc_token");
-      localStorage.removeItem("gc_user");
+      sessionStorage.removeItem("gc_token");
+      sessionStorage.removeItem("gc_user");
       window.location.href = "/auth/login";
     }
     let message = `API error: ${response.status}`;

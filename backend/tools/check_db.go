@@ -21,11 +21,9 @@ func main() {
 	defer db.Close()
 
 	rows, err := db.Query(`
-		SELECT v.vehicle_id, v.license_plate, u.name, m.name
-		FROM vehicles v
-		JOIN users u ON v.owner_id = u.user_id
-		JOIN vehicle_models m ON v.vehicle_model_id = m.vehicle_model_id
-		ORDER BY v.vehicle_id DESC LIMIT 10
+		SELECT booking_id, status, total_price, deposit_amount
+		FROM bookings
+		ORDER BY booking_id DESC LIMIT 10
 	`)
 	if err != nil {
 		log.Fatal(err)
@@ -34,8 +32,9 @@ func main() {
 
 	for rows.Next() {
 		var id int
-		var plate, owner, model string
-		rows.Scan(&id, &plate, &owner, &model)
-		log.Printf("Vehicle %d: plate='%s', owner='%s', model='%s'", id, plate, owner, model)
+		var status string
+		var price, deposit float64
+		rows.Scan(&id, &status, &price, &deposit)
+		log.Printf("Booking %d: status='[%s]', price=%f, deposit=%f", id, status, price, deposit)
 	}
 }

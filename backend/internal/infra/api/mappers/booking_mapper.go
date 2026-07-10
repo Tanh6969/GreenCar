@@ -53,6 +53,10 @@ func ToBookingResponse(b *entities.Booking) *dto.BookingResponse {
 		LicensePlate:  b.LicensePlate,
 		CustomerName:  b.CustomerName,
 		CustomerPhone: b.CustomerPhone,
+		CustomerEmail: b.CustomerEmail,
+		CustomerLicenseNo: b.CustomerLicenseNo,
+		CustomerTripCount: b.CustomerTripCount,
+		OwnerNote:     b.OwnerNote,
 		HasReviewed:   b.HasReviewed,
 	}
 }

@@ -6,12 +6,14 @@ import { Booking } from "../../../types/booking.type";
 type Status = Booking["status"] | "all";
 
 const STATUS_CONFIG: Record<Booking["status"], { label: string; color: string; bg: string }> = {
-  pending:   { label: "Chờ xác nhận", color: "#b45309", bg: "#fef3c7" },
-  confirmed: { label: "Đã xác nhận",  color: "#1d4ed8", bg: "#dbeafe" },
-  active:    { label: "Đang thuê",    color: "#006C4C", bg: "#dcfce7" },
-  running:   { label: "Đang thuê",    color: "#006C4C", bg: "#dcfce7" },
-  completed: { label: "Hoàn thành",   color: "#374151", bg: "#f3f4f6" },
-  cancelled: { label: "Đã huỷ",       color: "#dc2626", bg: "#fef2f2" },
+  pending:         { label: "Chờ xác nhận",  color: "#b45309", bg: "#fef3c7" },
+  confirmed:       { label: "Đã xác nhận",   color: "#1d4ed8", bg: "#dbeafe" },
+  active:          { label: "Đang thuê",     color: "#006C4C", bg: "#dcfce7" },
+  running:         { label: "Đang thuê",     color: "#006C4C", bg: "#dcfce7" },
+  pending_payment: { label: "Chưa thanh toán",color: "#dc2626", bg: "#fef2f2" },
+  completed:       { label: "Hoàn thành",    color: "#374151", bg: "#f3f4f6" },
+  paid:            { label: "Hoàn thành",    color: "#006c4c", bg: "#dcfce7" },
+  cancelled:       { label: "Đã huỷ",        color: "#dc2626", bg: "#fef2f2" },
 };
 
 const FILTERS: { key: Status; label: string }[] = [
@@ -92,14 +94,19 @@ const BookingManagePage: React.FC = () => {
   useEffect(() => { refresh(); }, [refresh]);
 
   const counts = bookings.reduce<Record<string, number>>((acc, b) => {
-    const key = (b.status === "active" || b.status === "running") ? "active" : b.status;
+    let key = b.status;
+    if (b.status === "active" || b.status === "running") key = "active";
+    if (b.status === "paid") key = "completed";
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
   }, {});
 
   const visible = filter === "all"
     ? bookings
-    : bookings.filter(b => b.status === filter || (filter === "active" && b.status === "running"));
+    : bookings.filter(b => {
+        const status = b.status === "paid" ? "completed" : b.status;
+        return status === filter || (filter === "active" && status === "running");
+      });
 
   if (loading) return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 240 }}>
