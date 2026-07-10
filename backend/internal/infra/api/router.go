@@ -156,6 +156,7 @@ func NewRouter(
 		r.Post("/vehicles/{id}/unavailabilities", handlers.AddVehicleUnavailabilityHandler(vehicleSvc, log))
 		r.Delete("/vehicles/{id}/unavailabilities/{uid}", handlers.DeleteVehicleUnavailabilityHandler(vehicleSvc, log))
 		r.Get("/bookings", handlers.GetOwnerBookingsHandler(bookingSvc, log))
+		r.Put("/bookings/{id}/status", handlers.SetBookingStatusHandler(bookingSvc, log))
 		r.Post("/bookings/{id}/complete", handlers.CompleteBookingHandler(bookingSvc, log))
 	})
 
