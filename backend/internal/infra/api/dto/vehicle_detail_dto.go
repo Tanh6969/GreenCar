@@ -2,17 +2,17 @@ package dto
 
 // VehicleCardResponse is the lightweight card view used in list pages and carousels.
 type VehicleCardResponse struct {
-	Vehicle  *VehicleResponse      `json:"vehicle"`
-	Model    *VehicleModelResponse `json:"model"`
-	Location *LocationResponse     `json:"location"`
-	ImageURL string                `json:"image_url"`
-	Price24h float64               `json:"price_24h"`
-	Price4h  float64               `json:"price_4h"`
-	TripCount int                  `json:"trip_count"`
-	Revenue   float64              `json:"revenue"`
-	AvgRating float64              `json:"avg_rating"`
-	PromoDiscount float64          `json:"promo_discount,omitempty"`
-	PromoEndDate  string           `json:"promo_end_date,omitempty"`
+	Vehicle       *VehicleResponse      `json:"vehicle"`
+	Model         *VehicleModelResponse `json:"model"`
+	Location      *LocationResponse     `json:"location"`
+	ImageURL      string                `json:"image_url"`
+	Price24h      float64               `json:"price_24h"`
+	Price4h       float64               `json:"price_4h"`
+	TripCount     int                   `json:"trip_count"`
+	Revenue       float64               `json:"revenue"`
+	AvgRating     float64               `json:"avg_rating"`
+	PromoDiscount float64               `json:"promo_discount,omitempty"`
+	PromoEndDate  string                `json:"promo_end_date,omitempty"`
 }
 
 // VehicleFeatureResponse represents a feature.
@@ -23,15 +23,15 @@ type VehicleFeatureResponse struct {
 
 // VehicleDetailResponse is the API response payload for the vehicle detail page.
 type VehicleDetailResponse struct {
-	Vehicle  *VehicleResponse          `json:"vehicle"`
-	Model    *VehicleModelResponse     `json:"model"`
-	Location *LocationResponse         `json:"location"`
-	Images   []*VehicleImageResponse   `json:"images"`
-	Features []*VehicleFeatureResponse `json:"features"`
-	Specs    []*VehicleSpecResponse    `json:"specs"`
-	Pricing  []*VehiclePricingResponse `json:"pricing"`
-	Reviews  []*ReviewResponse         `json:"reviews"`
-	Meta     *VehicleMetaResponse      `json:"meta"`
+	Vehicle        *VehicleResponse          `json:"vehicle"`
+	Model          *VehicleModelResponse     `json:"model"`
+	Location       *LocationResponse         `json:"location"`
+	Images         []*VehicleImageResponse   `json:"images"`
+	Features       []*VehicleFeatureResponse `json:"features"`
+	Specs          []*VehicleSpecResponse    `json:"specs"`
+	Pricing        []*VehiclePricingResponse `json:"pricing"`
+	Reviews        []*ReviewResponse         `json:"reviews"`
+	Meta           *VehicleMetaResponse      `json:"meta"`
 	Owner          *OwnerPublicResponse      `json:"owner,omitempty"`
 	ActiveBookings []*TimeRangeResponse      `json:"active_bookings"`
 }

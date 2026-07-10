@@ -284,7 +284,14 @@ const CarListPage: React.FC = () => {
                       <div className="flex justify-between items-start gap-2 mb-3">
                         <h4 className="font-bold text-[#191C1E] text-[15px] leading-tight">{item.model.name}</h4>
                         <div className="text-right shrink-0">
-                          <p className="text-[#006C4C] font-bold text-sm leading-tight">{formatCurrency(item.price_24h)}</p>
+                          {(item.promo_discount ?? 0) > 0 ? (
+                            <>
+                              <p className="text-[#6E7A72] line-through text-[11px] leading-none mb-0.5">{formatCurrency(item.price_24h)}</p>
+                              <p className="text-[#EF4444] font-extrabold text-sm leading-tight">{formatCurrency(item.price_24h * (1 - (item.promo_discount ?? 0) / 100))}</p>
+                            </>
+                          ) : (
+                            <p className="text-[#006C4C] font-bold text-sm leading-tight">{formatCurrency(item.price_24h)}</p>
+                          )}
                           <p className="text-[10px] text-[#6E7A72]">/ngày</p>
                         </div>
                       </div>
@@ -304,7 +311,17 @@ const CarListPage: React.FC = () => {
 
                       {/* price 4h + link */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[11px] text-[#6E7A72]">{formatCurrency(item.price_4h)}/4h · {item.model.vehicle_type}</span>
+                        <span className="text-[11px] text-[#6E7A72]">
+                          {(item.promo_discount ?? 0) > 0 ? (
+                            <>
+                              <span className="line-through">{formatCurrency(item.price_4h)}</span>{" "}
+                              <span className="text-[#EF4444] font-semibold">{formatCurrency(item.price_4h * (1 - (item.promo_discount ?? 0) / 100))}</span>
+                            </>
+                          ) : (
+                            formatCurrency(item.price_4h)
+                          )}
+                          /4h · {item.model.vehicle_type}
+                        </span>
                       </div>
 
                       <Link

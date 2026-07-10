@@ -68,15 +68,15 @@ func ToVehicleCardResponse(c *entities.VehicleCard) *dto.VehicleCardResponse {
 		return nil
 	}
 	res := &dto.VehicleCardResponse{
-		Vehicle:  ToVehicleResponse(c.Vehicle),
-		Model:    toVehicleModelResponse(c.Model),
-		Location: toLocationResponse(c.Location),
-		ImageURL: c.ImageURL,
-		Price24h: c.Price24h,
-		Price4h:  c.Price4h,
-		TripCount: c.TripCount,
-		Revenue:  c.Revenue,
-		AvgRating: c.AvgRating,
+		Vehicle:       ToVehicleResponse(c.Vehicle),
+		Model:         toVehicleModelResponse(c.Model),
+		Location:      toLocationResponse(c.Location),
+		ImageURL:      c.ImageURL,
+		Price24h:      c.Price24h,
+		Price4h:       c.Price4h,
+		TripCount:     c.TripCount,
+		Revenue:       c.Revenue,
+		AvgRating:     c.AvgRating,
 		PromoDiscount: c.PromoDiscount,
 	}
 	if c.PromoEndDate != nil {
@@ -91,12 +91,12 @@ func ToVehicleDetailResponse(detail *entities.VehicleDetail) *dto.VehicleDetailR
 	}
 
 	return &dto.VehicleDetailResponse{
-		Vehicle:  ToVehicleResponse(detail.Vehicle),
-		Model:    toVehicleModelResponse(detail.Model),
-		Location: toLocationResponse(detail.Location),
-		Images:   toVehicleImageResponses(detail.Images),
-		Features: toVehicleFeatureResponses(detail.Features),
-		Specs:    toVehicleSpecResponses(detail.Specs),
+		Vehicle:        ToVehicleResponse(detail.Vehicle),
+		Model:          toVehicleModelResponse(detail.Model),
+		Location:       toLocationResponse(detail.Location),
+		Images:         toVehicleImageResponses(detail.Images),
+		Features:       toVehicleFeatureResponses(detail.Features),
+		Specs:          toVehicleSpecResponses(detail.Specs),
 		Pricing:        toVehiclePricingResponses(detail.Pricing),
 		Reviews:        toReviewResponses(detail.Reviews),
 		Meta:           toVehicleMetaResponse(detail.Meta),

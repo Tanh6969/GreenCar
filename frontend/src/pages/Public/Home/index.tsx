@@ -145,11 +145,26 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         <div className={`border-t pt-2.5 flex justify-between items-end
           border-[#E5E7EB]`}>
           <div>
-            <div className="text-[#006C4C] font-bold text-lg">{formatCurrency(price24h)}</div>
+            {(data.promo_discount ?? 0) > 0 ? (
+              <>
+                <div className="text-[#6E7A72] line-through text-xs leading-none mb-0.5">{formatCurrency(price24h)}</div>
+                <div className="text-[#EF4444] font-extrabold text-base leading-tight">{formatCurrency(price24h * (1 - (data.promo_discount ?? 0) / 100))}</div>
+              </>
+            ) : (
+              <div className="text-[#006C4C] font-bold text-lg">{formatCurrency(price24h)}</div>
+            )}
             <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</div>
           </div>
           <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>
-            {formatCurrency(price4h)}/4h
+            {(data.promo_discount ?? 0) > 0 ? (
+              <>
+                <span className="line-through">{formatCurrency(price4h)}</span>{" "}
+                <span className="text-[#EF4444] font-semibold">{formatCurrency(price4h * (1 - (data.promo_discount ?? 0) / 100))}</span>
+              </>
+            ) : (
+              formatCurrency(price4h)
+            )}
+            /4h
           </div>
         </div>
 

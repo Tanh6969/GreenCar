@@ -36,6 +36,8 @@ interface VehicleCardApiResponse {
   image_url: string;
   price_24h: number;
   price_4h: number;
+  promo_discount?: number;
+  promo_end_date?: string;
 }
 
 interface ApiFeature { feature_id: number; feature_name: string; }
@@ -52,6 +54,8 @@ interface VehicleDetailApiResponse {
   meta:     ApiMeta;
   owner?:   ApiOwner;
   active_bookings?: { start_time: string; end_time: string }[];
+  promo_discount?: number;
+  promo_end_date?: string;
 }
 
 // ── mappers ───────────────────────────────────────────────────
@@ -78,6 +82,8 @@ function mapCard(r: VehicleCardApiResponse): VehicleCardData {
     image_url: r.image_url,
     price_24h: r.price_24h,
     price_4h: r.price_4h,
+    promo_discount: r.promo_discount,
+    promo_end_date: r.promo_end_date,
   };
 }
 
@@ -133,6 +139,8 @@ export const vehicleService = {
         start_time: b.start_time,
         end_time: b.end_time,
       })),
+      promo_discount: r.promo_discount,
+      promo_end_date: r.promo_end_date,
     };
   },
 

@@ -69,7 +69,7 @@ SELECT b.booking_id, b.user_id, b.vehicle_id, b.rental_plan_id,
   COALESCE(u.phone, '')  AS customer_phone,
   COALESCE(u.email, '')  AS customer_email,
   COALESCE(u.license_no, '') AS customer_license_no,
-  (SELECT COUNT(*) FROM bookings cb WHERE cb.user_id = b.user_id AND cb.status IN ('completed','pending_payment')) AS customer_trip_count,
+  (SELECT COUNT(*) FROM bookings cb WHERE cb.user_id = b.user_id AND cb.status IN ('completed','pending_payment','paid')) AS customer_trip_count,
   EXISTS(SELECT 1 FROM reviews r WHERE r.booking_id = b.booking_id) AS has_reviewed
 FROM bookings b
 LEFT JOIN vehicles v       ON v.vehicle_id        = b.vehicle_id

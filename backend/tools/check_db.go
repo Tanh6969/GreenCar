@@ -4,8 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"greencar/pkg/database"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -21,9 +22,9 @@ func main() {
 	defer db.Close()
 
 	rows, err := db.Query(`
-		SELECT booking_id, status, total_price, deposit_amount
+		SELECT status, COUNT(*)
 		FROM bookings
-		ORDER BY booking_id DESC LIMIT 10
+		GROUP BY status
 	`)
 	if err != nil {
 		log.Fatal(err)
@@ -31,10 +32,9 @@ func main() {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int
 		var status string
-		var price, deposit float64
-		rows.Scan(&id, &status, &price, &deposit)
-		log.Printf("Booking %d: status='[%s]', price=%f, deposit=%f", id, status, price, deposit)
+		var count int
+		rows.Scan(&status, &count)
+		log.Printf("Status: %s, Count: %d", status, count)
 	}
 }

@@ -25,7 +25,7 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h,
-			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS trip_count,
+			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status IN ('completed', 'paid')) AS trip_count,
 			   0 AS revenue,
 			   (SELECT COALESCE(AVG(rv.rating), 0) FROM reviews rv JOIN bookings b ON b.booking_id = rv.booking_id WHERE b.vehicle_id = v.vehicle_id) AS avg_rating,
 			   COALESCE((SELECT MAX(discount_percent) FROM vehicle_pricing_rules WHERE vehicle_id = v.vehicle_id AND is_active = true AND rule_type IN ('promo', 'multi_day') AND promo_start_date <= CURRENT_DATE AND promo_end_date >= CURRENT_DATE), 0) AS promo_discount,
@@ -62,15 +62,15 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 			return nil, err
 		}
 		cards = append(cards, &entities.VehicleCard{
-			Vehicle:  &v,
-			Model:    &m,
-			Location: &loc,
-			ImageURL: imageURL,
-			Price24h: price24h,
-			Price4h:  price4h,
-			TripCount: tripCount,
-			Revenue: revenue,
-			AvgRating: avgRating,
+			Vehicle:       &v,
+			Model:         &m,
+			Location:      &loc,
+			ImageURL:      imageURL,
+			Price24h:      price24h,
+			Price4h:       price4h,
+			TripCount:     tripCount,
+			Revenue:       revenue,
+			AvgRating:     avgRating,
 			PromoDiscount: promoDiscount,
 			PromoEndDate:  promoEndDate,
 		})
@@ -86,8 +86,8 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h,
-			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS trip_count,
-			   (SELECT COALESCE(SUM(b.total_price), 0) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS revenue,
+			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status IN ('completed', 'paid')) AS trip_count,
+			   (SELECT COALESCE(SUM(b.total_price), 0) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status IN ('completed', 'paid')) AS revenue,
 			   (SELECT COALESCE(AVG(rv.rating), 0) FROM reviews rv JOIN bookings b ON b.booking_id = rv.booking_id WHERE b.vehicle_id = v.vehicle_id) AS avg_rating,
 			   COALESCE((SELECT MAX(discount_percent) FROM vehicle_pricing_rules WHERE vehicle_id = v.vehicle_id AND is_active = true AND rule_type IN ('promo', 'multi_day') AND promo_start_date <= CURRENT_DATE AND promo_end_date >= CURRENT_DATE), 0) AS promo_discount,
 			   (SELECT MAX(promo_end_date) FROM vehicle_pricing_rules WHERE vehicle_id = v.vehicle_id AND is_active = true AND rule_type IN ('promo', 'multi_day') AND promo_start_date <= CURRENT_DATE AND promo_end_date >= CURRENT_DATE) AS promo_end_date
@@ -123,15 +123,15 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 			return nil, err
 		}
 		cards = append(cards, &entities.VehicleCard{
-			Vehicle:  &v,
-			Model:    &m,
-			Location: &loc,
-			ImageURL: imageURL,
-			Price24h: price24h,
-			Price4h:  price4h,
-			TripCount: tripCount,
-			Revenue: revenue,
-			AvgRating: avgRating,
+			Vehicle:       &v,
+			Model:         &m,
+			Location:      &loc,
+			ImageURL:      imageURL,
+			Price24h:      price24h,
+			Price4h:       price4h,
+			TripCount:     tripCount,
+			Revenue:       revenue,
+			AvgRating:     avgRating,
 			PromoDiscount: promoDiscount,
 			PromoEndDate:  promoEndDate,
 		})
@@ -175,7 +175,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		r.db.QueryRow(
 			`SELECT COUNT(*) FROM bookings b
 			 JOIN vehicles vv ON vv.vehicle_id = b.vehicle_id
-			 WHERE vv.owner_id = $1 AND b.status = 'completed'`,
+			 WHERE vv.owner_id = $1 AND b.status IN ('completed', 'paid')`,
 			v.OwnerID,
 		).Scan(&tripCount)
 		r.db.QueryRow(
@@ -299,7 +299,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		 AND end_time > NOW()
 		 UNION ALL
 		 SELECT start_time, end_time FROM vehicle_unavailabilities
-		 WHERE vehicle_id = $1 AND end_time > NOW()`, 
+		 WHERE vehicle_id = $1 AND end_time > NOW()`,
 		id,
 	)
 	if err == nil {
@@ -365,7 +365,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			ReviewCount: reviewCount,
 			Available:   available,
 		},
-		OwnerInfo: &owner,
+		OwnerInfo:      &owner,
 		ActiveBookings: activeBookings,
 	}, nil
 }

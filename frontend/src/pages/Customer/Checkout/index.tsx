@@ -149,7 +149,9 @@ const CheckoutPage: React.FC = () => {
   const isHCM = location?.city?.toLowerCase().includes("hồ chí minh") || location?.city?.toLowerCase().includes("hcm");
   const airportName = isHCM ? "Sân bay Tân Sơn Nhất" : "Sân bay Nội Bài";
 
-  const planPrice = pricing?.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
+  const discountPercent = detail.promo_discount ?? 0;
+  const originalPlanPrice = pricing?.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
+  const planPrice = discountPercent > 0 ? originalPlanPrice * (1 - discountPercent / 100) : originalPlanPrice;
   const planName = PLAN_NAMES[planId] ?? "Gói thuê";
   
   const startISO  = fromLocal(startLocal);
@@ -400,9 +402,17 @@ const CheckoutPage: React.FC = () => {
                 </div>
 
                 <div className="border-t border-[#F3F4F6] pt-4 flex flex-col gap-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-[#6E7A72]">Giá gói thuê</span>
-                    <span className="font-semibold">{formatCurrency(planPrice)}</span>
+                    {discountPercent > 0 ? (
+                      <div className="text-right">
+                        <span className="text-xs text-[#6E7A72] line-through mr-1.5">{formatCurrency(originalPlanPrice)}</span>
+                        <span className="font-bold text-[#EF4444]">{formatCurrency(planPrice)}</span>
+                        <span className="ml-1 text-[9px] bg-[#EF4444] text-white px-1.5 py-0.5 rounded font-bold">-{discountPercent}%</span>
+                      </div>
+                    ) : (
+                      <span className="font-semibold">{formatCurrency(planPrice)}</span>
+                    )}
                   </div>
 
                   {deliveryFee > 0 && (

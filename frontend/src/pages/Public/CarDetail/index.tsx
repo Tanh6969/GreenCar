@@ -46,6 +46,8 @@ interface DetailData {
   owner?: { user_id: number; name: string; phone: string; trip_count: number; avg_rating: number };
   meta?: { avg_rating: number; review_count: number };
   active_bookings?: { start_time: string; end_time: string }[];
+  promo_discount?: number;
+  promo_end_date?: string;
 }
 
 const PLAN_LABELS: Record<number, { label: string; sub: string }> = {
@@ -647,6 +649,7 @@ const CarDetailPage: React.FC = () => {
                     const plan = PLAN_LABELS[p.rental_plan_id];
                     if (!plan) return null;
                     const isSelected = selectedPlan === p.rental_plan_id;
+                    const hasPromo = (data?.promo_discount ?? 0) > 0;
                     return (
                       <button key={p.pricing_id} onClick={() => setSelectedPlan(p.rental_plan_id)}
                         className={`w-full flex justify-between items-center px-4 py-3 rounded-xl border-2 transition-all text-left
@@ -666,9 +669,16 @@ const CarDetailPage: React.FC = () => {
                             <p className="text-xs text-[#6E7A72]">{plan.sub}</p>
                           </div>
                         </div>
-                        <span className={`font-bold text-sm ${isSelected ? "text-[#006C4C]" : "text-[#191C1E]"}`}>
-                          {formatCurrency(p.price)}
-                        </span>
+                        {hasPromo ? (
+                          <div className="text-right">
+                            <p className="text-xs text-[#6E7A72] line-through leading-none mb-0.5">{formatCurrency(p.price)}</p>
+                            <p className={`font-bold text-sm ${isSelected ? "text-[#EF4444]" : "text-[#191C1E]"}`}>{formatCurrency(p.price * (1 - (data?.promo_discount ?? 0) / 100))}</p>
+                          </div>
+                        ) : (
+                          <span className={`font-bold text-sm ${isSelected ? "text-[#006C4C]" : "text-[#191C1E]"}`}>
+                            {formatCurrency(p.price)}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -679,7 +689,14 @@ const CarDetailPage: React.FC = () => {
               <div className="bg-[#F8F9FB] rounded-xl p-4 mt-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-[#6E7A72]">Tổng thanh toán</span>
-                  <span className="text-xl font-bold text-[#006C4C]">{formatCurrency(selectedPrice)}</span>
+                  {(data?.promo_discount ?? 0) > 0 ? (
+                    <div className="text-right">
+                      <span className="text-sm text-[#6E7A72] line-through mr-2 font-normal">{formatCurrency(selectedPrice)}</span>
+                      <span className="text-xl font-bold text-[#EF4444]">{formatCurrency(selectedPrice * (1 - (data?.promo_discount ?? 0) / 100))}</span>
+                    </div>
+                  ) : (
+                    <span className="text-xl font-bold text-[#006C4C]">{formatCurrency(selectedPrice)}</span>
+                  )}
                 </div>
                 <p className="text-xs text-[#6E7A72] mt-1">Đã bao gồm bảo hiểm pin & mạng sạc</p>
               </div>

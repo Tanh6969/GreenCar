@@ -1097,7 +1097,7 @@ const MyVehiclesPage: React.FC = () => {
           <div style={{ background: "#fff", borderRadius: 20, padding: 28, width: "100%", maxWidth: 560, boxShadow: "0 20px 40px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
               <div>
-                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px", color: "#006C4C" }}>⚡ Chiến lược giá linh hoạt</h3>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px", color: "#006C4C" }}>Chiến lược giá linh hoạt</h3>
                 <p style={{ fontSize: 14, color: "#6E7A72", margin: 0 }}>Cài đặt giá cuối tuần & giảm giá thuê nhiều ngày</p>
               </div>
               <button onClick={() => setPricingVehicleId(null)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#6E7A72" }}>×</button>
@@ -1111,13 +1111,13 @@ const MyVehiclesPage: React.FC = () => {
                   onClick={() => setNewRuleType("weekend")}
                   style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "2px solid", borderColor: newRuleType === "weekend" ? "#006C4C" : "#E5EBE8", background: newRuleType === "weekend" ? "#ECFDF5" : "#fff", color: newRuleType === "weekend" ? "#006C4C" : "#3E4943", cursor: "pointer", transition: "all 0.2s" }}
                 >
-                  🗓️ Giá Cuối Tuần
+                  Giá Cuối Tuần
                 </button>
                 <button
                   onClick={() => setNewRuleType("promo")}
                   style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "2px solid", borderColor: newRuleType === "promo" ? "#006C4C" : "#E5EBE8", background: newRuleType === "promo" ? "#ECFDF5" : "#fff", color: newRuleType === "promo" ? "#006C4C" : "#3E4943", cursor: "pointer", transition: "all 0.2s" }}
                 >
-                  🔥 Khuyến mãi theo ngày
+                  Khuyến mãi theo ngày
                 </button>
               </div>
 
@@ -1172,13 +1172,16 @@ const MyVehiclesPage: React.FC = () => {
                   <div key={rule.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", background: rule.is_active ? "#ECFDF5" : "#F9FAFB", border: "1px solid", borderColor: rule.is_active ? "#A7F3D0" : "#E5EBE8", borderRadius: 10 }}>
                     <div>
                       <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E" }}>
-                        {rule.rule_type === "weekend" ? "🗓️ Giá Cuối Tuần" : "🔥 Khuyến mãi"}
+                        {rule.rule_type === "weekend" ? "Giá Cuối Tuần" : rule.rule_type === "multi_day" ? "Khuyến mãi dài ngày" : "Khuyến mãi theo ngày"}
                         {!rule.is_active && <span style={{ marginLeft: 8, fontSize: 11, color: "#6E7A72" }}>(Tắt)</span>}
                       </div>
                       <div style={{ fontSize: 13, color: "#6E7A72", marginTop: 4 }}>
                         {rule.rule_type === "weekend"
-                          ? `Tăng +${rule.extra_percent}% vào thứ 7 & CN`
-                          : (rule.promo_start_date && rule.promo_end_date ? `Giảm ${rule.discount_percent}% từ ${new Date(rule.promo_start_date).toLocaleDateString("vi-VN")} đến ${new Date(rule.promo_end_date).toLocaleDateString("vi-VN")}` : `Giảm ${rule.discount_percent}%`)}
+                          ? `Tăng +${rule.extra_percent}% vào Thứ 7 & Chủ Nhật`
+                          : (rule.promo_start_date && rule.promo_end_date && !rule.promo_start_date.startsWith("0001-01-01")
+                            ? `Giảm ${rule.discount_percent}% từ ngày ${new Date(rule.promo_start_date).toLocaleDateString("vi-VN")} đến ngày ${new Date(rule.promo_end_date).toLocaleDateString("vi-VN")}`
+                            : `Giảm ${rule.discount_percent}%`
+                          )}
                       </div>
                     </div>
                     <button onClick={() => deletePricingRule(rule.id)} style={{ background: "#FEF2F2", border: "none", color: "#EF4444", padding: "6px 12px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Xóa</button>
