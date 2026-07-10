@@ -138,6 +138,9 @@ const CarDetailPage: React.FC = () => {
 
   const { vehicle, model, location, images, specs, features, pricing, active_bookings } = data;
   
+  const isHCM = location?.city?.toLowerCase().includes("hồ chí minh") || location?.city?.toLowerCase().includes("hcm");
+  const airportName = isHCM ? "Sân bay Tân Sơn Nhất" : "Sân bay Nội Bài";
+
   // Overlap check
   let isOverlapping = false;
   let isOutsideAvailability = false;
@@ -357,7 +360,7 @@ const CarDetailPage: React.FC = () => {
                       {deliveryOption === "custom" && customAddress 
                         ? `Địa chỉ nhận xe: ${customAddress}`
                         : deliveryOption === "airport" 
-                          ? "Giao xe sân bay Nội Bài" 
+                          ? `Giao xe ${airportName}` 
                           : "Chủ xe sẽ giao và nhận xe đến tận nhà hoặc địa chỉ mà bạn lựa chọn trên ứng dụng."}
                     </p>
                   </div>
@@ -689,7 +692,7 @@ const CarDetailPage: React.FC = () => {
                   if (deliveryOption === "custom" && customAddress) {
                     url += `&address=${encodeURIComponent(customAddress)}`;
                   } else if (deliveryOption === "airport") {
-                    url += `&address=${encodeURIComponent("Sân bay Nội Bài")}`;
+                    url += `&address=${encodeURIComponent(airportName)}`;
                   }
                   navigate(url);
                 }}
@@ -890,7 +893,7 @@ const CarDetailPage: React.FC = () => {
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${modalDeliveryType === "airport" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
                       {modalDeliveryType === "airport" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
                     </div>
-                    <span className="font-semibold text-[#191C1E]">Sân bay Nội Bài</span>
+                    <span className="font-semibold text-[#191C1E]">{airportName}</span>
                   </div>
                   <span className="font-bold text-[#191C1E]">150.000đ</span>
                 </label>

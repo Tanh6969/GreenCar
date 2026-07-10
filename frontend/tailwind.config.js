@@ -11,7 +11,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "Segoe UI", "Arial", "sans-serif"],
+        sans: ["Outfit", "Plus Jakarta Sans", "Inter", "Segoe UI", "Arial", "sans-serif"],
       },
     },
   },

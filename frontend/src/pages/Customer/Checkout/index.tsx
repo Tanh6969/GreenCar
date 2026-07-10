@@ -146,6 +146,9 @@ const CheckoutPage: React.FC = () => {
   );
 
   const { vehicle, model, location, pricing } = detail;
+  const isHCM = location?.city?.toLowerCase().includes("hồ chí minh") || location?.city?.toLowerCase().includes("hcm");
+  const airportName = isHCM ? "Sân bay Tân Sơn Nhất" : "Sân bay Nội Bài";
+
   const planPrice = pricing?.find((p: any) => p.rental_plan_id === planId)?.price ?? 0;
   const planName = PLAN_NAMES[planId] ?? "Gói thuê";
   
@@ -392,7 +395,7 @@ const CheckoutPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#6E7A72]">Giao nhận</span>
-                    <span className="font-semibold text-[#191C1E] text-right text-xs">{queryDelivery === "airport" ? "Giao tại sân bay Nội Bài" : queryDelivery === "custom" ? "Giao tận nơi" : "Tự đến lấy"}</span>
+                    <span className="font-semibold text-[#191C1E] text-right text-xs">{queryDelivery === "airport" ? `Giao tại ${airportName}` : queryDelivery === "custom" ? "Giao tận nơi" : "Tự đến lấy"}</span>
                   </div>
                 </div>
 
