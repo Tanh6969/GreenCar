@@ -24,6 +24,16 @@ interface VehicleCardResponse {
   model: { vehicle_model_id: number; name: string; brand: string };
   location: { city: string; address: string };
   image_url: string;
+  trip_count: number;
+  revenue: number;
+  avg_rating: number;
+}
+
+interface Unavailability {
+  id: number;
+  start_time: string;
+  end_time: string;
+  type: string;
 }
 
 const STATUS_MAP = {
@@ -36,14 +46,29 @@ const STATUS_MAP = {
 const MyVehiclesPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"vehicles" | "registrations" | "bookings">("vehicles");
+  const [bookingFilter, setBookingFilter] = useState<string>("all");
   
   const [items, setItems] = useState<MyRegistration[]>([]);
   const [vehicles, setVehicles] = useState<VehicleCardResponse[]>([]);
   const [ownerBookings, setOwnerBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [settingVehicleId, setSettingVehicleId] = useState<number | null>(null);
-  const [availableFrom, setAvailableFrom] = useState("");
-  const [availableTo, setAvailableTo] = useState("");
+  const [unavailabilities, setUnavailabilities] = useState<Unavailability[]>([]);
+  const [blockFrom, setBlockFrom] = useState("");
+  const [blockTo, setBlockTo] = useState("");
+  const [isBlocking, setIsBlocking] = useState(false);
+
+  // Trip Completion
+  const [completingBooking, setCompletingBooking] = useState<any>(null);
+  const [actualKM, setActualKM] = useState<number | "">("");
+  const [extraFee, setExtraFee] = useState<number | "">("");
+  const [extraFeeDesc, setExtraFeeDesc] = useState("");
+
+  // Handover (Check-in)
+  const [handoverBooking, setHandoverBooking] = useState<any>(null);
+  const [skipODO, setSkipODO] = useState(false);
+  const [startODO, setStartODO] = useState<number | "">("");
+  const [checklist, setChecklist] = useState({ license: false, photos: false });
 
   useEffect(() => {
     loadData();
@@ -56,32 +81,156 @@ const MyVehiclesPage: React.FC = () => {
         const data = await apiClient<MyRegistration[]>("/owner/my-registrations");
         setItems(data || []);
       } else if (activeTab === "bookings") {
-        const data = await bookingService.getOwnerBookings();
-        setOwnerBookings(data || []);
+        loadOwnerBookings();
       } else {
         const data = await apiClient<VehicleCardResponse[]>("/owner/vehicles");
         setVehicles(data || []);
       }
     } catch {
-
-      if (activeTab === "registrations") setItems(MOCK_MY);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateVehicleStatus = async (id: number, status: string, from?: string, to?: string) => {
+  const loadOwnerBookings = async () => {
+    const data = await bookingService.getOwnerBookings();
+    setOwnerBookings(data || []);
+  };
+
+  const loadUnavailabilities = async (id: number) => {
     try {
-      await apiClient(`/owner/vehicles/${id}/status`, "PUT", { 
-        status, 
-        available_from: from || null,
-        available_to: to || null
-      });
-      loadData();
-      setSettingVehicleId(null);
+      const data = await apiClient<Unavailability[]>(`/owner/vehicles/${id}/unavailabilities`);
+      setUnavailabilities(data || []);
     } catch (error) {
-      alert("Không thể cập nhật trạng thái");
+      console.error(error);
     }
+  };
+
+  const addUnavailability = async () => {
+    if (!settingVehicleId || !blockFrom || !blockTo) return;
+    setIsBlocking(true);
+    try {
+      const from = new Date(blockFrom);
+      from.setHours(0, 0, 0, 0);
+      const to = new Date(blockTo);
+      to.setHours(23, 59, 59, 999);
+
+      await apiClient(`/owner/vehicles/${settingVehicleId}/unavailabilities`, "POST", {
+        start_time: from.toISOString(),
+        end_time: to.toISOString(),
+        type: "blocked"
+      });
+      setBlockFrom("");
+      setBlockTo("");
+      await loadUnavailabilities(settingVehicleId);
+    } catch (error) {
+      alert("Không thể thêm lịch bận");
+    } finally {
+      setIsBlocking(false);
+    }
+  };
+
+  const deleteUnavailability = async (uid: number) => {
+    if (!settingVehicleId) return;
+    try {
+      await apiClient(`/owner/vehicles/${settingVehicleId}/unavailabilities/${uid}`, "DELETE");
+      await loadUnavailabilities(settingVehicleId);
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Có lỗi xảy ra khi xóa ngày khóa.");
+    }
+  };
+
+  const handleCompleteTrip = async () => {
+    if (!completingBooking) return;
+    if (actualKM === "" || Number(actualKM) < 0) {
+      alert("Vui lòng nhập số KM thực tế hợp lệ.");
+      return;
+    }
+    
+    try {
+      await apiClient(`/owner/bookings/${completingBooking.booking_id}/complete`, "POST", {
+        actual_km: Number(actualKM),
+        extra_fee: Number(extraFee) || 0,
+        extra_fee_desc: extraFeeDesc
+      });
+      alert("Hoàn thành chuyến đi thành công!");
+      setCompletingBooking(null);
+      setActualKM("");
+      setExtraFee("");
+      setExtraFeeDesc("");
+      loadOwnerBookings(); // reload
+    } catch (err: any) {
+      alert(err.message || "Có lỗi xảy ra khi hoàn thành chuyến đi.");
+    }
+  };
+
+  const handleUpdateStatus = async (bookingId: number, status: string) => {
+    try {
+      await apiClient(`/owner/bookings/${bookingId}/status`, "PUT", { status });
+      loadOwnerBookings();
+    } catch (err: any) {
+      alert(err.message || "Có lỗi xảy ra khi cập nhật trạng thái.");
+    }
+  };
+
+  const handleHandover = async () => {
+    if (!handoverBooking) return;
+    if (!checklist.license || !checklist.photos) {
+      alert("Vui lòng hoàn thành các bước kiểm tra an toàn (bằng lái, chụp ảnh) trước khi giao xe.");
+      return;
+    }
+    if (!skipODO && startODO === "") {
+      alert("Vui lòng nhập số KM trên đồng hồ, hoặc chọn 'Bỏ qua ghi nhận số ODO'.");
+      return;
+    }
+    // Just update status to active. In a real app, we'd save startODO to DB.
+    await handleUpdateStatus(handoverBooking.booking_id, "active");
+    setHandoverBooking(null);
+    setStartODO("");
+    setSkipODO(false);
+    setChecklist({ license: false, photos: false });
+  };
+
+  const renderStepper = (status: string) => {
+    const steps = ["Xác nhận", "Đang thuê", "Thanh toán", "Hoàn thành"];
+    let currentStep = 0;
+    if (status === "confirmed") currentStep = 1;
+    if (status === "active" || status === "running") currentStep = 2;
+    if (status === "pending_payment") currentStep = 3;
+    if (status === "completed") currentStep = 4;
+    
+    if (status === "cancelled") {
+      return <div style={{ color: "#EF4444", fontWeight: 700, padding: "4px 12px", background: "#FEF2F2", borderRadius: 8 }}>Đã hủy</div>;
+    }
+    if (status === "pending") {
+      return <div style={{ color: "#F59E0B", fontWeight: 700, padding: "4px 12px", background: "#FEF3C7", borderRadius: 8 }}>Chờ duyệt</div>;
+    }
+
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {steps.map((s, i) => {
+          const isActive = i < currentStep;
+          const isCurrent = i === Math.min(currentStep, 3);
+          return (
+            <React.Fragment key={s}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: isActive ? "#10B981" : isCurrent ? "#3B82F6" : "#E5EBE8",
+                  color: "#fff", fontSize: 10, fontWeight: 800
+                }}>
+                  {isActive ? "✓" : i + 1}
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: isActive || isCurrent ? "#191C1E" : "#A3AFA8" }}>{s}</span>
+              </div>
+              {i < steps.length - 1 && (
+                <div style={{ width: 24, height: 2, background: isActive ? "#10B981" : "#E5EBE8", marginBottom: 16 }} />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -148,9 +297,25 @@ const MyVehiclesPage: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {activeTab === "bookings" && ownerBookings.length > 0 && (
+              <div style={{ display: "flex", gap: 8, marginBottom: 8, overflowX: "auto", paddingBottom: 4 }}>
+                {[{id: "all", label: "Tất cả"}, {id: "pending", label: "Chờ xác nhận"}, {id: "active", label: "Đang diễn ra"}, {id: "completed", label: "Hoàn thành"}, {id: "cancelled", label: "Đã hủy"}].map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => setBookingFilter(f.id)}
+                    style={{
+                      padding: "6px 16px", borderRadius: 20, fontSize: 13, fontWeight: 700, border: "none", whiteSpace: "nowrap",
+                      background: bookingFilter === f.id ? "#006C4C" : "#E5EBE8",
+                      color: bookingFilter === f.id ? "#fff" : "#3E4943",
+                      cursor: "pointer", transition: "all 0.2s"
+                    }}
+                  >{f.label}</button>
+                ))}
+              </div>
+            )}
             {activeTab === "vehicles" ? vehicles.map(v => (
               <div key={v.vehicle.id} style={{
-                background: "#fff", borderRadius: 16, padding: 24,
+                background: "#fff", borderRadius: 16, padding: 16,
                 border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
                 transition: "box-shadow 0.2s",
               }}>
@@ -192,15 +357,15 @@ const MyVehiclesPage: React.FC = () => {
                   <div style={{ display: "flex", gap: 32, marginTop: 16, paddingBottom: 16, borderBottom: "1px dashed #E5EBE8" }}>
                     <div>
                       <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Số chuyến</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>0</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>{v.trip_count || 0}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Doanh thu</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>0đ</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>{Number(v.revenue || 0).toLocaleString("vi")}đ</div>
                     </div>
                     <div>
                       <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase" }}>Đánh giá</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>Chưa có</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: "#191C1E" }}>{v.avg_rating > 0 ? `${v.avg_rating.toFixed(1)} ⭐` : "Chưa có"}</div>
                     </div>
                   </div>
 
@@ -208,14 +373,13 @@ const MyVehiclesPage: React.FC = () => {
                       <button 
                         onClick={() => {
                           setSettingVehicleId(v.vehicle.id);
-                          setAvailableFrom(v.vehicle.available_from ? v.vehicle.available_from.split("T")[0] : "");
-                          setAvailableTo(v.vehicle.available_to ? v.vehicle.available_to.split("T")[0] : "");
+                          loadUnavailabilities(v.vehicle.id);
                         }}
                         style={{ 
                           padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
                           background: "#006C4C", color: "#fff", cursor: "pointer"
                         }}>
-                        Thiết lập thời gian cho thuê
+                        Quản lý Lịch bận
                       </button>
                     <button 
                       onClick={() => navigate(`/cars/${v.vehicle.id}`)}
@@ -229,20 +393,29 @@ const MyVehiclesPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-            )) : activeTab === "bookings" ? ownerBookings.map((b: any) => {
+            )) : activeTab === "bookings" ? ownerBookings.filter((b: any) => {
+                if (bookingFilter === "all") return true;
+                if (bookingFilter === "pending") return b.status === "pending" || b.status === "confirmed";
+                if (bookingFilter === "active") return b.status === "active" || b.status === "running";
+                if (bookingFilter === "completed") return b.status === "completed" || b.status === "pending_payment";
+                if (bookingFilter === "cancelled") return b.status === "cancelled";
+                return true;
+              }).map((b: any) => {
               const start = new Date(b.start_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
               const end = new Date(b.end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"});
               const isPastEndTime = new Date(b.end_time).getTime() < Date.now();
-              const effectiveStatus = (b.status === "active" || b.status === "running") && isPastEndTime ? "completed" : b.status;
+              // Do not automatically set to completed if they haven't explicitly completed it.
+              const effectiveStatus = b.status;
               let statusText = "Chờ duyệt"; let statusBg = "#FEF3C7"; let statusColor = "#F59E0B";
               if (effectiveStatus === "confirmed") { statusText = "Đã xác nhận"; statusBg = "#EFF6FF"; statusColor = "#3B82F6"; }
               if (effectiveStatus === "active" || effectiveStatus === "running") { statusText = "Đang cho thuê"; statusBg = "#ECFDF5"; statusColor = "#10B981"; }
-              if (effectiveStatus === "completed") { statusText = "Đã hoàn thành"; statusBg = "#F3F4F6"; statusColor = "#6B7280"; }
+              if (effectiveStatus === "pending_payment") { statusText = "Chờ thanh toán"; statusBg = "#F3F4F6"; statusColor = "#6B7280"; }
+              if (effectiveStatus === "completed") { statusText = "Đã hoàn thành"; statusBg = "#D1FAE5"; statusColor = "#059669"; }
               if (effectiveStatus === "cancelled") { statusText = "Đã hủy"; statusBg = "#FEF2F2"; statusColor = "#EF4444"; }
 
               return (
                 <div key={b.booking_id} style={{
-                  background: "#fff", borderRadius: 16, padding: 24,
+                  background: "#fff", borderRadius: 16, padding: 16,
                   border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
                   transition: "box-shadow 0.2s",
                 }}>
@@ -259,9 +432,9 @@ const MyVehiclesPage: React.FC = () => {
                           👤 Khách hàng: {b.customer_name} · 📞 {b.customer_phone}
                         </p>
                       </div>
-                      <span style={{ padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, background: statusBg, color: statusColor, whiteSpace: "nowrap" }}>
-                        {statusText}
-                      </span>
+                      <div>
+                        {renderStepper(effectiveStatus)}
+                      </div>
                     </div>
 
                     <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -271,9 +444,9 @@ const MyVehiclesPage: React.FC = () => {
                         <div style={{ fontSize: 14, fontWeight: 600, color: "#191C1E", marginTop: 4 }}>Trả: <span style={{color: "var(--green)"}}>{end}</span></div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Giá trị đơn</div>
+                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Giá trị đơn (Gốc)</div>
                         <div style={{ fontSize: 18, fontWeight: 800, color: "#191C1E" }}>
-                          {Number(b.total_price).toLocaleString("vi")}đ
+                          {Number(b.total_price - (b.overtime_fee || 0) - (b.over_km_fee || 0) - (b.extra_fee || 0)).toLocaleString("vi")}đ
                         </div>
                       </div>
                       <div>
@@ -283,6 +456,111 @@ const MyVehiclesPage: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                    {effectiveStatus === "active" || effectiveStatus === "running" ? (
+                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8", display: "flex", justifyContent: "flex-end" }}>
+                        <button 
+                          onClick={() => {
+                            setCompletingBooking(b);
+                            setActualKM(b.planned_km); // default to planned
+                          }}
+                          style={{
+                            padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
+                            background: "#006C4C", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                          }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                          Tính tiền & Nhận xe
+                        </button>
+                      </div>
+                    ) : effectiveStatus === "confirmed" ? (
+                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8", display: "flex", justifyContent: "flex-end", gap: 12 }}>
+                        <button 
+                          onClick={() => {
+                            if (window.confirm("Bạn muốn hủy đơn này? Lưu ý: Việc hủy đơn có thể ảnh hưởng đến đánh giá của bạn.")) {
+                              handleUpdateStatus(b.booking_id, "cancelled");
+                            }
+                          }}
+                          style={{
+                            padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "1px solid #FECACA",
+                            background: "#FEF2F2", color: "#EF4444", cursor: "pointer", display: "flex", alignItems: "center"
+                          }}>
+                          Hủy đơn
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setHandoverBooking(b);
+                          }}
+                          style={{
+                            padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
+                            background: "#3B82F6", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                          }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                          Làm thủ tục giao xe
+                        </button>
+                      </div>
+                    ) : null}
+                    {effectiveStatus === "pending_payment" && (
+                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8", fontSize: 13, color: "#3E4943" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span><strong>Số KM thực tế:</strong> {b.actual_km} km (Giới hạn: {b.planned_km} km)</span>
+                          {b.over_km_fee > 0 && <span style={{ color: "#EF4444" }}>+ Phí vượt KM: {Number(b.over_km_fee).toLocaleString("vi")}đ</span>}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span><strong>Thời gian trả thực tế:</strong> {b.actual_end_time ? new Date(b.actual_end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"}) : "-"}</span>
+                          {b.overtime_fee > 0 && <span style={{ color: "#EF4444" }}>+ Phí quá giờ: {Number(b.overtime_fee).toLocaleString("vi")}đ</span>}
+                        </div>
+                        {(Number(b.extra_fee) > 0 || (b.extra_fee_desc && b.extra_fee_desc.length > 0)) ? (
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                            <span><strong>Phụ phí khác:</strong> {b.extra_fee_desc || "Không có ghi chú"}</span>
+                            <span style={{ color: "#EF4444" }}>+ {Number(b.extra_fee || 0).toLocaleString("vi")}đ</span>
+                          </div>
+                        ) : null}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Xác nhận bạn đã nhận đủ số tiền thanh toán còn lại từ khách hàng?`)) {
+                                handleUpdateStatus(b.booking_id, "completed");
+                              }
+                            }}
+                            style={{
+                              padding: "8px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
+                              background: "#10B981", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                            }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Đã nhận thanh toán
+                          </button>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E" }}>
+                            Tổng thu cuối cùng: <span style={{ color: "#006C4C", marginLeft: 8, fontSize: 16 }}>{Number(b.total_price).toLocaleString("vi")}đ</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {effectiveStatus === "completed" && (
+                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px dashed #E5EBE8", fontSize: 13, color: "#3E4943" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span><strong>Số KM thực tế:</strong> {b.actual_km} km</span>
+                          {b.over_km_fee > 0 && <span style={{ color: "#EF4444" }}>+ Phí vượt KM: {Number(b.over_km_fee).toLocaleString("vi")}đ</span>}
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                          <span><strong>Thời gian trả thực tế:</strong> {b.actual_end_time ? new Date(b.actual_end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"}) : "-"}</span>
+                          {b.overtime_fee > 0 && <span style={{ color: "#EF4444" }}>+ Phí quá giờ: {Number(b.overtime_fee).toLocaleString("vi")}đ</span>}
+                        </div>
+                        {(Number(b.extra_fee) > 0 || (b.extra_fee_desc && b.extra_fee_desc.length > 0)) ? (
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                            <span><strong>Phụ phí khác:</strong> {b.extra_fee_desc || "Không có ghi chú"}</span>
+                            <span style={{ color: "#EF4444" }}>+ {Number(b.extra_fee || 0).toLocaleString("vi")}đ</span>
+                          </div>
+                        ) : null}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, background: "#ECFDF5", padding: "12px 16px", borderRadius: 12 }}>
+                          <span style={{ color: "#059669", fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Đã thanh toán đủ
+                          </span>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: "#191C1E" }}>
+                            Tổng thu cuối cùng: <span style={{ color: "#006C4C", marginLeft: 8, fontSize: 18 }}>{Number(b.total_price).toLocaleString("vi")}đ</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -291,7 +569,7 @@ const MyVehiclesPage: React.FC = () => {
               const coverImg = item.images?.find(i => i.type === "front")?.url;
               return (
                 <div key={item.id} style={{
-                  background: "#fff", borderRadius: 16, padding: 24,
+                  background: "#fff", borderRadius: 16, padding: 16,
                   border: "1px solid #E5EBE8", display: "flex", gap: 20, alignItems: "flex-start",
                   transition: "box-shadow 0.2s",
                 }}>
@@ -396,6 +674,164 @@ const MyVehiclesPage: React.FC = () => {
         )}
       </div>
 
+      {/* Trip Completion Modal */}
+      {completingBooking && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", zIndex: 1000,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 16
+        }}>
+          <div style={{
+            background: "#fff", padding: 32, borderRadius: 20, width: "100%", maxWidth: 500,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px", color: "#006C4C" }}>Hoàn thành chuyến đi</h3>
+                <p style={{ fontSize: 14, color: "#6E7A72", margin: 0 }}>Mã đơn: GC-{String(completingBooking.booking_id).padStart(5, "0")}</p>
+              </div>
+              <button onClick={() => setCompletingBooking(null)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#6E7A72" }}>×</button>
+            </div>
+            
+            <div style={{ background: "#F0FDF4", padding: 16, borderRadius: 12, marginBottom: 20, border: "1px solid #BBF7D0" }}>
+              <div style={{ fontSize: 13, color: "#006C4C", fontWeight: 700, marginBottom: 8 }}>Khách hàng: {completingBooking.customer_name}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#3E4943", marginBottom: 4 }}>
+                <span>KM giới hạn:</span>
+                <strong>{completingBooking.planned_km} km</strong>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#3E4943" }}>
+                <span>Hạn trả xe:</span>
+                <strong>{new Date(completingBooking.end_time).toLocaleString("vi-VN", {day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"})}</strong>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#191C1E", marginBottom: 6 }}>Tổng số KM khách đã chạy <span style={{color: "red"}}>*</span></label>
+              <div style={{ position: "relative" }}>
+                <input 
+                  type="number" 
+                  value={actualKM}
+                  onChange={e => setActualKM(e.target.value ? Number(e.target.value) : "")}
+                  placeholder={`Vd: ${completingBooking.planned_km}`}
+                  style={{ width: "100%", padding: "12px 14px", border: "1px solid #E5EBE8", borderRadius: 10, fontSize: 14, outline: "none", transition: "border 0.2s" }}
+                />
+                <span style={{ position: "absolute", right: 14, top: 12, color: "#6E7A72", fontSize: 14, fontWeight: 600 }}>km</span>
+              </div>
+              <p style={{ fontSize: 12, color: "#6E7A72", margin: "6px 0 0" }}>Nhập tổng số khoảng cách (KM) khách đã di chuyển trong chuyến đi này.</p>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#191C1E", marginBottom: 6 }}>Phụ phí khác (Vệ sinh, khử mùi,...) <span style={{ color: "#6E7A72", fontWeight: 400 }}>(Tùy chọn)</span></label>
+              <div style={{ position: "relative", marginBottom: 8 }}>
+                <input 
+                  type="number" 
+                  value={extraFee}
+                  onChange={e => setExtraFee(e.target.value ? Number(e.target.value) : "")}
+                  placeholder="0"
+                  style={{ width: "100%", padding: "12px 14px", border: "1px solid #E5EBE8", borderRadius: 10, fontSize: 14, outline: "none", transition: "border 0.2s" }}
+                />
+                <span style={{ position: "absolute", right: 14, top: 12, color: "#6E7A72", fontSize: 14, fontWeight: 600 }}>VNĐ</span>
+              </div>
+              <input 
+                type="text" 
+                value={extraFeeDesc}
+                onChange={e => setExtraFeeDesc(e.target.value)}
+                placeholder="Lý do thu phụ phí (vd: Phí rửa xe, khử mùi thuốc lá...)"
+                style={{ width: "100%", padding: "12px 14px", border: "1px solid #E5EBE8", borderRadius: 10, fontSize: 14, outline: "none" }}
+              />
+            </div>
+
+            <p style={{ fontSize: 13, color: "#EF4444", margin: "0 0 20px", background: "#FEF2F2", padding: 12, borderRadius: 8, border: "1px solid #FECACA" }}>
+              <strong>Lưu ý:</strong> Việc kết thúc chuyến đi sẽ được ghi nhận vào lúc này. Phí trả trễ giờ (nếu có) sẽ được hệ thống tự động tính toán.
+            </p>
+
+            <button 
+              onClick={handleCompleteTrip}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 12, fontSize: 15, fontWeight: 800, border: "none",
+                background: "#006C4C", color: "#fff", cursor: "pointer", transition: "all 0.2s",
+                boxShadow: "0 4px 10px rgba(0, 108, 76, 0.2)"
+              }}>
+              Xác nhận Hoàn thành chuyến
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Handover Modal (Check-in) */}
+      {handoverBooking && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", zIndex: 1000,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 16
+        }}>
+          <div style={{
+            background: "#fff", padding: 32, borderRadius: 20, width: "100%", maxWidth: 500,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)", maxHeight: "90vh", overflowY: "auto"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 4px", color: "#3B82F6" }}>Biên bản Giao Xe</h3>
+                <p style={{ fontSize: 14, color: "#6E7A72", margin: 0 }}>Giao xe cho: <strong>{handoverBooking.customer_name}</strong></p>
+              </div>
+              <button onClick={() => setHandoverBooking(null)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#6E7A72" }}>×</button>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontSize: 14, fontWeight: 800, color: "#191C1E", marginBottom: 12 }}>1. Kiểm tra an toàn bắt buộc</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "#F8F9FB", padding: 16, borderRadius: 12 }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
+                  <input type="checkbox" checked={checklist.license} onChange={e => setChecklist({...checklist, license: e.target.checked})} style={{ marginTop: 2, width: 16, height: 16 }} />
+                  <div style={{ fontSize: 14, color: "#3E4943" }}>Tôi đã đối chiếu khớp CCCD và Bằng Lái Xe của khách hàng.</div>
+                </label>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}>
+                  <input type="checkbox" checked={checklist.photos} onChange={e => setChecklist({...checklist, photos: e.target.checked})} style={{ marginTop: 2, width: 16, height: 16 }} />
+                  <div style={{ fontSize: 14, color: "#3E4943" }}>Tôi đã tự quay video / chụp ảnh 4 góc xe, nội thất và mức xăng hiện tại để làm bằng chứng.</div>
+                </label>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <label style={{ fontSize: 14, fontWeight: 800, color: "#191C1E" }}>2. Chốt số ODO (Tùy chọn)</label>
+                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#6E7A72", cursor: "pointer" }}>
+                  <input type="checkbox" checked={skipODO} onChange={e => setSkipODO(e.target.checked)} />
+                  Bỏ qua ghi nhận
+                </label>
+              </div>
+              {!skipODO ? (
+                <div>
+                  <div style={{ position: "relative" }}>
+                    <input 
+                      type="number" 
+                      value={startODO}
+                      onChange={e => setStartODO(e.target.value ? Number(e.target.value) : "")}
+                      placeholder="Nhập số KM trên đồng hồ lúc này"
+                      style={{ width: "100%", padding: "12px 14px", border: "1px solid #E5EBE8", borderRadius: 10, fontSize: 14, outline: "none" }}
+                    />
+                    <span style={{ position: "absolute", right: 14, top: 12, color: "#6E7A72", fontSize: 14, fontWeight: 600 }}>km</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#6E7A72", margin: "6px 0 0" }}>Nếu không nhớ, bạn có thể chọn "Bỏ qua ghi nhận". Lúc trả xe hệ thống sẽ hỏi bạn "Tổng số KM khách đã chạy" tính theo Trip A/B.</p>
+                </div>
+              ) : (
+                <div style={{ padding: 12, background: "#FEF3C7", borderRadius: 8, fontSize: 13, color: "#92400E" }}>
+                  Bạn đã chọn bỏ qua. Hãy yêu cầu khách bấm reset Trip A/B về 0 trên bảng điều khiển xe để dễ đối chiếu.
+                </div>
+              )}
+            </div>
+
+            <button 
+              onClick={handleHandover}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 12, fontSize: 15, fontWeight: 800, border: "none",
+                background: "#3B82F6", color: "#fff", cursor: "pointer", transition: "all 0.2s"
+              }}>
+              Xác nhận Giao Xe
+            </button>
+          </div>
+        </div>
+      )}
+
       {settingVehicleId && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
@@ -403,59 +839,79 @@ const MyVehiclesPage: React.FC = () => {
           display: "flex", alignItems: "center", justifyContent: "center"
         }}>
           <div style={{
-            background: "#fff", padding: 24, borderRadius: 16, width: "100%", maxWidth: 400,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+            background: "#fff", padding: 16, borderRadius: 16, width: "100%", maxWidth: 480,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)", maxHeight: "90vh", overflowY: "auto"
           }}>
-            <h3 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 16px", color: "#191C1E" }}>Thiết lập thời gian cho thuê</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "#191C1E" }}>Quản lý Lịch bận</h3>
+              <button onClick={() => setSettingVehicleId(null)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer" }}>×</button>
+            </div>
+            
             <p style={{ fontSize: 14, color: "#6E7A72", margin: "0 0 20px" }}>
-              Hãy chọn khoảng thời gian bạn muốn hiển thị xe này trên nền tảng để khách hàng có thể đặt.
+              Thêm các ngày bạn muốn khóa lại, không cho khách thuê (ví dụ: ngày gia đình dùng xe, ngày mang xe đi bảo dưỡng).
             </p>
             
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#191C1E", marginBottom: 6 }}>Từ ngày</label>
-              <input 
-                type="date" 
-                value={availableFrom}
-                onChange={e => setAvailableFrom(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #E5EBE8", borderRadius: 8 }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#191C1E", marginBottom: 6 }}>Đến ngày</label>
-              <input 
-                type="date" 
-                value={availableTo}
-                onChange={e => setAvailableTo(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", border: "1px solid #E5EBE8", borderRadius: 8 }}
-              />
+            <div style={{ background: "#F8F9FB", padding: 16, borderRadius: 12, marginBottom: 24 }}>
+              <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#6E7A72", marginBottom: 4 }}>Từ ngày</label>
+                  <input 
+                    type="date" 
+                    value={blockFrom}
+                    onChange={e => setBlockFrom(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14 }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#6E7A72", marginBottom: 4 }}>Đến ngày</label>
+                  <input 
+                    type="date" 
+                    value={blockTo}
+                    onChange={e => setBlockTo(e.target.value)}
+                    style={{ width: "100%", padding: "8px 12px", border: "1px solid #E5EBE8", borderRadius: 8, fontSize: 14 }}
+                  />
+                </div>
+              </div>
+              <button 
+                onClick={addUnavailability}
+                disabled={isBlocking || !blockFrom || !blockTo}
+                style={{ 
+                  width: "100%", padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 700,
+                  border: "none", background: (!blockFrom || !blockTo) ? "#E5EBE8" : "#006C4C", 
+                  color: (!blockFrom || !blockTo) ? "#9CA3AF" : "#fff", cursor: (!blockFrom || !blockTo) ? "not-allowed" : "pointer",
+                  transition: "all 0.2s"
+                }}>
+                {isBlocking ? "Đang thêm..." : "+ Thêm ngày bận"}
+              </button>
             </div>
 
-            <div style={{ display: "flex", gap: 12 }}>
-              <button 
-                onClick={() => setSettingVehicleId(null)}
-                style={{ 
-                  flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 600,
-                  border: "1px solid #BDCAC1", background: "#fff", color: "#3E4943", cursor: "pointer"
-                }}>
-                Hủy
-              </button>
-              <button 
-                onClick={() => {
-                  if (!availableFrom || !availableTo) {
-                    alert("Vui lòng chọn ngày bắt đầu và kết thúc.");
-                    return;
-                  }
-                  updateVehicleStatus(settingVehicleId, "available", availableFrom, availableTo);
-                  alert("Đã lưu thời gian cho thuê! Xe của bạn giờ đây đã sẵn sàng.");
-                }}
-                style={{ 
-                  flex: 1, padding: "10px 0", borderRadius: 8, fontSize: 14, fontWeight: 600,
-                  border: "none", background: "#006C4C", color: "#fff", cursor: "pointer"
-                }}>
-                Lưu thời gian
-              </button>
-            </div>
+            <h4 style={{ fontSize: 15, fontWeight: 700, color: "#191C1E", margin: "0 0 12px" }}>Danh sách ngày đã khóa</h4>
+            {unavailabilities.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "24px 0", color: "#9CA3AF", fontSize: 14, background: "#F9FAFB", borderRadius: 8 }}>
+                Chưa có ngày bận nào được thiết lập.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {unavailabilities.map(u => (
+                  <div key={u.id} style={{ 
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "12px 16px", background: "#fff", border: "1px solid #E5EBE8", borderRadius: 10
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#191C1E" }}>
+                        {new Date(u.start_time).toLocaleDateString("vi-VN")} - {new Date(u.end_time).toLocaleDateString("vi-VN")}
+                      </div>
+                      <div style={{ fontSize: 12, color: "#EF4444", fontWeight: 500 }}>Đã khóa</div>
+                    </div>
+                    <button 
+                      onClick={() => deleteUnavailability(u.id)}
+                      style={{ background: "#FEF2F2", border: "none", color: "#EF4444", padding: "6px 12px", borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      Xóa
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

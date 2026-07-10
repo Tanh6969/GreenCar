@@ -289,7 +289,7 @@ const HomePage: React.FC = () => {
       {/* ── HERO ──────────────────────────────────────────────── */}
       <section className="relative h-[600px] flex items-center overflow-hidden bg-black">
         <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/videos/xemau.mp4" type="video/mp4" />
+          <source src="/videos/xemau.mp4#t=2" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
 

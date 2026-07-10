@@ -127,7 +127,7 @@ func (s *BookingService) CompleteBooking(id int, actualKM int, extraFee float64,
 	// Let's just add to TotalPrice.
 	b.TotalPrice += b.OverKMFee + b.OvertimeFee + b.ExtraFee
 
-	b.Status = "completed"
+	b.Status = "pending_payment"
 
 	err = s.repo.Update(b)
 	return b, err
