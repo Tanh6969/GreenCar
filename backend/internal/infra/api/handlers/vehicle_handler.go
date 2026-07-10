@@ -308,3 +308,138 @@ func UpdateVehicleStatusHandler(vehicleSvc *service.VehicleService, log *logger.
 	}
 }
 
+// GetVehicleUnavailabilitiesHandler returns all blocked dates for a vehicle
+func GetVehicleUnavailabilitiesHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
+			return
+		}
+
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		v, err := vehicleSvc.GetVehicle(id)
+		if err != nil || v.OwnerID != int(payload.UserId) {
+			response.WriteError(w, http.StatusForbidden, "not allowed")
+			return
+		}
+
+		list, err := vehicleSvc.ListVehicleUnavailabilities(id)
+		if err != nil {
+			log.Warn("list unavailabilities %d: %v", id, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to get unavailabilities")
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, list)
+	}
+}
+
+// AddVehicleUnavailabilityHandler adds a new blocked date range
+func AddVehicleUnavailabilityHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
+			return
+		}
+
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		v, err := vehicleSvc.GetVehicle(id)
+		if err != nil || v.OwnerID != int(payload.UserId) {
+			response.WriteError(w, http.StatusForbidden, "not allowed")
+			return
+		}
+
+		var req struct {
+			StartTime string `json:"start_time"`
+			EndTime   string `json:"end_time"`
+			Type      string `json:"type"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+
+		start, err := time.Parse(time.RFC3339, req.StartTime)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid start_time format")
+			return
+		}
+		end, err := time.Parse(time.RFC3339, req.EndTime)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid end_time format")
+			return
+		}
+
+		u := &entities.VehicleUnavailability{
+			VehicleID: id,
+			StartTime: start,
+			EndTime:   end,
+			Type:      req.Type,
+		}
+
+		if u.Type == "" {
+			u.Type = "blocked"
+		}
+
+		if err := vehicleSvc.AddVehicleUnavailability(u); err != nil {
+			log.Warn("add unavailability %d: %v", id, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to add unavailability")
+			return
+		}
+
+		response.WriteJSON(w, http.StatusCreated, u)
+	}
+}
+
+// DeleteVehicleUnavailabilityHandler removes a blocked date range
+func DeleteVehicleUnavailabilityHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
+			return
+		}
+
+		uidStr := chi.URLParam(r, "uid")
+		uid, err := strconv.Atoi(uidStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid unavailability id")
+			return
+		}
+
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		v, err := vehicleSvc.GetVehicle(id)
+		if err != nil || v.OwnerID != int(payload.UserId) {
+			response.WriteError(w, http.StatusForbidden, "not allowed")
+			return
+		}
+
+		if err := vehicleSvc.RemoveVehicleUnavailability(uid); err != nil {
+			log.Warn("delete unavailability %d: %v", uid, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to delete unavailability")
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+

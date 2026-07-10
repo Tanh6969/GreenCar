@@ -41,6 +41,8 @@ func ToBookingResponse(b *entities.Booking) *dto.BookingResponse {
 		DepositAmount: b.DepositAmount,
 		OvertimeFee:   b.OvertimeFee,
 		OverKMFee:     b.OverKMFee,
+		ExtraFee:      b.ExtraFee,
+		ExtraFeeDesc:  b.ExtraFeeDesc,
 		TotalPrice:    b.TotalPrice,
 		Status:        b.Status,
 		PaymentMethod: b.PaymentMethod,

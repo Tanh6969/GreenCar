@@ -17,6 +17,8 @@ type BookingResponse struct {
 	DepositAmount float64    `json:"deposit_amount"`
 	OvertimeFee   float64    `json:"overtime_fee"`
 	OverKMFee     float64    `json:"over_km_fee"`
+	ExtraFee      float64    `json:"extra_fee"`
+	ExtraFeeDesc  string     `json:"extra_fee_desc,omitempty"`
 	TotalPrice    float64    `json:"total_price"`
 	Status        string     `json:"status"`
 	PaymentMethod string     `json:"payment_method,omitempty"`
@@ -63,4 +65,11 @@ type UpdateBookingRequest struct {
 // SetBookingStatusRequest is used by admin to change only the booking status.
 type SetBookingStatusRequest struct {
 	Status string `json:"status"`
+}
+
+// CompleteBookingRequest is used by owner to complete a trip
+type CompleteBookingRequest struct {
+	ActualKM     int     `json:"actual_km"`
+	ExtraFee     float64 `json:"extra_fee"`
+	ExtraFeeDesc string  `json:"extra_fee_desc"`
 }

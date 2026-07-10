@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"greencar/internal/domain/adapters"
 	"greencar/internal/domain/entities"
@@ -78,4 +79,56 @@ func (s *BookingService) SetBookingStatus(id int, status string) error {
 	}
 	b.Status = status
 	return s.repo.Update(b)
+}
+
+// CompleteBooking finishes the trip and calculates extra fees
+func (s *BookingService) CompleteBooking(id int, actualKM int, extraFee float64, extraFeeDesc string, returnTime time.Time) (*entities.Booking, error) {
+	b, err := s.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	_, overKMPrice, overtimePrice, err := s.repo.GetRentalPlanRates(id)
+	if err != nil {
+		return nil, err
+	}
+
+	b.ActualKM = actualKM
+	b.ActualEndTime = &returnTime
+	b.ExtraFee = extraFee
+	b.ExtraFeeDesc = extraFeeDesc
+	
+	// Calculate over_km_fee
+	if actualKM > b.PlannedKM {
+		overKM := actualKM - b.PlannedKM
+		b.OverKMFee = float64(overKM) * overKMPrice
+	} else {
+		b.OverKMFee = 0
+	}
+
+	// Calculate overtime_fee
+	// Only charge overtime if returnTime is after end_time + 1 hour grace period? Let's just use end_time.
+	if b.EndTime != nil && returnTime.After(*b.EndTime) {
+		diff := returnTime.Sub(*b.EndTime)
+		hoursOver := int(diff.Hours())
+		if diff.Minutes() > float64(hoursOver*60) {
+			hoursOver += 1 // Round up to next hour
+		}
+		b.OvertimeFee = float64(hoursOver) * overtimePrice
+	} else {
+		b.OvertimeFee = 0
+	}
+
+	// Calculate total addition to bill:
+	// The customer already paid TotalPrice (which was base price - deposit? Or total price including deposit).
+	// TotalPrice in DB should be the total the customer agreed to pay initially.
+	// Actually we should just update TotalPrice = original TotalPrice + OverKMFee + OvertimeFee + ExtraFee.
+	// But it's better to keep original TotalPrice or calculate a new GrandTotal.
+	// Let's just add to TotalPrice.
+	b.TotalPrice += b.OverKMFee + b.OvertimeFee + b.ExtraFee
+
+	b.Status = "completed"
+
+	err = s.repo.Update(b)
+	return b, err
 }

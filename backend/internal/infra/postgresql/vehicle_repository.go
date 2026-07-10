@@ -112,6 +112,12 @@ func (r *vehicleRepository) ListAvailable(start, end *time.Time, locationID, mod
 			  AND b.start_time < $2
 			  AND b.end_time > $1
 		))
+		  AND ($1::timestamptz IS NULL OR NOT EXISTS (
+			SELECT 1 FROM vehicle_unavailabilities u
+			WHERE u.vehicle_id = v.vehicle_id
+			  AND u.start_time < $2
+			  AND u.end_time > $1
+		))
 		  AND ($3 IS NULL OR v.location_id = $3)
 		  AND ($4 IS NULL OR v.vehicle_model_id = $4)
 		ORDER BY vehicle_id LIMIT $5 OFFSET $6`
@@ -132,4 +138,35 @@ func (r *vehicleRepository) ListAvailable(start, end *time.Time, locationID, mod
 		vehicles = append(vehicles, &v)
 	}
 	return vehicles, nil
+}
+
+func (r *vehicleRepository) AddUnavailability(u *entities.VehicleUnavailability) error {
+	query := `INSERT INTO vehicle_unavailabilities (vehicle_id, start_time, end_time, type) 
+		VALUES ($1, $2, $3, $4) RETURNING id`
+	return r.db.QueryRow(query, u.VehicleID, u.StartTime, u.EndTime, u.Type).Scan(&u.ID)
+}
+
+func (r *vehicleRepository) RemoveUnavailability(id int) error {
+	query := `DELETE FROM vehicle_unavailabilities WHERE id = $1`
+	_, err := r.db.Exec(query, id)
+	return err
+}
+
+func (r *vehicleRepository) ListUnavailabilities(vehicleID int) ([]*entities.VehicleUnavailability, error) {
+	query := `SELECT id, vehicle_id, start_time, end_time, type FROM vehicle_unavailabilities WHERE vehicle_id = $1 ORDER BY start_time`
+	rows, err := r.db.Query(query, vehicleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []*entities.VehicleUnavailability
+	for rows.Next() {
+		var u entities.VehicleUnavailability
+		if err := rows.Scan(&u.ID, &u.VehicleID, &u.StartTime, &u.EndTime, &u.Type); err != nil {
+			return nil, err
+		}
+		list = append(list, &u)
+	}
+	return list, nil
 }

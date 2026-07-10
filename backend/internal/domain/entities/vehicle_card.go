@@ -8,4 +8,7 @@ type VehicleCard struct {
 	ImageURL string
 	Price24h float64
 	Price4h  float64
+	TripCount int
+	Revenue   float64
+	AvgRating float64
 }

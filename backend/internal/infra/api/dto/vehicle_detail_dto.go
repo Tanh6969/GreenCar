@@ -8,6 +8,9 @@ type VehicleCardResponse struct {
 	ImageURL string                `json:"image_url"`
 	Price24h float64               `json:"price_24h"`
 	Price4h  float64               `json:"price_4h"`
+	TripCount int                  `json:"trip_count"`
+	Revenue   float64              `json:"revenue"`
+	AvgRating float64              `json:"avg_rating"`
 }
 
 // VehicleFeatureResponse represents a feature.

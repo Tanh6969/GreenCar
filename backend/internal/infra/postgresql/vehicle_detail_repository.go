@@ -24,7 +24,10 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
-		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h,
+			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS trip_count,
+			   0 AS revenue,
+			   (SELECT COALESCE(AVG(rv.rating), 0) FROM reviews rv JOIN bookings b ON b.booking_id = rv.booking_id WHERE b.vehicle_id = v.vehicle_id) AS avg_rating
 		FROM vehicles v
 		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
 		JOIN locations l ON l.location_id = v.location_id
@@ -44,11 +47,13 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		var loc entities.Location
 		var imageURL string
 		var price24h, price4h float64
+		var tripCount int
+		var revenue, avgRating float64
 		err := rows.Scan(
 			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
-			&imageURL, &price24h, &price4h,
+			&imageURL, &price24h, &price4h, &tripCount, &revenue, &avgRating,
 		)
 		if err != nil {
 			return nil, err
@@ -60,6 +65,9 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 			ImageURL: imageURL,
 			Price24h: price24h,
 			Price4h:  price4h,
+			TripCount: tripCount,
+			Revenue: revenue,
+			AvgRating: avgRating,
 		})
 	}
 	return cards, rows.Err()
@@ -72,7 +80,10 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
 		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 3 LIMIT 1), 0) AS price_24h,
-		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h
+		       COALESCE((SELECT price FROM pricing WHERE vehicle_model_id = v.vehicle_model_id AND rental_plan_id = 1 LIMIT 1), 0) AS price_4h,
+			   (SELECT COUNT(*) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS trip_count,
+			   (SELECT COALESCE(SUM(b.total_price), 0) FROM bookings b WHERE b.vehicle_id = v.vehicle_id AND b.status = 'completed') AS revenue,
+			   (SELECT COALESCE(AVG(rv.rating), 0) FROM reviews rv JOIN bookings b ON b.booking_id = rv.booking_id WHERE b.vehicle_id = v.vehicle_id) AS avg_rating
 		FROM vehicles v
 		JOIN vehicle_models m ON m.vehicle_model_id = v.vehicle_model_id
 		JOIN locations l ON l.location_id = v.location_id
@@ -92,11 +103,13 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		var loc entities.Location
 		var imageURL string
 		var price24h, price4h float64
+		var tripCount int
+		var revenue, avgRating float64
 		err := rows.Scan(
 			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
-			&imageURL, &price24h, &price4h,
+			&imageURL, &price24h, &price4h, &tripCount, &revenue, &avgRating,
 		)
 		if err != nil {
 			return nil, err
@@ -108,6 +121,9 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 			ImageURL: imageURL,
 			Price24h: price24h,
 			Price4h:  price4h,
+			TripCount: tripCount,
+			Revenue: revenue,
+			AvgRating: avgRating,
 		})
 	}
 	return cards, rows.Err()
@@ -270,7 +286,10 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 	bookingRows, err := r.db.Query(
 		`SELECT start_time, end_time FROM bookings 
 		 WHERE vehicle_id = $1 AND status IN ('pending', 'confirmed', 'active', 'running')
-		 AND end_time > NOW()`, 
+		 AND end_time > NOW()
+		 UNION ALL
+		 SELECT start_time, end_time FROM vehicle_unavailabilities
+		 WHERE vehicle_id = $1 AND end_time > NOW()`, 
 		id,
 	)
 	if err == nil {
@@ -308,6 +327,12 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 			FROM bookings
 			WHERE vehicle_id = $1
 			  AND status != 'cancelled'
+			  AND start_time < $2
+			  AND end_time > $2
+		) AND NOT EXISTS (
+			SELECT 1
+			FROM vehicle_unavailabilities
+			WHERE vehicle_id = $1
 			  AND start_time < $2
 			  AND end_time > $2
 		)`,

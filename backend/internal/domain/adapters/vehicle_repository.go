@@ -21,4 +21,8 @@ type VehicleRepository interface {
 	// locationID/modelID are optional filters (nil => ignore).
 	ListAvailable(start, end *time.Time, locationID, modelID *int, limit, offset int) ([]*entities.Vehicle, error)
 	AddImage(modelID int, url string) error
+	
+	AddUnavailability(u *entities.VehicleUnavailability) error
+	RemoveUnavailability(id int) error
+	ListUnavailabilities(vehicleID int) ([]*entities.VehicleUnavailability, error)
 }

@@ -23,12 +23,13 @@ func scanBookingDetail(scan func(...any) error) (entities.Booking, error) {
 	var b entities.Booking
 	var actualStart, actualEnd sql.NullTime
 	var actualKM               sql.NullInt64
-	var overtimeFee, overKMFee sql.NullFloat64
-	var paymentMethod          sql.NullString
+	var overtimeFee, overKMFee, extraFee sql.NullFloat64
+	var paymentMethod, extraFeeDesc sql.NullString
 	err := scan(
 		&b.BookingID, &b.UserID, &b.VehicleID, &b.RentalPlanID,
 		&b.StartTime, &b.EndTime, &actualStart, &actualEnd,
 		&b.PlannedKM, &actualKM, &b.DepositAmount, &overtimeFee, &overKMFee,
+		&extraFee, &extraFeeDesc,
 		&b.TotalPrice, &b.Status, &paymentMethod, &b.CreatedAt,
 		&b.VehicleModelID, &b.VehicleBrand, &b.VehicleName, &b.LicensePlate,
 		&b.CustomerName, &b.CustomerPhone, &b.HasReviewed,
@@ -41,6 +42,8 @@ func scanBookingDetail(scan func(...any) error) (entities.Booking, error) {
 	if actualKM.Valid      { b.ActualKM        = int(actualKM.Int64) }
 	if overtimeFee.Valid   { b.OvertimeFee     = overtimeFee.Float64 }
 	if overKMFee.Valid     { b.OverKMFee       = overKMFee.Float64 }
+	if extraFee.Valid      { b.ExtraFee        = extraFee.Float64 }
+	if extraFeeDesc.Valid  { b.ExtraFeeDesc    = extraFeeDesc.String }
 	if paymentMethod.Valid { b.PaymentMethod   = paymentMethod.String }
 	return b, nil
 }
@@ -49,6 +52,7 @@ const selectBookingDetail = `
 SELECT b.booking_id, b.user_id, b.vehicle_id, b.rental_plan_id,
   b.start_time, b.end_time, b.actual_start_time, b.actual_end_time,
   b.planned_km, b.actual_km, b.deposit_amount, b.overtime_fee, b.over_km_fee,
+  b.extra_fee, b.extra_fee_description,
   b.total_price, b.status, b.payment_method, b.created_at,
   COALESCE(vm.vehicle_model_id, 0) AS vehicle_model_id,
   COALESCE(vm.brand, '') AS vehicle_brand,
@@ -84,11 +88,11 @@ func (r *bookingRepository) Create(b *entities.Booking) error {
 func (r *bookingRepository) Update(b *entities.Booking) error {
 	query := `UPDATE bookings SET user_id=$1, vehicle_id=$2, rental_plan_id=$3, start_time=$4, end_time=$5,
 		actual_start_time=$6, actual_end_time=$7, planned_km=$8, actual_km=$9, deposit_amount=$10,
-		overtime_fee=$11, over_km_fee=$12, total_price=$13, status=$14 WHERE booking_id=$15`
+		overtime_fee=$11, over_km_fee=$12, extra_fee=$13, extra_fee_description=$14, total_price=$15, status=$16 WHERE booking_id=$17`
 	_, err := r.db.Exec(query,
 		b.UserID, b.VehicleID, b.RentalPlanID, b.StartTime, b.EndTime,
 		b.ActualStartTime, b.ActualEndTime, b.PlannedKM, b.ActualKM, b.DepositAmount,
-		b.OvertimeFee, b.OverKMFee, b.TotalPrice, b.Status, b.BookingID)
+		b.OvertimeFee, b.OverKMFee, b.ExtraFee, b.ExtraFeeDesc, b.TotalPrice, b.Status, b.BookingID)
 	return err
 }
 
@@ -139,10 +143,23 @@ func scanBookings(rows *sql.Rows) ([]*entities.Booking, error) {
 func (r *bookingRepository) ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error) {
 	query := `SELECT EXISTS(
 		SELECT 1 FROM bookings
+		WHERE vehicle_id = $1 AND status != 'cancelled'
+		AND NOT (end_time <= $2 OR start_time >= $3)
+	) OR EXISTS (
+		SELECT 1 FROM vehicle_unavailabilities
 		WHERE vehicle_id = $1
 		AND NOT (end_time <= $2 OR start_time >= $3)
 	)`
 	var exists bool
 	err := r.db.QueryRow(query, vehicleID, start, end).Scan(&exists)
 	return exists, err
+}
+
+func (r *bookingRepository) GetRentalPlanRates(bookingID int) (maxKM int, overKMPrice float64, overtimePrice float64, err error) {
+	query := `SELECT p.max_km, p.over_km_price, p.overtime_price 
+		FROM bookings b 
+		JOIN rental_plans p ON b.rental_plan_id = p.rental_plan_id 
+		WHERE b.booking_id = $1`
+	err = r.db.QueryRow(query, bookingID).Scan(&maxKM, &overKMPrice, &overtimePrice)
+	return
 }

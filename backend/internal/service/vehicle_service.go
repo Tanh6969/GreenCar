@@ -68,3 +68,15 @@ func (s *VehicleService) ListVehicleCards(limit, offset int) ([]*entities.Vehicl
 func (s *VehicleService) ListVehicleCardsByOwnerID(ownerID int) ([]*entities.VehicleCard, error) {
 	return s.detailRepo.ListByOwnerID(ownerID)
 }
+
+func (s *VehicleService) AddVehicleUnavailability(u *entities.VehicleUnavailability) error {
+	return s.repo.AddUnavailability(u)
+}
+
+func (s *VehicleService) RemoveVehicleUnavailability(id int) error {
+	return s.repo.RemoveUnavailability(id)
+}
+
+func (s *VehicleService) ListVehicleUnavailabilities(vehicleID int) ([]*entities.VehicleUnavailability, error) {
+	return s.repo.ListUnavailabilities(vehicleID)
+}

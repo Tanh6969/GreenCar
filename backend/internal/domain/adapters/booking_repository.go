@@ -19,4 +19,5 @@ type BookingRepository interface {
 	// ExistsOverlapping returns true if there is an existing booking for the same vehicle
 	// that overlaps the given time range.
 	ExistsOverlapping(vehicleID int, start, end time.Time) (bool, error)
+	GetRentalPlanRates(bookingID int) (maxKM int, overKMPrice float64, overtimePrice float64, err error)
 }
