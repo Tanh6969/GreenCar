@@ -33,8 +33,11 @@ type OwnerPublic struct {
 	UserID    int     `json:"user_id"`
 	Name      string  `json:"name"`
 	Phone     string  `json:"phone"`
-	TripCount int     `json:"trip_count"`
-	AvgRating float64 `json:"avg_rating"`
+	TripCount    int     `json:"trip_count"`
+	AvgRating    float64 `json:"avg_rating"`
+	ResponseRate float64 `json:"response_rate"`
+	ApprovalRate float64 `json:"approval_rate"`
+	ResponseTime string  `json:"response_time"`
 }
 
 // VehiclePricing is pricing detail for a vehicle model, including rental plan information.

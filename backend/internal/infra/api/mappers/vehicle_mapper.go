@@ -124,11 +124,14 @@ func toOwnerPublicResponse(owner *entities.OwnerPublic) *dto.OwnerPublicResponse
 		return nil
 	}
 	return &dto.OwnerPublicResponse{
-		UserID:    owner.UserID,
-		Name:      owner.Name,
-		Phone:     owner.Phone,
-		TripCount: owner.TripCount,
-		AvgRating: owner.AvgRating,
+		UserID:       owner.UserID,
+		Name:         owner.Name,
+		Phone:        owner.Phone,
+		TripCount:    owner.TripCount,
+		AvgRating:    owner.AvgRating,
+		ResponseRate: owner.ResponseRate,
+		ApprovalRate: owner.ApprovalRate,
+		ResponseTime: owner.ResponseTime,
 	}
 }
 

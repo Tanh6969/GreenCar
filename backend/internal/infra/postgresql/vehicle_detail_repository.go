@@ -191,6 +191,30 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		).Scan(&owner.UserID, &owner.Name, &owner.Phone)
 		owner.TripCount = tripCount
 		owner.AvgRating = avgRating
+
+		// Calculate Approval Rate
+		var totalBookings, rejectedBookings int
+		r.db.QueryRow(`SELECT COUNT(*) FROM bookings b JOIN vehicles vv ON vv.vehicle_id = b.vehicle_id WHERE vv.owner_id = $1`, v.OwnerID).Scan(&totalBookings)
+		r.db.QueryRow(`SELECT COUNT(*) FROM bookings b JOIN vehicles vv ON vv.vehicle_id = b.vehicle_id WHERE vv.owner_id = $1 AND b.status = 'cancelled' AND (b.owner_note IS NOT NULL AND b.owner_note != '')`, v.OwnerID).Scan(&rejectedBookings)
+		
+		if totalBookings > 0 {
+			owner.ApprovalRate = float64(totalBookings-rejectedBookings) / float64(totalBookings) * 100
+		} else {
+			owner.ApprovalRate = 100
+		}
+
+		// Calculate Response Rate (approximate based on messages vs conversations)
+		var totalConvos, repliedConvos int
+		r.db.QueryRow(`SELECT COUNT(*) FROM conversations WHERE owner_id = $1`, v.OwnerID).Scan(&totalConvos)
+		r.db.QueryRow(`SELECT COUNT(DISTINCT conversation_id) FROM messages WHERE sender_id = $1`, v.OwnerID).Scan(&repliedConvos)
+
+		if totalConvos > 0 {
+			owner.ResponseRate = float64(repliedConvos) / float64(totalConvos) * 100
+		} else {
+			owner.ResponseRate = 100 // Default if no conversations
+		}
+		
+		owner.ResponseTime = "<1h" // Static for now as precise calculation is complex
 	}
 
 	// Load images

@@ -567,15 +567,15 @@ const CarDetailPage: React.FC = () => {
               </div>
               <div className="grid grid-cols-3 gap-3 mt-4 text-center">
                 <div className="bg-[#F0FDF4] rounded-xl p-3">
-                  <p className="font-bold text-[#006C4C] text-base">100%</p>
+                  <p className="font-bold text-[#006C4C] text-base">{(data as any).owner.response_rate ?? 100}%</p>
                   <p className="text-xs text-[#6E7A72] mt-0.5">Tỉ lệ phản hồi</p>
                 </div>
                 <div className="bg-[#F0FDF4] rounded-xl p-3">
-                  <p className="font-bold text-[#006C4C] text-base">100%</p>
+                  <p className="font-bold text-[#006C4C] text-base">{Math.round((data as any).owner.approval_rate ?? 100)}%</p>
                   <p className="text-xs text-[#6E7A72] mt-0.5">Tỉ lệ đồng ý</p>
                 </div>
                 <div className="bg-[#F0FDF4] rounded-xl p-3">
-                  <p className="font-bold text-[#006C4C] text-base">&lt;1h</p>
+                  <p className="font-bold text-[#006C4C] text-base">{(data as any).owner.response_time ?? "<1h"}</p>
                   <p className="text-xs text-[#6E7A72] mt-0.5">Phản hồi trong</p>
                 </div>
               </div>

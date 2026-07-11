@@ -11,66 +11,66 @@ import { VehicleCardData } from "../../../types/vehicle.type";
 // ── icons ──────────────────────────────────────────────────────
 const IcCar = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
-    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2"/>
-    <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+    <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h1l3-3h8l3 3h1a2 2 0 012 2v6a2 2 0 01-2 2h-2" />
+    <circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
   </svg>
 );
 const IcBolt = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
-    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10" />
   </svg>
 );
 const IcSeat = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
-    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2"/><circle cx="10" cy="7" r="4"/>
+    <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" /><circle cx="10" cy="7" r="4" />
   </svg>
 );
 const IcSpeed = ({ size = 12, color = "#006C4C" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
-    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+    <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64" /><line x1="12" y1="2" x2="12" y2="12" />
   </svg>
 );
 const IcPin = ({ size = 12, color = "#6E7A72" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 3, flexShrink: 0 }}>
-    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
   </svg>
 );
 const IcShield = ({ size = 13 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 4 }}>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 const IcSearch = ({ size = 32 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
   </svg>
 );
 const IcClipboard = ({ size = 32 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
-    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-    <rect x="9" y="3" width="6" height="4" rx="1"/>
-    <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/>
+    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+    <line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="13" y2="16" />
   </svg>
 );
 const IcLeaf = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 5 }}>
-    <path d="M2 22l10-10"/><path d="M13.5 21.5C18 21.5 21 17.5 21 12c0-5.5-4-9-9-9C7 3 3 7 3 12c0 3 1.5 5.5 4 7l6.5 2.5z"/>
+    <path d="M2 22l10-10" /><path d="M13.5 21.5C18 21.5 21 17.5 21 12c0-5.5-4-9-9-9C7 3 3 7 3 12c0 3 1.5 5.5 4 7l6.5 2.5z" />
   </svg>
 );
 const IcTree = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
-    <path d="M12 22V12"/><path d="M5 12H3l9-9 9 9h-2"/><path d="M5 17H3l9-9 9 9h-2"/>
+    <path d="M12 22V12" /><path d="M5 12H3l9-9 9 9h-2" /><path d="M5 17H3l9-9 9 9h-2" />
   </svg>
 );
 const IcBattery = ({ size = 22 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#006C4C" strokeWidth="1.5" strokeLinecap="round">
-    <rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/>
-    <line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="11" x2="10" y2="13"/>
+    <rect x="2" y="7" width="18" height="10" rx="2" /><line x1="22" y1="11" x2="22" y2="13" />
+    <line x1="6" y1="11" x2="6" y2="13" /><line x1="10" y1="11" x2="10" y2="13" />
   </svg>
 );
 const IcTimer = ({ size = 14, color = "#4FBD91" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 6 }}>
-    <circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>
+    <circle cx="12" cy="12" r="9" /><path d="M12 6v6l4 2" />
   </svg>
 );
 
@@ -81,14 +81,12 @@ function getImage(data: VehicleCardData): string | undefined {
   return MODEL_LOCAL_IMAGES[data.model.vehicle_model_id] ?? data.image_url;
 }
 
-function dedupeByModel(list: VehicleCardData[]): VehicleCardData[] {
-  const seenModels   = new Set<number>();
-  const seenVehicles = new Set<number>();
+function dedupeByModelAndOwner(list: VehicleCardData[]): VehicleCardData[] {
+  const seen = new Set<string>();
   return list.filter(v => {
-    if (seenModels.has(v.model.vehicle_model_id))   return false;
-    if (seenVehicles.has(v.vehicle.vehicle_id))     return false;
-    seenModels.add(v.model.vehicle_model_id);
-    seenVehicles.add(v.vehicle.vehicle_id);
+    const key = `${v.model.vehicle_model_id}-${v.vehicle.owner_id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }
@@ -108,14 +106,14 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
   return (
     <Link
       to={`/cars/${vehicle.vehicle_id}`}
-      className="flex-shrink-0 w-60 rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-xl group"
+      className="flex-shrink-0 w-[270px] rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-xl group flex flex-col"
     >
       <div className="relative overflow-hidden">
         {img ? (
           <img src={img} alt={model.name}
-            className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-300" />
+            className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
-          <div className="w-full h-36 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center">
+          <div className="w-full h-44 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] flex items-center justify-center">
             <IcCar size={48} color="#4FBD91" />
           </div>
         )}
@@ -126,8 +124,8 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         )}
       </div>
 
-      <div className="p-3.5">
-        <p className={`text-xs font-bold uppercase tracking-wider mb-0.5 text-[#006C4C]`}>{model.brand}</p>
+      <div className="p-4 flex flex-col flex-1">
+        <p className={`text-xs font-bold uppercase tracking-wider mb-1 text-[#006C4C]`}>{model.brand}</p>
         <h4 className="font-bold text-base leading-tight mb-2 text-[#191C1E]">{model.name}</h4>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
@@ -142,29 +140,39 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
           </span>
         </div>
 
-        <div className={`border-t pt-2.5 flex justify-between items-end
-          border-[#E5E7EB]`}>
-          <div>
+        <div className={`border-t pt-2.5 mt-auto flex justify-between items-end border-[#E5E7EB]`}>
+          <div className="flex flex-col">
             {(data.promo_discount ?? 0) > 0 ? (
               <>
-                <div className="text-[#6E7A72] line-through text-xs leading-none mb-0.5">{formatCurrency(price24h)}</div>
-                <div className="text-[#EF4444] font-extrabold text-base leading-tight">{formatCurrency(price24h * (1 - (data.promo_discount ?? 0) / 100))}</div>
+                <span className="text-[#6E7A72] line-through text-[10px] leading-none mb-0.5">{formatCurrency(price24h)}</span>
+                <span className="text-[#EF4444] font-extrabold text-[15px] leading-tight">
+                  {formatCurrency(price24h * (1 - (data.promo_discount ?? 0) / 100))}
+                  <span className={`text-[10px] font-normal ml-0.5 ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</span>
+                </span>
               </>
             ) : (
-              <div className="text-[#006C4C] font-bold text-lg">{formatCurrency(price24h)}</div>
+              <div className="text-[#006C4C] font-bold text-[15px]">
+                {formatCurrency(price24h)}
+                <span className={`text-[10px] font-normal ml-0.5 ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</span>
+              </div>
             )}
-            <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/ngày</div>
           </div>
-          <div className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>
+          
+          <div className="flex flex-col items-end">
             {(data.promo_discount ?? 0) > 0 ? (
               <>
-                <span className="line-through">{formatCurrency(price4h)}</span>{" "}
-                <span className="text-[#EF4444] font-semibold">{formatCurrency(price4h * (1 - (data.promo_discount ?? 0) / 100))}</span>
+                <span className="text-[#6E7A72] line-through text-[10px] leading-none mb-0.5">{formatCurrency(price4h)}</span>
+                <span className="text-[#EF4444] font-semibold text-xs leading-tight">
+                  {formatCurrency(price4h * (1 - (data.promo_discount ?? 0) / 100))}
+                  <span className={`text-[10px] font-normal ml-0.5 ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>/4h</span>
+                </span>
               </>
             ) : (
-              formatCurrency(price4h)
+              <span className={`text-xs ${isLuxury ? "text-[#64748B]" : "text-[#9CA3AF]"}`}>
+                {formatCurrency(price4h)}
+                <span className="text-[10px] ml-0.5">/4h</span>
+              </span>
             )}
-            /4h
           </div>
         </div>
 
@@ -197,6 +205,10 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
       const scroll = () => {
         if (rowRef.current) {
           rowRef.current.scrollLeft += 1;
+          // Seamless loop: if we've scrolled past the first set, reset to 0
+          if (rowRef.current.scrollLeft >= rowRef.current.scrollWidth / 2) {
+            rowRef.current.scrollLeft = 0;
+          }
         }
         animationId = requestAnimationFrame(scroll);
       };
@@ -206,7 +218,7 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
   }, [isHovered]);
 
   const scrollAction = (dir: "left" | "right") =>
-    rowRef.current?.scrollBy({ left: dir === "right" ? 260 : -260, behavior: "smooth" });
+    rowRef.current?.scrollBy({ left: dir === "right" ? 284 : -284, behavior: "smooth" });
 
   if (cars.length === 0) return null;
 
@@ -234,15 +246,19 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
           </div>
         </div>
 
-        <div 
-          ref={rowRef} 
+        <div
+          ref={rowRef}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           className="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2"
         >
-          {cars.map(item => {
-            return <ScrollCard key={item.vehicle.vehicle_id} data={item} price4h={item.price_4h} price24h={item.price_24h} />;
-          })}
+          {cars.map((item, i) => (
+            <ScrollCard key={`${item.vehicle.vehicle_id}-${i}`} data={item} price4h={item.price_4h} price24h={item.price_24h} />
+          ))}
+          {/* Duplicate set for infinite scroll effect */}
+          {cars.map((item, i) => (
+            <ScrollCard key={`${item.vehicle.vehicle_id}-dup-${i}`} data={item} price4h={item.price_4h} price24h={item.price_24h} />
+          ))}
         </div>
 
         <div className="mt-4 text-center sm:hidden">
@@ -293,12 +309,12 @@ const SearchWidget: React.FC = () => {
       </div>
 
       <button onClick={() => {
-          const params = new URLSearchParams();
-          if (search.locationId) params.append("locationId", String(search.locationId));
-          if (search.startDate) params.append("startDate", search.startDate);
-          if (search.endDate) params.append("endDate", search.endDate);
-          navigate(`/cars?${params.toString()}`);
-        }}
+        const params = new URLSearchParams();
+        if (search.locationId) params.append("locationId", String(search.locationId));
+        if (search.startDate) params.append("startDate", search.startDate);
+        if (search.endDate) params.append("endDate", search.endDate);
+        navigate(`/cars?${params.toString()}`);
+      }}
         className="w-full bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white font-bold py-3 rounded-xl text-sm transition-all">
         Tìm Xe Trống →
       </button>
@@ -316,13 +332,16 @@ const HomePage: React.FC = () => {
   const { vehicles, loading } = useVehicles();
   const { user } = useAuth();
 
-  const filteredVehicles = user?.user_id 
-    ? vehicles.filter(v => v.vehicle.owner_id !== user.user_id) 
+  const filteredVehicles = user?.user_id
+    ? vehicles.filter(v => v.vehicle.owner_id !== user.user_id)
     : vehicles;
 
-  const available   = dedupeByModel(filteredVehicles.filter(v => v.vehicle.status === "available"));
-  const luxury      = dedupeByModel(filteredVehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
-  const recommended = dedupeByModel(filteredVehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
+  const availableUnsorted = dedupeByModelAndOwner(filteredVehicles.filter(v => v.vehicle.status === "available"));
+  // Prioritize discounted cars
+  const available = [...availableUnsorted].sort((a, b) => (b.promo_discount || 0) - (a.promo_discount || 0));
+
+  const luxury = dedupeByModelAndOwner(filteredVehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
+  const recommended = dedupeByModelAndOwner(filteredVehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
 
   return (
     <div className="w-full">
@@ -382,10 +401,10 @@ const HomePage: React.FC = () => {
       <div className="bg-[#F8F9FB] border-b border-[#E5E7EB] py-5">
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E5E7EB]">
           {[
-            { num: "15+",    lbl: "Mẫu xe điện" },
-            { num: "7",      lbl: "Điểm đón Hà Nội" },
-            { num: "20K+",   lbl: "Chuyến thành công" },
-            { num: "4.9 ★",  lbl: "Đánh giá trung bình" },
+            { num: "15+", lbl: "Mẫu xe điện" },
+            { num: "7", lbl: "Điểm đón Hà Nội" },
+            { num: "20K+", lbl: "Chuyến thành công" },
+            { num: "4.9 ★", lbl: "Đánh giá trung bình" },
           ].map(s => (
             <div key={s.lbl} className="text-center px-4 py-2">
               <div className="text-xl font-black text-[#006C4C]">{s.num}</div>
@@ -417,9 +436,9 @@ const HomePage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {([
-              { step: "01", icon: <IcSearch size={32} />,                   title: "Chọn xe & địa điểm", desc: "Lọc theo loại xe, khu vực đón và ngày giờ phù hợp." },
-              { step: "02", icon: <IcClipboard size={32} />,                 title: "Đặt & thanh toán",   desc: "Xác nhận thông tin, chọn gói thuê và thanh toán an toàn." },
-              { step: "03", icon: <IcCar size={32} color="#006C4C" />,       title: "Nhận xe & lái",      desc: "Nhận xe tại điểm hẹn. Xe đã sạc đầy, bảo hiểm đầy đủ." },
+              { step: "01", icon: <IcSearch size={32} />, title: "Chọn xe & địa điểm", desc: "Lọc theo loại xe, khu vực đón và ngày giờ phù hợp." },
+              { step: "02", icon: <IcClipboard size={32} />, title: "Đặt & thanh toán", desc: "Xác nhận thông tin, chọn gói thuê và thanh toán an toàn." },
+              { step: "03", icon: <IcCar size={32} color="#006C4C" />, title: "Nhận xe & lái", desc: "Nhận xe tại điểm hẹn. Xe đã sạc đầy, bảo hiểm đầy đủ." },
             ] as { step: string; icon: React.ReactNode; title: string; desc: string }[]).map(s => (
               <div key={s.step} className="bg-white rounded-2xl border border-[#E5E7EB] p-6 text-center hover:border-[#BDCAC1] transition-colors">
                 <div className="flex justify-center mb-3">{s.icon}</div>
@@ -448,9 +467,9 @@ const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
-              { img: PREMIUM_IMAGES.lucidDream, brand: "Lucid",  name: "Air Dream Edition", price: "4.200.000", range: "837km", accel: "2.7s" },
-              { img: PREMIUM_IMAGES.rivianR1S,  brand: "Rivian", name: "R1S Adventure",     price: "3.400.000", range: "505km", accel: "3.0s" },
-              { img: PREMIUM_IMAGES.lucidAir,   brand: "Lucid",  name: "Air Grand Touring", price: "3.800.000", range: "760km", accel: "3.0s" },
+              { img: PREMIUM_IMAGES.lucidDream, brand: "Lucid", name: "Air Dream Edition", price: "4.200.000", range: "837km", accel: "2.7s" },
+              { img: PREMIUM_IMAGES.rivianR1S, brand: "Rivian", name: "R1S Adventure", price: "3.400.000", range: "505km", accel: "3.0s" },
+              { img: PREMIUM_IMAGES.lucidAir, brand: "Lucid", name: "Air Grand Touring", price: "3.800.000", range: "760km", accel: "3.0s" },
             ].map(car => (
               <div key={car.name}
                 className="bg-[#131A2B] rounded-2xl overflow-hidden border border-white/10 hover:-translate-y-1 hover:shadow-2xl hover:border-white/20 transition-all duration-200">
@@ -504,9 +523,9 @@ const HomePage: React.FC = () => {
             </div>
             <div className="flex sm:flex-col gap-3">
               {([
-                { icon: <IcTree size={26} />,                    num: "12.5K", lbl: "Trees equivalent" },
-                { icon: <IcBattery size={26} />,                 num: "450K",  lbl: "kWh tiết kiệm" },
-                { icon: <IcCar size={26} color="#006C4C" />,     num: "20K+",  lbl: "Chuyến thành công" },
+                { icon: <IcTree size={26} />, num: "12.5K", lbl: "Trees equivalent" },
+                { icon: <IcBattery size={26} />, num: "450K", lbl: "kWh tiết kiệm" },
+                { icon: <IcCar size={26} color="#006C4C" />, num: "20K+", lbl: "Chuyến thành công" },
               ] as { icon: React.ReactNode; num: string; lbl: string }[]).map(s => (
                 <div key={s.lbl} className="bg-white rounded-xl border border-[#bbf7d0] p-4 text-center min-w-[110px] shadow-sm">
                   <div className="flex justify-center mb-1">{s.icon}</div>
