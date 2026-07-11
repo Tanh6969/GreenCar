@@ -93,19 +93,19 @@ const CarDetailPage: React.FC = () => {
     return getLocalDateStr(now);
   });
 
-  const [endDate, setEndDate] = useState(() => {
-    const e = searchParams.get("endDate");
-    if (e) return `${e}T20:00`;
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 25, 0, 0, 0);
-    return getLocalDateStr(tomorrow);
-  });
+  const PLAN_HOURS: Record<number, number> = { 1: 4, 2: 8, 3: 24 };
+
+  const endDate = React.useMemo(() => {
+    const d = new Date(startDate);
+    if (isNaN(d.getTime())) return startDate;
+    const hours = PLAN_HOURS[selectedPlan] || 24;
+    d.setHours(d.getHours() + hours);
+    return getLocalDateStr(d);
+  }, [startDate, selectedPlan]);
 
   useEffect(() => {
     const s = searchParams.get("startDate");
-    const e = searchParams.get("endDate");
     if (s) setStartDate(`${s}T09:00`);
-    if (e) setEndDate(`${e}T20:00`);
   }, [searchParams]);
 
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -280,8 +280,8 @@ const CarDetailPage: React.FC = () => {
                 <input 
                   type="datetime-local" 
                   value={endDate} 
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="font-bold text-[#191C1E] bg-transparent border-none p-0 focus:ring-0 w-full"
+                  readOnly
+                  className="font-bold text-[#6E7A72] bg-transparent border-none p-0 focus:ring-0 w-full cursor-not-allowed"
                 />
               </div>
             </div>

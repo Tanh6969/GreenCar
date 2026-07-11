@@ -40,7 +40,7 @@ a { text-decoration: none; color: inherit; }
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1010;
   box-shadow: var(--shadow-sm);
 }
 

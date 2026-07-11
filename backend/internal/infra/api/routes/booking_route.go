@@ -9,9 +9,9 @@ import (
 )
 
 // RegisterBookingRoutes registers all booking-related routes under the given router.
-func RegisterBookingRoutes(r chi.Router, bookingSvc *service.BookingService, log *logger.Logger) {
+func RegisterBookingRoutes(r chi.Router, bookingSvc *service.BookingService, vehicleSvc *service.VehicleService, notifSvc service.NotificationService, log *logger.Logger) {
 	r.Get("/", handlers.ListBookingsHandler(bookingSvc, log))
-	r.Post("/", handlers.CreateBookingHandler(bookingSvc, log))
+	r.Post("/", handlers.CreateBookingHandler(bookingSvc, vehicleSvc, notifSvc, log))
 
 	r.Route("/{id}", func(r chi.Router) {
 		r.Get("/", handlers.GetBookingHandler(bookingSvc, log))

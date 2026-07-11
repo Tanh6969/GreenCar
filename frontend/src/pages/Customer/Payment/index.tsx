@@ -95,7 +95,7 @@ const PaymentPage: React.FC = () => {
         bookingId = booking.booking_id;
         
         try {
-          const defaultMsg = `Chào bạn, tôi vừa đặt thuê xe ${vehicleInfo.name} của bạn. Lịch trình từ ${formatDT(startTime)} đến ${formatDT(endTime)}. Vui lòng chuẩn bị và giao xe đúng lịch nhé!`;
+          const defaultMsg = `Chào bạn, tôi vừa gửi yêu cầu thuê xe ${vehicleInfo.name} của bạn.\n- Lịch trình: Từ ${formatDT(startTime)} đến ${formatDT(endTime)}.\n- Giao nhận tại: ${vehicleInfo.locationName || "Địa chỉ mặc định"}.\nRất mong bạn sớm duyệt đơn nhé!`;
           const finalMsg = pendingBooking.customerNote 
             ? `${defaultMsg}\n\nGhi chú thêm của tôi: ${pendingBooking.customerNote}`
             : defaultMsg;
@@ -126,6 +126,12 @@ const PaymentPage: React.FC = () => {
           <div className="flex-1 flex flex-col gap-5">
             <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
               <h2 className="font-bold text-[#191C1E] text-base mb-5">Phương thức thanh toán đặt cọc</h2>
+              <div className="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-100 flex gap-3 text-[#1E3A8A]">
+                <span className="text-xl">🛡️</span>
+                <p className="text-sm">
+                  <strong>Thanh toán an toàn qua GreenCar:</strong> Số tiền cọc của bạn sẽ được GreenCar <strong>tạm giữ</strong>. Nếu chủ xe không duyệt đơn, hệ thống sẽ tự động <strong>hoàn tiền 100%</strong> về tài khoản của bạn.
+                </p>
+              </div>
 
               <div className="flex flex-col gap-3">
                 {METHODS.map(m => (

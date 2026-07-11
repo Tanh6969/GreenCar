@@ -10,6 +10,8 @@ interface ApiBooking {
   status: string; payment_method?: string; created_at: string;
   vehicle_model_id?: number; vehicle_brand?: string; vehicle_name?: string; license_plate?: string;
   customer_name?: string; customer_phone?: string; has_reviewed?: boolean;
+  customer_email?: string; customer_license_no?: string; customer_trip_count?: number;
+  owner_note?: string;
 }
 
 function toBooking(b: ApiBooking): Booking {
@@ -37,6 +39,10 @@ function toBooking(b: ApiBooking): Booking {
     license_plate:  b.license_plate,
     customer_name:  b.customer_name,
     customer_phone: b.customer_phone,
+    customer_email: b.customer_email,
+    customer_license_no: b.customer_license_no,
+    customer_trip_count: b.customer_trip_count,
+    owner_note:     b.owner_note,
     has_reviewed:   b.has_reviewed,
   };
 }

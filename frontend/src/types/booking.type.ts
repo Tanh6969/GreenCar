@@ -39,5 +39,9 @@ export interface Booking {
   license_plate?: string;
   customer_name?: string;
   customer_phone?: string;
+  customer_email?: string;
+  customer_license_no?: string;
+  customer_trip_count?: number;
+  owner_note?: string;
   has_reviewed?: boolean;
 }

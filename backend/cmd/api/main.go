@@ -51,6 +51,7 @@ func main() {
 	postRepo := repository.NewPostRepository(db)
 	ownerRegRepo := repository.NewOwnerRegistrationRepository(db)
 	chatRepo := repository.NewChatRepository(db)
+	notifRepo := repository.NewNotificationRepository(db)
 
 	pricingRuleRepo := repository.NewPricingRuleRepository(db)
 
@@ -63,8 +64,9 @@ func main() {
 	chatSvc := service.NewChatService(chatRepo, bookingSvc, log)
 	reviewSvc := service.NewReviewService(repository.NewReviewRepository(db))
 	pricingRuleSvc := service.NewPricingRuleService(pricingRuleRepo)
+	notifSvc := service.NewNotificationService(notifRepo)
 
-	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, reviewSvc, pricingRuleSvc, db)
+	router := api.NewRouter(userSvc, vehicleSvc, bookingSvc, log, authSvc, maker, postSvc, ownerRegSvc, chatSvc, reviewSvc, pricingRuleSvc, notifSvc, db)
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {

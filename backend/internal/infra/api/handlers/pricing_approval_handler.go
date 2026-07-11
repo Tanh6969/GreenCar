@@ -18,7 +18,7 @@ import (
 )
 
 // ApproveBookingHandler allows owner to approve a pending booking.
-func ApproveBookingHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+func ApproveBookingHandler(bookingSvc *service.BookingService, notifSvc service.NotificationService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
@@ -37,12 +37,22 @@ func ApproveBookingHandler(bookingSvc *service.BookingService, log *logger.Logge
 			return
 		}
 		b, _ := bookingSvc.GetBooking(id)
+		
+		// Send notification to customer
+		_ = notifSvc.CreateNotification(
+			b.UserID,
+			"booking_approved",
+			"Đơn thuê xe đã được duyệt",
+			"Tuyệt vời! Chủ xe đã chấp nhận yêu cầu thuê xe của bạn.",
+			"/customer/my-bookings",
+		)
+
 		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponse(b))
 	}
 }
 
 // RejectBookingHandler allows owner to reject a pending booking with a reason.
-func RejectBookingHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+func RejectBookingHandler(bookingSvc *service.BookingService, notifSvc service.NotificationService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
 		id, err := strconv.Atoi(idStr)
@@ -71,6 +81,16 @@ func RejectBookingHandler(bookingSvc *service.BookingService, log *logger.Logger
 			response.WriteError(w, http.StatusInternalServerError, "failed to reject booking")
 			return
 		}
+		
+		// Send notification to customer
+		_ = notifSvc.CreateNotification(
+			b.UserID,
+			"booking_rejected",
+			"Đơn thuê xe đã bị từ chối",
+			"Rất tiếc, đơn thuê xe của bạn đã bị từ chối. Tiền cọc sẽ được hoàn lại.",
+			"/customer/my-bookings",
+		)
+
 		response.WriteJSON(w, http.StatusOK, mappers.ToBookingResponse(b))
 	}
 }

@@ -35,7 +35,7 @@ const AdminHeader: React.FC = () => {
       flexShrink: 0,
       position: "sticky",
       top: 0,
-      zIndex: 100,
+      zIndex: 1010,
     }}>
       {/* left: logo */}
       <Link to="/admin/dashboard" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>

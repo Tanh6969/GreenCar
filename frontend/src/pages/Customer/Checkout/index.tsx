@@ -15,8 +15,15 @@ function addHours(iso: string, h: number) {
   d.setHours(d.getHours() + h);
   return d.toISOString();
 }
+function getLocalDateStr(d: Date) {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function toLocal(iso: string) {
-  return iso.slice(0, 16); // "YYYY-MM-DDTHH:MM" for datetime-local input
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return getLocalDateStr(d);
 }
 function fromLocal(local: string) {
   return new Date(local).toISOString();
@@ -159,7 +166,11 @@ const CheckoutPage: React.FC = () => {
   
   const totalRentalPrice = planPrice;
   
-  const deliveryFee = (queryDelivery === "custom" || queryDelivery === "airport") ? 150000 : 0;
+  const mockDistance = queryDelivery === "custom" && queryAddress 
+    ? (queryAddress.length % 15) + 5 
+    : (queryDelivery === "airport" ? 15 : 0);
+  
+  const deliveryFee = mockDistance > 0 ? mockDistance * 10000 : 0;
   const serviceFee = Math.round(totalRentalPrice * 0.1);
   const totalPrice = totalRentalPrice + deliveryFee + serviceFee;
   
@@ -181,7 +192,8 @@ const CheckoutPage: React.FC = () => {
       vehicleId: vehicle.vehicle_id,
       vehicleInfo: {
         name: model.name, brand: model.brand, imageUrl: imgUrl,
-        locationName: location?.name ?? "", locationCity: location?.city ?? "",
+        locationName: queryDelivery === "custom" && queryAddress ? queryAddress : queryDelivery === "airport" ? airportName : (location?.name ?? ""), 
+        locationCity: location?.city ?? "",
         licensePlate: vehicle.license_plate, batteryLevel: vehicle.battery_level,
       },
       planId, planName, planDurationHours: hours,
@@ -417,7 +429,9 @@ const CheckoutPage: React.FC = () => {
 
                   {deliveryFee > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-[#6E7A72]">Phí giao xe</span>
+                      <span className="text-[#6E7A72]">
+                        Phí giao xe {mockDistance > 0 ? `(${mockDistance} km)` : ""}
+                      </span>
                       <span className="font-semibold">{formatCurrency(deliveryFee)}</span>
                     </div>
                   )}

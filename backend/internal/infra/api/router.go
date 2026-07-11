@@ -27,6 +27,7 @@ func NewRouter(
 	chatSvc *service.ChatService,
 	reviewSvc *service.ReviewService,
 	pricingRuleSvc *service.PricingRuleService,
+	notifSvc service.NotificationService,
 	db *database.DB,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -137,7 +138,7 @@ func NewRouter(
 
 	r.Route("/bookings", func(r chi.Router) {
 		r.Use(auth)
-		routes.RegisterBookingRoutes(r, bookingSvc, log)
+		routes.RegisterBookingRoutes(r, bookingSvc, vehicleSvc, notifSvc, log)
 	})
 
 	r.Route("/reviews", func(r chi.Router) {
@@ -159,8 +160,8 @@ func NewRouter(
 		r.Get("/bookings", handlers.GetOwnerBookingsHandler(bookingSvc, log))
 		r.Put("/bookings/{id}/status", handlers.SetBookingStatusHandler(bookingSvc, log))
 		r.Post("/bookings/{id}/complete", handlers.CompleteBookingHandler(bookingSvc, log))
-		r.Post("/bookings/{id}/approve", handlers.ApproveBookingHandler(bookingSvc, log))
-		r.Post("/bookings/{id}/reject", handlers.RejectBookingHandler(bookingSvc, log))
+		r.Post("/bookings/{id}/approve", handlers.ApproveBookingHandler(bookingSvc, notifSvc, log))
+		r.Post("/bookings/{id}/reject", handlers.RejectBookingHandler(bookingSvc, notifSvc, log))
 		// Pricing rules
 		r.Get("/vehicles/{id}/pricing-rules", handlers.ListPricingRulesHandler(pricingRuleSvc, vehicleSvc, log))
 		r.Post("/vehicles/{id}/pricing-rules", handlers.CreatePricingRuleHandler(pricingRuleSvc, vehicleSvc, log))
@@ -190,6 +191,16 @@ func NewRouter(
 		r.Get("/conversations", chatHandler.GetConversations)
 		r.Get("/{bookingId}", chatHandler.GetConversationDetail)
 		r.Post("/{bookingId}", chatHandler.SendMessage)
+	})
+
+	// Notification routes
+	notifHandler := handlers.NewNotificationHandler(notifSvc)
+	r.Route("/notifications", func(r chi.Router) {
+		r.Use(auth)
+		r.Get("/", notifHandler.GetNotifications)
+		r.Get("/unread-count", notifHandler.GetUnreadCount)
+		r.Put("/read-all", notifHandler.MarkAllAsRead)
+		r.Put("/{id}/read", notifHandler.MarkAsRead)
 	})
 
 	return r

@@ -37,7 +37,7 @@ func GetBookingHandler(bookingSvc *service.BookingService, log *logger.Logger) h
 }
 
 // CreateBookingHandler returns a handler for creating a new booking.
-func CreateBookingHandler(bookingSvc *service.BookingService, log *logger.Logger) http.HandlerFunc {
+func CreateBookingHandler(bookingSvc *service.BookingService, vehicleSvc *service.VehicleService, notifSvc service.NotificationService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req dto.CreateBookingRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -59,8 +59,21 @@ func CreateBookingHandler(bookingSvc *service.BookingService, log *logger.Logger
 				response.WriteError(w, http.StatusConflict, "booking overlaps an existing reservation")
 				return
 			}
-			response.WriteError(w, http.StatusBadRequest, err.Error())
+			response.WriteError(w, http.StatusInternalServerError, "failed to create booking")
 			return
+		}
+
+		// Fetch vehicle to get ownerID
+		vehicle, err := vehicleSvc.GetVehicle(b.VehicleID)
+		if err == nil && vehicle != nil {
+			// Notify owner
+			_ = notifSvc.CreateNotification(
+				vehicle.OwnerID,
+				"booking_requested",
+				"Yêu cầu thuê xe mới",
+				"Có khách hàng vừa gửi yêu cầu thuê xe của bạn. Hãy kiểm tra ngay!",
+				"/owner/my-vehicles", // or /owner/bookings
+			)
 		}
 
 		response.WriteJSON(w, http.StatusCreated, mappers.ToBookingResponse(&b))

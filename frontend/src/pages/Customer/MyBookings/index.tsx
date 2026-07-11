@@ -77,14 +77,33 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
       {/* Pricing row */}
       <div className="flex items-end justify-between mt-2">
         <div>
-          <p className="text-xs text-gray-500">Đặt cọc đã thanh toán</p>
-          <p className="text-base font-bold text-[#006C4C]">{formatCurrency(booking.deposit_amount)}</p>
+          <p className={`text-xs font-medium ${effectiveStatus === "cancelled" ? "text-blue-600" : "text-gray-500"}`}>
+            {effectiveStatus === "cancelled" ? "Tiền cọc đã hoàn trả" : "Đặt cọc đã thanh toán"}
+          </p>
+          <p className={`text-base font-bold ${effectiveStatus === "cancelled" ? "text-blue-600" : "text-[#006C4C]"}`}>
+            {effectiveStatus === "cancelled" ? "+" : ""}{formatCurrency(booking.deposit_amount)}
+          </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-500">Tổng giá trị đơn</p>
-          <p className="text-base font-bold text-gray-800">{formatCurrency(booking.total_price)}</p>
-        </div>
+        {effectiveStatus !== "cancelled" && (
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Tổng giá trị đơn</p>
+            <p className="text-base font-bold text-gray-800">
+              {formatCurrency(booking.total_price)}
+            </p>
+          </div>
+        )}
       </div>
+
+      {effectiveStatus === "cancelled" && (
+        <div className="mt-4 pt-3 border-t border-red-100">
+          <p className="text-xs font-semibold text-red-600 mb-1">
+            {booking.owner_note ? "Lý do hủy từ chủ xe:" : "Lý do hủy từ hệ thống:"}
+          </p>
+          <p className="text-sm text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-100">
+            {booking.owner_note || "Hệ thống tự động hủy do chủ xe không phản hồi trong thời gian quy định."}
+          </p>
+        </div>
+      )}
 
       {effectiveStatus === "completed" && !booking.has_reviewed && (
         <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">

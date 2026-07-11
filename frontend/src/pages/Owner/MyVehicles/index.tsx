@@ -526,8 +526,11 @@ const MyVehiclesPage: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>Đã thanh toán (Cọc 30%)</div>
-                        <div style={{ fontSize: 16, fontWeight: 800, color: "var(--green)" }}>
+                        <div style={{ fontSize: 11, color: "#6E7A72", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>
+                          {effectiveStatus === "cancelled" ? "Đã hoàn tiền (Cọc 30%)" : 
+                           `Đã thanh toán ${effectiveStatus === "pending" ? "(Cọc 30% - Tạm giữ)" : "(Cọc 30%)"}`}
+                        </div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: effectiveStatus === "cancelled" ? "#9CA3AF" : "var(--green)", textDecoration: effectiveStatus === "cancelled" ? "line-through" : "none" }}>
                           {Number(b.deposit_amount).toLocaleString("vi")}đ
                         </div>
                       </div>
@@ -559,7 +562,7 @@ const MyVehiclesPage: React.FC = () => {
                             <div><span style={{color: "#6E7A72"}}>Họ tên:</span> <strong>{b.customer_name}</strong></div>
                             <div><span style={{color: "#6E7A72"}}>SĐT:</span> <strong>{b.customer_phone}</strong></div>
                             <div><span style={{color: "#6E7A72"}}>Email:</span> <strong>{b.customer_email || "Chưa cung cấp"}</strong></div>
-                            <div><span style={{color: "#6E7A72"}}>Bằng lái:</span> <strong style={{color: b.customer_license_no ? "#059669" : "#EF4444"}}>{b.customer_license_no ? "✓ Đã xác minh" : "✗ Chưa có"}</strong></div>
+                            <div><span style={{color: "#6E7A72"}}>Bằng lái:</span> <strong style={{color: b.customer_license_no ? "#191C1E" : "#EF4444"}}>{b.customer_license_no || "✗ Chưa cung cấp"}</strong></div>
                             <div style={{gridColumn: "span 2"}}><span style={{color: "#6E7A72"}}>Số chuyến đã thuê:</span> <strong style={{color: "#3B82F6"}}>{b.customer_trip_count || 0} chuyến</strong></div>
                           </div>
                         </div>

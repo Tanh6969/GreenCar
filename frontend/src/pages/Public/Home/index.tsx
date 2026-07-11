@@ -108,7 +108,7 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
   return (
     <Link
       to={`/cars/${vehicle.vehicle_id}`}
-      className="flex-shrink-0 w-60 rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-xl group snap-start"
+      className="flex-shrink-0 w-60 rounded-2xl overflow-hidden border border-[#E5E7EB] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-xl group"
     >
       <div className="relative overflow-hidden">
         {img ? (
@@ -169,8 +169,8 @@ const ScrollCard: React.FC<ScrollCardProps> = ({ data, price4h, price24h }) => {
         </div>
 
         {location && (
-          <p className={`text-xs mt-1.5 ${isLuxury ? "text-[#4FBD91]" : "text-[#6E7A72]"}`}>
-            <IcPin size={12} color={isLuxury ? "#4FBD91" : "#6E7A72"} />{location.name}
+          <p className="text-xs mt-1.5 text-[#6E7A72]">
+            <IcPin size={12} color="#6E7A72" />{location.name}
           </p>
         )}
       </div>
@@ -188,8 +188,24 @@ interface CarRowProps {
 }
 
 const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false }) => {
-  const rowRef = useRef<HTMLDivElement>(null);
-  const scroll = (dir: "left" | "right") =>
+  const rowRef = React.useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  React.useEffect(() => {
+    let animationId: number;
+    if (isHovered && rowRef.current) {
+      const scroll = () => {
+        if (rowRef.current) {
+          rowRef.current.scrollLeft += 1;
+        }
+        animationId = requestAnimationFrame(scroll);
+      };
+      animationId = requestAnimationFrame(scroll);
+    }
+    return () => cancelAnimationFrame(animationId);
+  }, [isHovered]);
+
+  const scrollAction = (dir: "left" | "right") =>
     rowRef.current?.scrollBy({ left: dir === "right" ? 260 : -260, behavior: "smooth" });
 
   if (cars.length === 0) return null;
@@ -203,11 +219,11 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
             <h2 className="text-3xl font-bold text-[#191C1E]">{title}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => scroll("left")}
+            <button onClick={() => scrollAction("left")}
               className="w-8 h-8 rounded-full border border-[#BDCAC1] text-[#3E4943] flex items-center justify-center text-sm transition-colors hover:bg-[#F3F4F6]">
               ‹
             </button>
-            <button onClick={() => scroll("right")}
+            <button onClick={() => scrollAction("right")}
               className="w-8 h-8 rounded-full border border-[#BDCAC1] text-[#3E4943] flex items-center justify-center text-sm transition-colors hover:bg-[#F3F4F6]">
               ›
             </button>
@@ -218,7 +234,12 @@ const CarRow: React.FC<CarRowProps> = ({ id, title, subtitle, cars, dark = false
           </div>
         </div>
 
-        <div ref={rowRef} className="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2 snap-x">
+        <div 
+          ref={rowRef} 
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="flex gap-3.5 overflow-x-auto scrollbar-hide pb-2"
+        >
           {cars.map(item => {
             return <ScrollCard key={item.vehicle.vehicle_id} data={item} price4h={item.price_4h} price24h={item.price_24h} />;
           })}
