@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
           <div className="search-field">
             <label htmlFor="password" style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Mật khẩu</span>
-              <span style={{ fontSize: 12, color: "#316BF3", fontWeight: 600, cursor: "pointer" }}>Quên mật khẩu?</span>
+              <Link to="/auth/forgot-password" style={{ fontSize: 12, color: "#316BF3", fontWeight: 600, cursor: "pointer", textDecoration: "none" }}>Quên mật khẩu?</Link>
             </label>
             <div style={{ position: "relative" }}>
               <input

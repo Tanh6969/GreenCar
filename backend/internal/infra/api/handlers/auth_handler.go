@@ -65,3 +65,55 @@ func LoginHandler(authSvc *service.AuthService, log *logger.Logger) http.Handler
 		})
 	}
 }
+
+// ForgotPasswordHandler handles forgot password requests.
+func ForgotPasswordHandler(authSvc *service.AuthService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Email string `json:"email"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+		if req.Email == "" {
+			response.WriteError(w, http.StatusBadRequest, "email is required")
+			return
+		}
+
+		if err := authSvc.ForgotPassword(req.Email); err != nil {
+			log.Warn("forgot password failed: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to process forgot password")
+			return
+		}
+
+		response.WriteJSON(w, http.StatusOK, map[string]string{"message": "If email exists, a reset link has been sent"})
+	}
+}
+
+// ResetPasswordHandler handles reset password requests.
+func ResetPasswordHandler(authSvc *service.AuthService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Token       string `json:"token"`
+			NewPassword string `json:"new_password"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+		if req.Token == "" || req.NewPassword == "" {
+			response.WriteError(w, http.StatusBadRequest, "token and new_password are required")
+			return
+		}
+
+		if err := authSvc.ResetPassword(req.Token, req.NewPassword); err != nil {
+			log.Warn("reset password failed: %v", err)
+			response.WriteError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		response.WriteJSON(w, http.StatusOK, map[string]string{"message": "Password successfully reset"})
+	}
+}
+

@@ -58,7 +58,11 @@ func main() {
 	userSvc := service.NewUserService(userRepo)
 	vehicleSvc := service.NewVehicleService(vehicleRepo, vehicleDetailRepo)
 	bookingSvc := service.NewBookingService(bookingRepo)
-	authSvc := service.NewAuthService(userRepo, roleRepo, maker, 24*365*10*time.Hour, 24*365*10*time.Hour)
+	
+	passwordResetRepo := repository.NewPasswordResetRepository(db)
+	emailSvc := service.NewEmailService()
+	authSvc := service.NewAuthService(userRepo, roleRepo, passwordResetRepo, emailSvc, maker, 24*365*10*time.Hour, 24*365*10*time.Hour)
+	
 	postSvc := service.NewPostService(postRepo)
 	ownerRegSvc := service.NewOwnerRegistrationService(ownerRegRepo)
 	chatSvc := service.NewChatService(chatRepo, bookingSvc, log)

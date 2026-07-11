@@ -19,6 +19,8 @@ import MessagesPage from "../pages/Customer/Messages";
 import MessageDetailPage from "../pages/Customer/Messages/Detail";
 import LoginPage from "../pages/Auth/Login";
 import RegisterPage from "../pages/Auth/Register";
+import ForgotPasswordPage from "../pages/Auth/ForgotPassword";
+import ResetPasswordPage from "../pages/Auth/ResetPassword";
 import AdminLoginPage from "../pages/Auth/AdminLogin";
 import ConfirmationPage from "../pages/Customer/Confirmation";
 import DashboardPage from "../pages/Admin/Dashboard";
@@ -155,6 +157,22 @@ const AppRouter: React.FC = () => {
         element={
           <AuthLayout>
             <RegisterPage />
+          </AuthLayout>
+        }
+      />
+      <Route
+        path="/auth/forgot-password"
+        element={
+          <AuthLayout>
+            <ForgotPasswordPage />
+          </AuthLayout>
+        }
+      />
+      <Route
+        path="/auth/reset-password"
+        element={
+          <AuthLayout>
+            <ResetPasswordPage />
           </AuthLayout>
         }
       />

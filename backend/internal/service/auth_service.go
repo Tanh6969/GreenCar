@@ -17,6 +17,8 @@ import (
 type AuthService struct {
 	userRepo             adapters.UserRepository
 	roleRepo             adapters.RoleRepository
+	passwordResetRepo    adapters.PasswordResetRepository
+	emailSvc             *EmailService
 	maker                token.Maker
 	accessTokenDuration  time.Duration
 	refreshTokenDuration time.Duration
@@ -26,12 +28,16 @@ type AuthService struct {
 func NewAuthService(
 	userRepo adapters.UserRepository,
 	roleRepo adapters.RoleRepository,
+	passwordResetRepo adapters.PasswordResetRepository,
+	emailSvc *EmailService,
 	maker token.Maker,
 	accessTokenDuration, refreshTokenDuration time.Duration,
 ) *AuthService {
 	return &AuthService{
 		userRepo:             userRepo,
 		roleRepo:             roleRepo,
+		passwordResetRepo:    passwordResetRepo,
+		emailSvc:             emailSvc,
 		maker:                maker,
 		accessTokenDuration:  accessTokenDuration,
 		refreshTokenDuration: refreshTokenDuration,
@@ -112,4 +118,73 @@ func (s *AuthService) HashPassword(password string) (string, error) {
 // ComparePassword compares hashed and plain-text password.
 func (s *AuthService) ComparePassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+// ForgotPassword generates a reset token, stores it, and sends an email.
+func (s *AuthService) ForgotPassword(email string) error {
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		// Even if not found, don't expose it to avoid email enumeration
+		return nil
+	}
+
+	// Create random token string (simulated with random string + hash)
+	resetToken, _, err := s.maker.CreateToken(int64(user.UserID), "reset", 15*time.Minute, token.TokenTypeAccessToken)
+	if err != nil {
+		return err
+	}
+
+	// We store the hash of the token in the DB
+	// We can just use the resetToken string as the token. In real apps, store hash, send token.
+	// For simplicity, we will store the raw token in DB for now (or hashed if preferred).
+	// Let's store raw in token_hash column.
+	expiresAt := time.Now().Add(15 * time.Minute)
+	pr := &entities.PasswordReset{
+		UserID:    user.UserID,
+		TokenHash: resetToken,
+		ExpiresAt: &expiresAt,
+	}
+
+	if err := s.passwordResetRepo.Create(pr); err != nil {
+		return err
+	}
+
+	// Send Email
+	resetLink := "http://localhost:3000/auth/reset-password?token=" + resetToken
+	return s.emailSvc.SendPasswordResetEmail(user.Email, resetLink)
+}
+
+// ResetPassword verifies the token and resets the user's password.
+func (s *AuthService) ResetPassword(tokenStr, newPassword string) error {
+	// Verify token
+	pr, err := s.passwordResetRepo.GetByTokenHash(tokenStr)
+	if err != nil || pr == nil {
+		return errors.New("invalid or expired token")
+	}
+
+	if pr.Used {
+		return errors.New("token already used")
+	}
+
+	if time.Now().After(*pr.ExpiresAt) {
+		return errors.New("token expired")
+	}
+
+	// Update user password
+	user, err := s.userRepo.GetByID(pr.UserID)
+	if err != nil {
+		return err
+	}
+
+	hashed, err := s.HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	user.Password = hashed
+	if err := s.userRepo.Update(user); err != nil {
+		return err
+	}
+
+	// Mark token as used
+	return s.passwordResetRepo.MarkAsUsed(pr.ID)
 }

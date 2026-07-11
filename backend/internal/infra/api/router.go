@@ -43,6 +43,8 @@ func NewRouter(
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", handlers.LoginHandler(authSvc, log))
 		r.Post("/register", handlers.RegisterHandler(authSvc, log))
+		r.Post("/forgot-password", handlers.ForgotPasswordHandler(authSvc, log))
+		r.Post("/reset-password", handlers.ResetPasswordHandler(authSvc, log))
 	})
 
 	// Blog handler (used by public, user, and admin routes below)
