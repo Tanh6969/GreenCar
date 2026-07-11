@@ -46,7 +46,7 @@ const MessagesPage: React.FC = () => {
                 return (
                   <Link
                     key={c.conversation_id}
-                    to={`/customer/messages/${c.booking_id}`}
+                    to={`/customer/messages/${c.conversation_id}`}
                     className="flex items-center justify-between p-4 border-b border-[#F8F9FB] hover:bg-[#F8F9FB] transition border-l-4 border-l-transparent"
                   >
                     <div className="flex items-center gap-3 overflow-hidden">

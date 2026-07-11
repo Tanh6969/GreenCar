@@ -45,9 +45,9 @@ func (h *ChatHandler) GetConversationDetail(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	userID := int(payload.UserId)
-	bookingID, _ := strconv.Atoi(chi.URLParam(r, "bookingId"))
+	conversationID, _ := strconv.Atoi(chi.URLParam(r, "conversationId"))
 
-	c, msgs, err := h.svc.GetConversationDetail(bookingID, userID)
+	c, msgs, err := h.svc.GetConversationDetail(conversationID, userID)
 	if err != nil {
 		h.log.Error("GetConversationDetail", err)
 		response.WriteError(w, http.StatusInternalServerError, err.Error())
@@ -67,6 +67,33 @@ func (h *ChatHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := int(payload.UserId)
+	conversationID, _ := strconv.Atoi(chi.URLParam(r, "conversationId"))
+
+	var req struct {
+		Content string `json:"content"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.WriteError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	msg, err := h.svc.SendMessage(conversationID, userID, req.Content)
+	if err != nil {
+		h.log.Error("SendMessage", err)
+		response.WriteError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response.WriteJSON(w, http.StatusOK, msg)
+}
+
+func (h *ChatHandler) SendMessageByBooking(w http.ResponseWriter, r *http.Request) {
+	payload := middlewares.GetPayload(r)
+	if payload == nil {
+		response.WriteError(w, http.StatusUnauthorized, "not authenticated")
+		return
+	}
+	userID := int(payload.UserId)
 	bookingID, _ := strconv.Atoi(chi.URLParam(r, "bookingId"))
 
 	var req struct {
@@ -77,9 +104,9 @@ func (h *ChatHandler) SendMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	msg, err := h.svc.SendMessage(bookingID, userID, req.Content)
+	msg, err := h.svc.SendMessageByBooking(bookingID, userID, req.Content)
 	if err != nil {
-		h.log.Error("SendMessage", err)
+		h.log.Error("SendMessageByBooking", err)
 		response.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -4,10 +4,11 @@ import "greencar/internal/domain/entities"
 
 type ChatRepository interface {
 	GetConversationsByUserID(userID int) ([]*entities.Conversation, error)
-	GetConversationByBookingID(bookingID int) (*entities.Conversation, error)
+	GetConversationByID(conversationID int) (*entities.Conversation, error)
+	GetConversationByVehicleAndCustomer(vehicleID, customerID int) (*entities.Conversation, error)
 	GetMessagesByConversationID(conversationID int) ([]*entities.Message, error)
 	CreateMessage(msg *entities.Message) error
-	EnsureConversation(bookingID, customerID, ownerID int) (*entities.Conversation, error)
+	EnsureConversation(vehicleID, customerID, ownerID int) (*entities.Conversation, error)
 	MarkMessagesAsRead(conversationID, receiverID int) error
-	GetOwnerIdByBookingID(bookingID int) (int, error)
+	GetOwnerIdByVehicleID(vehicleID int) (int, error)
 }

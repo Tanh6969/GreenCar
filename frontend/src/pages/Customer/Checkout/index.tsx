@@ -5,6 +5,7 @@ import { vehicleService } from "../../../services/vehicle.service";
 import { useAuth } from "../../../hooks/useAuth";
 import { MODEL_LOCAL_IMAGES } from "../../../data/localImages";
 import { formatCurrency } from "../../../utils/formatters";
+import DeliveryMap from "./DeliveryMap";
 
 const PLAN_HOURS: Record<number, number> = { 1: 4, 2: 8, 3: 24 };
 const PLAN_NAMES: Record<number, string> = { 1: "Gói 4 giờ", 2: "Gói 8 giờ", 3: "Gói 24 giờ" };
@@ -115,9 +116,10 @@ const CheckoutPage: React.FC = () => {
     email: user?.email ?? "",
   });
   
-  const [note, setNote] = useState(
-    queryAddress ? `Xin chào, vui lòng giao xe tại địa chỉ: ${queryAddress}` : ""
-  );
+  const [note, setNote] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState(queryAddress || "");
+  const [deliveryDistance, setDeliveryDistance] = useState(0);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -127,6 +129,11 @@ const CheckoutPage: React.FC = () => {
       setLoading(false);
     });
   }, [vehicleId, navigate]);
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Pre-fill from user profile when it becomes available
   useEffect(() => {
@@ -166,11 +173,11 @@ const CheckoutPage: React.FC = () => {
   
   const totalRentalPrice = planPrice;
   
-  const mockDistance = queryDelivery === "custom" && queryAddress 
-    ? (queryAddress.length % 15) + 5 
+  const distanceToUse = queryDelivery === "custom" 
+    ? deliveryDistance 
     : (queryDelivery === "airport" ? 15 : 0);
   
-  const deliveryFee = mockDistance > 0 ? mockDistance * 10000 : 0;
+  const deliveryFee = distanceToUse > 0 ? Math.round(distanceToUse * 10000) : 0;
   const serviceFee = Math.round(totalRentalPrice * 0.1);
   const totalPrice = totalRentalPrice + deliveryFee + serviceFee;
   
@@ -192,7 +199,7 @@ const CheckoutPage: React.FC = () => {
       vehicleId: vehicle.vehicle_id,
       vehicleInfo: {
         name: model.name, brand: model.brand, imageUrl: imgUrl,
-        locationName: queryDelivery === "custom" && queryAddress ? queryAddress : queryDelivery === "airport" ? airportName : (location?.name ?? ""), 
+        locationName: queryDelivery === "custom" ? deliveryAddress : queryDelivery === "airport" ? airportName : (location?.name ?? ""), 
         locationCity: location?.city ?? "",
         licensePlate: vehicle.license_plate, batteryLevel: vehicle.battery_level,
       },
@@ -308,15 +315,28 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Note for Owner */}
+              {/* Map or Note */}
+              {queryDelivery === "custom" ? (
+                <DeliveryMap
+                  carLat={location?.latitude ?? 21.0285}
+                  carLng={location?.longitude ?? 105.8542}
+                  carAddress={location?.name ? `${location.name}, ${location.city}` : "Trung tâm Hà Nội"}
+                  defaultNoteAddress={queryAddress}
+                  onDistanceChange={(dist, addr) => {
+                    setDeliveryDistance(dist);
+                    setDeliveryAddress(addr);
+                  }}
+                />
+              ) : null}
+
               <div className="mt-4">
                 <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
-                  Lời nhắn cho chủ xe
+                  Ghi chú cho chủ xe (không bắt buộc)
                 </label>
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Ghi chú thêm về địa điểm giao nhận, yêu cầu đặc biệt..."
+                  placeholder="Ghi chú thêm về yêu cầu đặc biệt..."
                   className="w-full border border-[#E5E7EB] rounded-xl p-3.5 text-sm text-[#191C1E] bg-white transition-colors focus:outline-none focus:border-[#006C4C] min-h-[80px]"
                 />
               </div>
@@ -430,7 +450,7 @@ const CheckoutPage: React.FC = () => {
                   {deliveryFee > 0 && (
                     <div className="flex justify-between">
                       <span className="text-[#6E7A72]">
-                        Phí giao xe {mockDistance > 0 ? `(${mockDistance} km)` : ""}
+                        Phí giao xe {distanceToUse > 0 ? `(${distanceToUse} km)` : ""}
                       </span>
                       <span className="font-semibold">{formatCurrency(deliveryFee)}</span>
                     </div>

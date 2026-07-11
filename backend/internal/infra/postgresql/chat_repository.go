@@ -20,15 +20,14 @@ func NewChatRepository(db *database.DB) adapters.ChatRepository {
 
 func (r *chatRepository) GetConversationsByUserID(userID int) ([]*entities.Conversation, error) {
 	query := `
-		SELECT c.conversation_id, c.booking_id, c.customer_id, c.owner_id, c.last_message_at, c.created_at,
+		SELECT c.conversation_id, c.vehicle_id, c.customer_id, c.owner_id, c.last_message_at, c.created_at,
 		       cu.name AS customer_name, ou.name AS owner_name, vm.name AS vehicle_name,
 		       (SELECT content FROM messages m WHERE m.conversation_id = c.conversation_id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
 		       (SELECT COUNT(*) FROM messages m WHERE m.conversation_id = c.conversation_id AND m.sender_id != $1 AND m.is_read = FALSE) AS unread_count
 		FROM conversations c
 		JOIN users cu ON c.customer_id = cu.user_id
 		JOIN users ou ON c.owner_id = ou.user_id
-		JOIN bookings b ON c.booking_id = b.booking_id
-		JOIN vehicles v ON b.vehicle_id = v.vehicle_id
+		JOIN vehicles v ON c.vehicle_id = v.vehicle_id
 		JOIN vehicle_models vm ON v.vehicle_model_id = vm.vehicle_model_id
 		WHERE c.customer_id = $1 OR c.owner_id = $1
 		ORDER BY c.last_message_at DESC
@@ -44,7 +43,7 @@ func (r *chatRepository) GetConversationsByUserID(userID int) ([]*entities.Conve
 		var c entities.Conversation
 		var lastMsg sql.NullString
 		if err := rows.Scan(
-			&c.ConversationID, &c.BookingID, &c.CustomerID, &c.OwnerID, &c.LastMessageAt, &c.CreatedAt,
+			&c.ConversationID, &c.VehicleID, &c.CustomerID, &c.OwnerID, &c.LastMessageAt, &c.CreatedAt,
 			&c.CustomerName, &c.OwnerName, &c.VehicleName,
 			&lastMsg, &c.UnreadCount,
 		); err != nil {
@@ -58,15 +57,34 @@ func (r *chatRepository) GetConversationsByUserID(userID int) ([]*entities.Conve
 	return convos, rows.Err()
 }
 
-func (r *chatRepository) GetConversationByBookingID(bookingID int) (*entities.Conversation, error) {
+func (r *chatRepository) GetConversationByID(conversationID int) (*entities.Conversation, error) {
 	query := `
-		SELECT conversation_id, booking_id, customer_id, owner_id, last_message_at, created_at
+		SELECT conversation_id, vehicle_id, customer_id, owner_id, last_message_at, created_at
 		FROM conversations
-		WHERE booking_id = $1
+		WHERE conversation_id = $1
 	`
 	var c entities.Conversation
-	err := r.db.QueryRow(query, bookingID).Scan(
-		&c.ConversationID, &c.BookingID, &c.CustomerID, &c.OwnerID, &c.LastMessageAt, &c.CreatedAt,
+	err := r.db.QueryRow(query, conversationID).Scan(
+		&c.ConversationID, &c.VehicleID, &c.CustomerID, &c.OwnerID, &c.LastMessageAt, &c.CreatedAt,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func (r *chatRepository) GetConversationByVehicleAndCustomer(vehicleID, customerID int) (*entities.Conversation, error) {
+	query := `
+		SELECT conversation_id, vehicle_id, customer_id, owner_id, last_message_at, created_at
+		FROM conversations
+		WHERE vehicle_id = $1 AND customer_id = $2
+	`
+	var c entities.Conversation
+	err := r.db.QueryRow(query, vehicleID, customerID).Scan(
+		&c.ConversationID, &c.VehicleID, &c.CustomerID, &c.OwnerID, &c.LastMessageAt, &c.CreatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -119,8 +137,8 @@ func (r *chatRepository) CreateMessage(msg *entities.Message) error {
 	return err
 }
 
-func (r *chatRepository) EnsureConversation(bookingID, customerID, ownerID int) (*entities.Conversation, error) {
-	c, err := r.GetConversationByBookingID(bookingID)
+func (r *chatRepository) EnsureConversation(vehicleID, customerID, ownerID int) (*entities.Conversation, error) {
+	c, err := r.GetConversationByVehicleAndCustomer(vehicleID, customerID)
 	if err != nil {
 		return nil, err
 	}
@@ -130,13 +148,13 @@ func (r *chatRepository) EnsureConversation(bookingID, customerID, ownerID int) 
 
 	// Create new conversation
 	query := `
-		INSERT INTO conversations (booking_id, customer_id, owner_id, created_at, last_message_at)
+		INSERT INTO conversations (vehicle_id, customer_id, owner_id, created_at, last_message_at)
 		VALUES ($1, $2, $3, now(), now())
-		RETURNING conversation_id, booking_id, customer_id, owner_id, last_message_at, created_at
+		RETURNING conversation_id, vehicle_id, customer_id, owner_id, last_message_at, created_at
 	`
 	var newC entities.Conversation
-	err = r.db.QueryRow(query, bookingID, customerID, ownerID).Scan(
-		&newC.ConversationID, &newC.BookingID, &newC.CustomerID, &newC.OwnerID, &newC.LastMessageAt, &newC.CreatedAt,
+	err = r.db.QueryRow(query, vehicleID, customerID, ownerID).Scan(
+		&newC.ConversationID, &newC.VehicleID, &newC.CustomerID, &newC.OwnerID, &newC.LastMessageAt, &newC.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -154,14 +172,13 @@ func (r *chatRepository) MarkMessagesAsRead(conversationID, receiverID int) erro
 	return err
 }
 
-func (r *chatRepository) GetOwnerIdByBookingID(bookingID int) (int, error) {
+func (r *chatRepository) GetOwnerIdByVehicleID(vehicleID int) (int, error) {
 	var ownerID int
 	query := `
-		SELECT COALESCE(v.owner_id, 0)
-		FROM bookings b
-		JOIN vehicles v ON b.vehicle_id = v.vehicle_id
-		WHERE b.booking_id = $1
+		SELECT COALESCE(owner_id, 0)
+		FROM vehicles
+		WHERE vehicle_id = $1
 	`
-	err := r.db.QueryRow(query, bookingID).Scan(&ownerID)
+	err := r.db.QueryRow(query, vehicleID).Scan(&ownerID)
 	return ownerID, err
 }

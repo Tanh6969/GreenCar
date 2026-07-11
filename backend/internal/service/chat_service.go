@@ -22,24 +22,13 @@ func (s *ChatService) GetConversations(userID int) ([]*entities.Conversation, er
 	return s.repo.GetConversationsByUserID(userID)
 }
 
-func (s *ChatService) GetConversationDetail(bookingID, userID int) (*entities.Conversation, []*entities.Message, error) {
-	booking, err := s.bookingSvc.GetBooking(bookingID)
+func (s *ChatService) GetConversationDetail(conversationID, userID int) (*entities.Conversation, []*entities.Message, error) {
+	c, err := s.repo.GetConversationByID(conversationID)
 	if err != nil {
 		return nil, nil, err
 	}
-	if booking == nil {
-		return nil, nil, errors.New("booking not found")
-	}
-
-	ownerID, err := s.repo.GetOwnerIdByBookingID(bookingID)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Ensure conversation exists
-	c, err := s.repo.EnsureConversation(bookingID, booking.UserID, ownerID)
-	if err != nil {
-		return nil, nil, err
+	if c == nil {
+		return nil, nil, errors.New("conversation not found")
 	}
 
 	if c.CustomerID != userID && c.OwnerID != userID {
@@ -53,25 +42,42 @@ func (s *ChatService) GetConversationDetail(bookingID, userID int) (*entities.Co
 	return c, msgs, err
 }
 
-func (s *ChatService) SendMessage(bookingID, senderID int, content string) (*entities.Message, error) {
+func (s *ChatService) SendMessage(conversationID, senderID int, content string) (*entities.Message, error) {
+	c, err := s.repo.GetConversationByID(conversationID)
+	if err != nil {
+		return nil, err
+	}
+	if c == nil {
+		return nil, errors.New("conversation not found")
+	}
+
+	if c.CustomerID != senderID && c.OwnerID != senderID {
+		return nil, errors.New("unauthorized to send message to this conversation")
+	}
+
+	msg := &entities.Message{
+		ConversationID: c.ConversationID,
+		SenderID:       senderID,
+		Content:        content,
+	}
+
+	err = s.repo.CreateMessage(msg)
+	return msg, err
+}
+
+func (s *ChatService) SendMessageByBooking(bookingID, senderID int, content string) (*entities.Message, error) {
 	booking, err := s.bookingSvc.GetBooking(bookingID)
 	if err != nil || booking == nil {
 		return nil, errors.New("booking not found")
 	}
 
-	// Wait, is "active" or "confirmed" required? Yes, or maybe "completed". Let's say all valid bookings.
-	// We'll allow chatting if it's not cancelled.
-	if booking.Status == "cancelled" {
-		return nil, errors.New("cannot chat on cancelled bookings")
-	}
-
-	ownerID, err := s.repo.GetOwnerIdByBookingID(bookingID)
+	ownerID, err := s.repo.GetOwnerIdByVehicleID(booking.VehicleID)
 	if err != nil {
 		return nil, err
 	}
 
 	// Ensure conversation
-	c, err := s.repo.EnsureConversation(bookingID, booking.UserID, ownerID)
+	c, err := s.repo.EnsureConversation(booking.VehicleID, booking.UserID, ownerID)
 	if err != nil {
 		return nil, err
 	}

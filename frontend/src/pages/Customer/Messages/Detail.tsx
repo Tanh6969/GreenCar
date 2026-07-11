@@ -4,7 +4,7 @@ import { chatService, Conversation, Message } from "../../../services/chat.servi
 import { useAuth } from "../../../hooks/useAuth";
 
 const MessageDetailPage: React.FC = () => {
-  const { bookingId } = useParams();
+  const { conversationId } = useParams();
   const { user } = useAuth();
   
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -23,8 +23,8 @@ const MessageDetailPage: React.FC = () => {
       setConversations(data);
     });
 
-    if (!bookingId) return;
-    chatService.getConversationDetail(Number(bookingId))
+    if (!conversationId) return;
+    chatService.getConversationDetail(Number(conversationId))
       .then((data) => {
         if (data) {
           setConversation(data.conversation);
@@ -44,7 +44,7 @@ const MessageDetailPage: React.FC = () => {
     loadData();
     const interval = setInterval(loadData, 5000);
     return () => clearInterval(interval);
-  }, [bookingId]);
+  }, [conversationId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -60,11 +60,11 @@ const MessageDetailPage: React.FC = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || !bookingId) return;
+    if (!content.trim() || !conversationId) return;
     
     setSending(true);
     try {
-      const newMsg = await chatService.sendMessage(Number(bookingId), content);
+      const newMsg = await chatService.sendMessage(Number(conversationId), content);
       if (newMsg) {
         setMessages([...messages, newMsg]);
         setContent("");
@@ -104,14 +104,14 @@ const MessageDetailPage: React.FC = () => {
               </div>
             ) : (
               conversations.map((c) => {
-                const isActive = Number(bookingId) === c.booking_id;
+                const isActive = Number(conversationId) === c.conversation_id;
                 const isCnvOwner = user?.user_id === c.owner_id;
                 const cPartnerName = isCnvOwner ? c.customer_name : c.owner_name;
                 
                 return (
                   <Link
                     key={c.conversation_id}
-                    to={`/customer/messages/${c.booking_id}`}
+                    to={`/customer/messages/${c.conversation_id}`}
                     className={`flex items-center justify-between p-4 border-b border-[#F8F9FB] transition ${isActive ? "bg-[#F0FDF4] border-l-4 border-l-[#006C4C]" : "hover:bg-[#F8F9FB] border-l-4 border-l-transparent"}`}
                   >
                     <div className="flex items-center gap-3 overflow-hidden">

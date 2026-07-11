@@ -86,7 +86,9 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
         </div>
         {effectiveStatus !== "cancelled" && (
           <div className="text-right">
-            <p className="text-xs text-gray-500">Tổng giá trị đơn</p>
+            <p className="text-xs text-gray-500">
+              {["completed", "pending_payment"].includes(effectiveStatus) ? "Tổng giá trị đơn" : "Tổng tạm tính (dự kiến)"}
+            </p>
             <p className="text-base font-bold text-gray-800">
               {formatCurrency(booking.total_price)}
             </p>
@@ -142,14 +144,33 @@ const MyBookingsPage: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    bookingService
-      .getBookingsByUser(user.user_id)
-      .then(data => { if (!cancelled) setBookings(data); })
-      .catch(() => { if (!cancelled) setError("Không thể tải danh sách đơn thuê. Vui lòng thử lại."); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    
+    const fetchBookings = async (showLoading: boolean) => {
+      if (showLoading) {
+        setLoading(true);
+        setError(null);
+      }
+      try {
+        const data = await bookingService.getBookingsByUser(user.user_id);
+        if (!cancelled) setBookings(data);
+      } catch (err) {
+        if (!cancelled && showLoading) setError("Không thể tải danh sách đơn thuê. Vui lòng thử lại.");
+      } finally {
+        if (!cancelled && showLoading) setLoading(false);
+      }
+    };
+
+    fetchBookings(true);
+
+    // Auto refresh every 10 seconds to catch status updates from owner
+    const interval = setInterval(() => {
+      fetchBookings(false);
+    }, 10000);
+
+    return () => { 
+      cancelled = true; 
+      clearInterval(interval);
+    };
   }, [user]);
 
   const handleSubmitReview = async () => {

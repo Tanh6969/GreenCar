@@ -100,7 +100,7 @@ const PaymentPage: React.FC = () => {
             ? `${defaultMsg}\n\nGhi chú thêm của tôi: ${pendingBooking.customerNote}`
             : defaultMsg;
             
-          await chatService.sendMessage(bookingId, finalMsg);
+          await chatService.sendMessageByBooking(bookingId, finalMsg);
         } catch (chatErr) {
           console.error("Lỗi gửi tin nhắn mặc định:", chatErr);
         }

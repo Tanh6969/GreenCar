@@ -132,10 +132,26 @@ const MyVehiclesPage: React.FC = () => {
     }
   };
 
-  const loadOwnerBookings = async () => {
-    const data = await bookingService.getOwnerBookings();
-    setOwnerBookings(data || []);
+  const loadOwnerBookings = async (showLoading: boolean = true) => {
+    if (showLoading) setLoading(true);
+    try {
+      const data = await bookingService.getOwnerBookings();
+      setOwnerBookings(data || []);
+    } catch {
+      // ignore
+    } finally {
+      if (showLoading) setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    loadOwnerBookings(true);
+    // Auto refresh every 10 seconds for real-time updates
+    const interval = setInterval(() => {
+      loadOwnerBookings(false);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadUnavailabilities = async (id: number) => {
     try {

@@ -191,8 +191,9 @@ func NewRouter(
 	r.Route("/messages", func(r chi.Router) {
 		r.Use(auth)
 		r.Get("/conversations", chatHandler.GetConversations)
-		r.Get("/{bookingId}", chatHandler.GetConversationDetail)
-		r.Post("/{bookingId}", chatHandler.SendMessage)
+		r.Get("/{conversationId}", chatHandler.GetConversationDetail)
+		r.Post("/{conversationId}", chatHandler.SendMessage)
+		r.Post("/booking/{bookingId}", chatHandler.SendMessageByBooking)
 	})
 
 	// Notification routes

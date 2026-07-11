@@ -47,11 +47,12 @@ const RANGE_OPTIONS = [
   { label: "600km+",  min: 600 },
 ];
 const SORT_OPTIONS = [
-  { value: "newest",      label: "Mới nhất" },
-  { value: "price_asc",   label: "Giá: Thấp → Cao"  },
-  { value: "price_desc",  label: "Giá: Cao → Thấp"  },
-  { value: "range_desc",  label: "Phạm vi: Xa nhất"  },
-  { value: "power_desc",  label: "Công suất: Mạnh nhất" },
+  { value: "newest",        label: "Mới nhất" },
+  { value: "price_asc",     label: "Giá: Thấp → Cao"  },
+  { value: "price_desc",    label: "Giá: Cao → Thấp"  },
+  { value: "discount_desc", label: "Giảm giá: Nhiều nhất" },
+  { value: "range_desc",    label: "Phạm vi: Xa nhất"  },
+  { value: "power_desc",    label: "Công suất: Mạnh nhất" },
 ];
 
 const CarListPage: React.FC = () => {
@@ -62,7 +63,9 @@ const CarListPage: React.FC = () => {
   const [selectedTypes,  setSelectedTypes]  = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minRange,       setMinRange]       = useState(0);
-  const [onlyAvailable,  setOnlyAvailable]  = useState(false);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedSeats,  setSelectedSeats]  = useState<number[]>([]);
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false);
   const [sortBy,         setSortBy]         = useState("newest");
   const [searchQuery,    setSearchQuery]    = useState("");
   const [filterLocation, setFilterLocation] = useState<number | null>(null);
@@ -85,6 +88,16 @@ const CarListPage: React.FC = () => {
     [vehicles]
   );
 
+  const cities = useMemo(() =>
+    Array.from(new Set(vehicles.map(v => v.location.city))).filter(Boolean).sort(),
+    [vehicles]
+  );
+
+  const seatCounts = useMemo(() =>
+    Array.from(new Set(vehicles.map(v => v.model.seats))).filter(Boolean).sort((a,b)=>a-b),
+    [vehicles]
+  );
+
   const filtered = useMemo(() => {
     let list = [...vehicles];
 
@@ -99,38 +112,58 @@ const CarListPage: React.FC = () => {
       list = list.filter(v => selectedTypes.includes(v.model.vehicle_type));
     if (selectedBrands.length)
       list = list.filter(v => selectedBrands.includes(v.model.brand));
+    if (selectedCities.length)
+      list = list.filter(v => selectedCities.includes(v.location.city));
+    if (selectedSeats.length)
+      list = list.filter(v => selectedSeats.includes(v.model.seats));
+    if (onlyDiscounted)
+      list = list.filter(v => (v.promo_discount || 0) > 0);
     if (minRange > 0)
       list = list.filter(v => v.model.range_km >= minRange);
     if (searchQuery.trim())
       list = list.filter(v =>
-        `${v.model.brand} ${v.model.name}`.toLowerCase().includes(searchQuery.toLowerCase())
+        `${v.model.brand} ${v.model.name} ${v.location.city}`.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
     list.sort((a, b) => {
-      if (sortBy === "newest")     return b.vehicle.vehicle_id - a.vehicle.vehicle_id;
-      if (sortBy === "price_asc")  return a.price_24h - b.price_24h;
-      if (sortBy === "price_desc") return b.price_24h - a.price_24h;
-      if (sortBy === "range_desc") return b.model.range_km - a.model.range_km;
-      if (sortBy === "power_desc") return b.model.horsepower - a.model.horsepower;
+      const priceA = a.price_24h * (1 - (a.promo_discount || 0) / 100);
+      const priceB = b.price_24h * (1 - (b.promo_discount || 0) / 100);
+      
+      if (sortBy === "newest")        return b.vehicle.vehicle_id - a.vehicle.vehicle_id;
+      if (sortBy === "price_asc")     return priceA - priceB;
+      if (sortBy === "price_desc")    return priceB - priceA;
+      if (sortBy === "discount_desc") return (b.promo_discount || 0) - (a.promo_discount || 0);
+      if (sortBy === "range_desc")    return b.model.range_km - a.model.range_km;
+      if (sortBy === "power_desc")    return b.model.horsepower - a.model.horsepower;
       return 0;
     });
 
     return list;
-  }, [vehicles, filterLocation, selectedTypes, selectedBrands, minRange, searchQuery, sortBy, user?.user_id]);
+  }, [vehicles, filterLocation, selectedTypes, selectedBrands, selectedCities, selectedSeats, onlyDiscounted, minRange, searchQuery, sortBy, user?.user_id]);
 
   const toggleType = (t: string) =>
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
 
   const toggleBrand = (b: string) =>
     setSelectedBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+    
+  const toggleCity = (c: string) =>
+    setSelectedCities(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
+    
+  const toggleSeat = (s: number) =>
+    setSelectedSeats(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
 
   const resetFilters = () => {
     setSelectedTypes([]);
     setSelectedBrands([]);
+    setSelectedCities([]);
+    setSelectedSeats([]);
+    setOnlyDiscounted(false);
     setMinRange(0);
     setFilterLocation(null);
     setFilterStartDate("");
     setFilterEndDate("");
+    setSearchQuery("");
   };
 
   return (
@@ -169,6 +202,17 @@ const CarListPage: React.FC = () => {
           <div className="flex justify-between items-center mb-5">
             <span className="font-semibold text-[#151C27]">Bộ lọc</span>
             <button onClick={resetFilters} className="text-sm text-[#006C4C] hover:underline font-medium">Xóa tất cả</button>
+          </div>
+
+          <hr className="border-[#F3F4F6] mb-5" />
+
+          {/* only discounted */}
+          <div className="mb-5">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input type="checkbox" checked={onlyDiscounted} onChange={e => setOnlyDiscounted(e.target.checked)}
+                className="w-4 h-4 accent-[#EF4444] rounded border-[#BDCAC1]" />
+              <span className="text-sm font-semibold text-[#151C27]">Xe đang giảm giá</span>
+            </label>
           </div>
 
           <hr className="border-[#F3F4F6] mb-5" />
@@ -225,6 +269,50 @@ const CarListPage: React.FC = () => {
 
           <hr className="border-[#F3F4F6] mb-5" />
 
+          {/* city */}
+          {cities.length > 0 && (
+            <div className="mb-5">
+              <p className="text-sm font-semibold text-[#151C27] mb-3">Khu vực / Tỉnh thành</p>
+              <div className="flex flex-col gap-2">
+                {cities.map(c => (
+                  <label key={c} className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={selectedCities.includes(c)} onChange={() => toggleCity(c)}
+                      className="w-4 h-4 accent-[#006C4C] rounded border-[#BDCAC1]" />
+                    <span className="text-sm text-[#3E4943]">{c}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <hr className="border-[#F3F4F6] mb-5" />
+
+          {/* seats */}
+          <div className="mb-5">
+            <p className="text-sm font-semibold text-[#151C27] mb-3">Số chỗ ngồi</p>
+            <div className="flex flex-wrap gap-2">
+              {seatCounts.map(s => {
+                const active = selectedSeats.includes(s);
+                return (
+                  <button
+                    key={s}
+                    onClick={() => toggleSeat(s)}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-all"
+                    style={{
+                      background: active ? "#006C4C" : "#fff",
+                      color: active ? "#fff" : "#3E4943",
+                      borderColor: active ? "#006C4C" : "#BDCAC1",
+                    }}
+                  >
+                    {s} chỗ
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <hr className="border-[#F3F4F6] mb-5" />
+
           {/* range */}
           <div>
             <p className="text-sm font-semibold text-[#151C27] mb-3">Phạm vi tối thiểu</p>
@@ -269,7 +357,7 @@ const CarListPage: React.FC = () => {
                       )}
                       {(item.promo_discount ?? 0) > 0 && (
                         <span className="absolute top-3 left-3 bg-[#EF4444] text-white text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-md z-10">
-                          🔥 GIẢM {item.promo_discount}%
+                          GIẢM {item.promo_discount}%
                         </span>
                       )}
                     </div>

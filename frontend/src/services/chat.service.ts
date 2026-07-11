@@ -29,11 +29,15 @@ export const chatService = {
     return data ?? [];
   },
 
-  async getConversationDetail(bookingId: number): Promise<{ conversation: Conversation; messages: Message[] } | null> {
-    return await apiClient<{ conversation: Conversation; messages: Message[] }>(`/messages/${bookingId}`, "GET");
+  async getConversationDetail(conversationId: number): Promise<{ conversation: Conversation; messages: Message[] } | null> {
+    return await apiClient<{ conversation: Conversation; messages: Message[] }>(`/messages/${conversationId}`, "GET");
   },
 
-  async sendMessage(bookingId: number, content: string): Promise<Message | null> {
-    return await apiClient<Message>(`/messages/${bookingId}`, "POST", { content });
+  async sendMessage(conversationId: number, content: string): Promise<Message | null> {
+    return await apiClient<Message>(`/messages/${conversationId}`, "POST", { content });
+  },
+
+  async sendMessageByBooking(bookingId: number, content: string): Promise<Message | null> {
+    return await apiClient<Message>(`/messages/booking/${bookingId}`, "POST", { content });
   },
 };

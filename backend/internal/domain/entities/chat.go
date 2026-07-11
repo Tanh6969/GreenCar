@@ -5,7 +5,7 @@ import "time"
 // Conversation represents the conversations table
 type Conversation struct {
 	ConversationID int        `json:"conversation_id"`
-	BookingID      int        `json:"booking_id"`
+	VehicleID      int        `json:"vehicle_id"`
 	CustomerID     int        `json:"customer_id"`
 	OwnerID        int        `json:"owner_id"`
 	LastMessageAt  *time.Time `json:"last_message_at"`
