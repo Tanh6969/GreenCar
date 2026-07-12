@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { CheckCircle2, ClipboardList, Car, MapPin, Package, Mail, CalendarDays } from "lucide-react";
 import { formatCurrency } from "../../../utils/formatters";
 
 function formatDT(iso: string) {
@@ -26,10 +27,10 @@ const ConfirmationPage: React.FC = () => {
 
   if (!state) {
     return (
-      <div className="text-center py-24 text-[#6E7A72]">
-        <p className="text-4xl mb-3">📋</p>
-        <p className="font-semibold text-lg mb-2">Không tìm thấy thông tin xác nhận.</p>
-        <Link to="/" className="text-[#006C4C] font-semibold hover:underline">← Về trang chủ</Link>
+      <div className="text-center py-32 text-[#6E7A72] flex flex-col items-center">
+        <ClipboardList size={64} className="mb-4 opacity-50" />
+        <p className="font-semibold text-xl mb-2 text-[#191C1E]">Không tìm thấy thông tin xác nhận.</p>
+        <Link to="/" className="text-[#006C4C] font-semibold hover:underline mt-2">← Về trang chủ</Link>
       </div>
     );
   }
@@ -38,130 +39,171 @@ const ConfirmationPage: React.FC = () => {
   const refCode = bookingId ? `GC-${String(bookingId).padStart(5, "0")}` : `GC-${Date.now().toString().slice(-6)}`;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB] py-10">
-      <div className="max-w-[600px] mx-auto px-4">
-
+    <div className="min-h-screen bg-[#F8F9FB] py-12">
+      <div className="max-w-[1000px] mx-auto px-4">
+        
         {/* success banner */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-[#ECFDF5] rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-            <span className="text-4xl">✅</span>
+        <div className="text-center mb-10">
+          <div className="w-24 h-24 bg-[#ECFDF5] rounded-full flex items-center justify-center mx-auto mb-5 shadow-sm border-[6px] border-white">
+            <CheckCircle2 size={48} className="text-[#006C4C]" />
           </div>
-          <h1 className="text-2xl font-black text-[#191C1E]">Đặt xe thành công!</h1>
-          <p className="text-[#6E7A72] mt-1.5 text-sm">
-            Yêu cầu đặt xe của bạn đã được ghi nhận.
+          <h1 className="text-3xl font-black text-[#191C1E] tracking-tight mb-2">Đặt xe thành công!</h1>
+          <p className="text-[#6E7A72] text-base">
+            Yêu cầu đặt xe của bạn đã được ghi nhận thành công.
           </p>
-          <div className="inline-flex items-center gap-2 bg-white border border-[#E5E7EB] rounded-full px-4 py-2 mt-3 shadow-sm">
-            <span className="text-xs text-[#6E7A72]">Mã đặt xe</span>
-            <span className="font-mono font-bold text-[#006C4C] tracking-wider">{refCode}</span>
+          <div className="inline-flex items-center gap-3 bg-white border border-[#E5E7EB] rounded-full px-5 py-2.5 mt-4 shadow-sm">
+            <span className="text-sm font-medium text-[#6E7A72]">Mã đặt xe:</span>
+            <span className="font-mono font-bold text-lg text-[#006C4C] tracking-wider">{refCode}</span>
           </div>
         </div>
 
-        {/* booking card */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-5">
-          <div className="relative h-44 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] overflow-hidden">
-            {vehicleInfo.imageUrl
-              ? <img src={vehicleInfo.imageUrl} alt={vehicleInfo.name} className="w-full h-full object-cover" />
-              : <div className="w-full h-full flex items-center justify-center text-6xl">🚗</div>}
-            <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
-            <div className="absolute bottom-4 left-4 text-white">
-              <p className="font-black text-lg">{vehicleInfo.brand} {vehicleInfo.name}</p>
-              <p className="text-xs opacity-80 font-mono">{vehicleInfo.licensePlate}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          
+          {/* Main Info - Left side (2/3 width) */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            
+            {/* booking card */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+              <div className="relative h-60 md:h-72 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] overflow-hidden">
+                {vehicleInfo.imageUrl ? (
+                  <img src={vehicleInfo.imageUrl} alt={vehicleInfo.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Car size={80} className="text-[#006C4C] opacity-20" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#191C1E]/80 via-[#191C1E]/20 to-transparent" />
+                <div className="absolute bottom-6 left-6 text-white">
+                  <p className="font-black text-2xl mb-1">{vehicleInfo.brand} {vehicleInfo.name}</p>
+                  <p className="text-sm opacity-90 font-mono bg-white/20 px-2.5 py-1 rounded-md inline-block backdrop-blur-sm">
+                    {vehicleInfo.licensePlate}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 md:p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Left Column in Details */}
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-[#F8F9FB] flex items-center justify-center shrink-0">
+                        <MapPin size={20} className="text-[#006C4C]" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Địa điểm nhận xe</p>
+                        <p className="font-semibold text-[#191C1E] leading-relaxed">{vehicleInfo.locationName}</p>
+                        <p className="text-sm text-[#6E7A72] mt-0.5">{vehicleInfo.locationCity}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-[#F8F9FB] flex items-center justify-center shrink-0">
+                        <Package size={20} className="text-[#006C4C]" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Gói thuê</p>
+                        <p className="font-semibold text-[#191C1E]">{planName}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column in Details */}
+                  <div className="flex flex-col gap-4">
+                    <div className="bg-[#F8F9FB] rounded-xl p-4 flex gap-4 items-center">
+                      <CalendarDays size={24} className="text-[#6E7A72] shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-0.5">Nhận xe</p>
+                        <p className="font-bold text-[#191C1E] text-sm">{formatDT(startTime)}</p>
+                      </div>
+                    </div>
+                    <div className="bg-[#F8F9FB] rounded-xl p-4 flex gap-4 items-center">
+                      <CalendarDays size={24} className="text-[#6E7A72] shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-0.5">Trả xe</p>
+                        <p className="font-bold text-[#191C1E] text-sm">{formatDT(endTime)}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* email note */}
+            <div className="bg-[#ECFDF5] border border-[#A7F3D0] rounded-2xl p-5 flex gap-4 items-start shadow-sm">
+              <Mail size={24} className="text-[#006C4C] shrink-0 mt-0.5" />
+              <p className="text-[#004832] leading-relaxed text-sm">
+                Email xác nhận chi tiết đơn hàng sẽ được gửi về <strong className="font-bold">{contactInfo.email || "địa chỉ email của bạn"}</strong> trong vài phút tới. Vui lòng kiểm tra hộp thư rác (Spam) nếu không nhận được.
+              </p>
+            </div>
+            
           </div>
 
-          <div className="p-5 flex flex-col gap-3 text-sm">
-            <div className="flex items-start gap-3">
-              <span className="text-lg mt-0.5">📍</span>
-              <div>
-                <p className="text-xs text-[#6E7A72] mb-0.5">Địa điểm nhận xe</p>
-                <p className="font-semibold text-[#191C1E]">{vehicleInfo.locationName}, {vehicleInfo.locationCity}</p>
+          {/* Sidebar - Right side (1/3 width) */}
+          <div className="flex flex-col gap-6">
+            
+            {/* Payment Summary */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+              <h3 className="font-bold text-lg text-[#191C1E] mb-5 border-b border-[#F3F4F6] pb-3">Chi tiết thanh toán</h3>
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-[#6E7A72]">Phí thuê xe</span>
+                  <span className="font-medium">{formatCurrency(totalPrice)}</span>
+                </div>
+                <div className="flex justify-between items-center bg-[#ECFDF5] -mx-4 px-4 py-2 rounded-lg">
+                  <span className="font-bold text-[#006C4C]">Đã thanh toán cọc</span>
+                  <span className="font-bold text-[#006C4C]">{formatCurrency(depositAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 mt-1 border-t border-dashed border-[#E5E7EB]">
+                  <span className="text-[#3E4943] font-semibold">Thanh toán khi nhận</span>
+                  <span className="font-black text-lg text-[#191C1E]">{formatCurrency(totalPrice - depositAmount)}</span>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#F8F9FB] rounded-xl p-3">
-                <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Nhận xe</p>
-                <p className="font-semibold text-[#191C1E] text-xs">{formatDT(startTime)}</p>
-              </div>
-              <div className="bg-[#F8F9FB] rounded-xl p-3">
-                <p className="text-[10px] text-[#6E7A72] uppercase font-bold tracking-wide mb-1">Trả xe</p>
-                <p className="font-semibold text-[#191C1E] text-xs">{formatDT(endTime)}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <span className="text-lg mt-0.5">📦</span>
-              <div>
-                <p className="text-xs text-[#6E7A72] mb-0.5">Gói thuê</p>
-                <p className="font-semibold text-[#191C1E]">{planName}</p>
+            {/* contact info */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
+              <h3 className="font-bold text-lg text-[#191C1E] mb-5 border-b border-[#F3F4F6] pb-3">Người đặt xe</h3>
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="flex justify-between"><span className="text-[#6E7A72]">Họ tên</span><span className="font-semibold text-right max-w-[120px] truncate" title={contactInfo.name}>{contactInfo.name}</span></div>
+                <div className="flex justify-between"><span className="text-[#6E7A72]">Điện thoại</span><span className="font-semibold text-right">{contactInfo.phone}</span></div>
+                {contactInfo.email && (
+                  <div className="flex justify-between"><span className="text-[#6E7A72]">Email</span><span className="font-semibold text-right truncate max-w-[150px]" title={contactInfo.email}>{contactInfo.email}</span></div>
+                )}
               </div>
             </div>
 
-            <div className="border-t border-[#F3F4F6] pt-3 flex flex-col gap-1.5">
-              <div className="flex justify-between">
-                <span className="text-[#6E7A72]">Phí thuê xe</span>
-                <span className="font-semibold">{formatCurrency(totalPrice)}</span>
+            {/* guest upsell */}
+            {isGuest && (
+              <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-2xl p-6 shadow-sm text-center">
+                <p className="font-bold text-[#0369A1] text-lg mb-2">Tạo tài khoản</p>
+                <p className="text-sm text-[#0C4A6E] mb-5 leading-relaxed">
+                  Lưu lịch sử đặt xe, nhận ưu đãi thành viên và tự động điền thông tin cho những lần sau.
+                </p>
+                <Link to="/auth/register"
+                  className="block w-full bg-[#0369A1] text-white text-sm font-bold px-5 py-3.5 rounded-xl
+                    hover:bg-[#0284C7] transition-colors shadow-sm">
+                  Đăng ký miễn phí ngay
+                </Link>
               </div>
-              <div className="flex justify-between font-bold text-[#006C4C]">
-                <span>Đã thanh toán cọc</span>
-                <span>{formatCurrency(depositAmount)}</span>
-              </div>
-              <div className="flex justify-between text-[#6E7A72]">
-                <span>Thanh toán khi nhận xe</span>
-                <span>{formatCurrency(totalPrice - depositAmount)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* contact info */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-sm mb-5 text-sm">
-          <h3 className="font-bold text-[#191C1E] mb-3">Thông tin liên lạc</h3>
-          <div className="flex flex-col gap-2 text-[#3E4943]">
-            <div className="flex justify-between"><span className="text-[#6E7A72]">Họ tên</span><span className="font-semibold">{contactInfo.name}</span></div>
-            <div className="flex justify-between"><span className="text-[#6E7A72]">Điện thoại</span><span className="font-semibold">{contactInfo.phone}</span></div>
-            {contactInfo.email && (
-              <div className="flex justify-between"><span className="text-[#6E7A72]">Email</span><span className="font-semibold">{contactInfo.email}</span></div>
             )}
+
+            {/* actions */}
+            <div className="flex flex-col gap-3 mt-1">
+              {!isGuest && (
+                <Link to="/customer/my-bookings"
+                  className="w-full bg-[#006C4C] hover:bg-[#004832] text-white font-bold py-3.5 rounded-xl
+                    text-center text-sm transition-all shadow-md hover:shadow-lg">
+                  Xem đơn của tôi
+                </Link>
+              )}
+              <Link to="/"
+                className={`w-full font-bold py-3.5 rounded-xl text-center text-sm transition-all border-2
+                  ${isGuest ? "bg-[#006C4C] text-white border-[#006C4C] hover:bg-[#004832] shadow-md hover:shadow-lg"
+                    : "border-[#E5E7EB] text-[#3E4943] hover:border-[#BDCAC1] hover:bg-[#F8F9FB]"}`}>
+                Về trang chủ
+              </Link>
+            </div>
+
           </div>
-        </div>
-
-        {/* email note */}
-        <div className="bg-[#ECFDF5] border border-[#86efac] rounded-2xl p-4 mb-5 flex gap-3 items-start text-sm">
-          <span className="text-xl mt-0.5">📧</span>
-          <p className="text-[#006C4C]">
-            Email xác nhận sẽ được gửi về <strong>{contactInfo.email || "địa chỉ email của bạn"}</strong> trong thời gian sớm nhất.
-          </p>
-        </div>
-
-        {/* guest upsell */}
-        {isGuest && (
-          <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-2xl p-5 mb-5">
-            <p className="font-bold text-[#0369A1] mb-1">Tạo tài khoản để theo dõi đơn thuê</p>
-            <p className="text-sm text-[#0C4A6E] mb-3">Lưu lịch sử đặt xe, nhận ưu đãi thành viên và quản lý thông tin GPLX nhanh hơn.</p>
-            <Link to="/auth/register"
-              className="inline-block bg-[#0369A1] text-white text-sm font-bold px-5 py-2.5 rounded-xl
-                hover:bg-[#0284C7] transition-colors">
-              Tạo tài khoản miễn phí
-            </Link>
-          </div>
-        )}
-
-        {/* actions */}
-        <div className="flex gap-3">
-          {!isGuest && (
-            <Link to="/customer/my-bookings"
-              className="flex-1 bg-[#006C4C] hover:bg-[#004832] text-white font-bold py-3.5 rounded-xl
-                text-center text-sm transition-all shadow-md hover:shadow-lg">
-              Xem đơn của tôi
-            </Link>
-          )}
-          <Link to="/"
-            className={`font-bold py-3.5 rounded-xl text-center text-sm transition-all border-2
-              ${isGuest ? "flex-1 bg-[#006C4C] text-white border-[#006C4C] hover:bg-[#004832]"
-                : "flex-1 border-[#E5E7EB] text-[#6E7A72] hover:border-[#BDCAC1] hover:text-[#3E4943]"}`}>
-            Về trang chủ
-          </Link>
         </div>
       </div>
     </div>

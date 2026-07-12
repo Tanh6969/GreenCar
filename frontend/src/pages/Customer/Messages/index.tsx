@@ -9,10 +9,16 @@ const MessagesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    chatService.getConversations().then((data) => {
-      setConversations(data);
-      setLoading(false);
-    });
+    chatService.getConversations()
+      .then((data) => {
+        setConversations(data);
+      })
+      .catch((error) => {
+        console.error("Failed to load conversations:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {

@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { BookingProvider } from "./context/BookingContext";
 import AppRouter from "./routes/AppRouter";
+import ScrollToTop from "./components/common/ScrollToTop";
 import "./App.css";
 
 const App: React.FC = () => {
@@ -10,6 +11,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <BookingProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <AppRouter />
         </BrowserRouter>
       </BookingProvider>

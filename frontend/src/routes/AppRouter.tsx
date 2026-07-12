@@ -135,7 +135,7 @@ const AppRouter: React.FC = () => {
         }
       />
       <Route
-        path="/customer/messages/:bookingId"
+        path="/customer/messages/:conversationId"
         element={
           <ProtectedRoute>
             <MainLayout>

@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Logo from "../Logo";
 import NotificationDropdown from "./NotificationDropdown";
+import { chatService } from "../../services/chat.service";
 
 // ── icons ─────────────────────────────────────────────────────
 const IcGrid = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>;
@@ -18,8 +19,10 @@ const IcLogout = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="non
 const Header: React.FC = () => {
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -28,6 +31,17 @@ const Header: React.FC = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    if (user && !isAdmin) {
+      chatService.getConversations().then(data => {
+        if (data) {
+          const count = data.reduce((acc, c) => acc + (c.unread_count || 0), 0);
+          setUnreadMsgCount(count);
+        }
+      }).catch(console.error);
+    }
+  }, [user, isAdmin, location.pathname]);
 
   const initials = user ? user.name.split(" ").slice(-2).map(w => w[0]).join("").toUpperCase() : "";
 
@@ -100,6 +114,11 @@ const Header: React.FC = () => {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
+                {unreadMsgCount > 0 && (
+                  <span style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "white", fontSize: 10, fontWeight: "bold", width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%" }}>
+                    {unreadMsgCount > 9 ? "9+" : unreadMsgCount}
+                  </span>
+                )}
               </Link>
               <NotificationDropdown />
 
