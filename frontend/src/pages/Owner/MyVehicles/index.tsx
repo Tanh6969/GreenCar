@@ -351,10 +351,26 @@ const MyVehiclesPage: React.FC = () => {
               padding: "0 0 12px", background: "none", border: "none",
               borderBottom: activeTab === "bookings" ? "3px solid #006C4C" : "3px solid transparent",
               color: activeTab === "bookings" ? "#191C1E" : "#6E7A72",
-              fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s"
+              fontSize: 16, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
+              display: "flex", alignItems: "center", gap: 8,
             }}
           >
             Đơn đặt xe
+            {(() => {
+              const pendingCount = ownerBookings.filter((b: any) => b.status === "pending").length;
+              return pendingCount > 0 ? (
+                <span style={{
+                  background: "#ef4444", color: "#fff",
+                  fontSize: 11, fontWeight: 800,
+                  minWidth: 18, height: 18,
+                  borderRadius: 999, display: "inline-flex",
+                  alignItems: "center", justifyContent: "center",
+                  padding: "0 5px", lineHeight: 1,
+                }}>
+                  {pendingCount > 9 ? "9+" : pendingCount}
+                </span>
+              ) : null;
+            })()}
           </button>
           <button
             onClick={() => setActiveTab("registrations")}

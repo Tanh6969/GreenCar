@@ -44,21 +44,40 @@ const OwnerRegisterLanding: React.FC = () => {
     <div style={{ background: "#F8F9FB", minHeight: "100vh" }}>
       {/* Hero */}
       <div style={{
-        background: "linear-gradient(135deg, #003D2B 0%, #006C4C 50%, #004832 100%)",
-        padding: "80px 0 100px",
         position: "relative",
+        padding: "100px 0 110px",
         overflow: "hidden",
+        minHeight: 520,
       }}>
+        {/* Background image */}
+        <img
+          src="/owner-hero.jpg"
+          alt="hero background"
+          style={{
+            position: "absolute", inset: 0,
+            width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center 40%",
+          }}
+        />
+        {/* Dark overlay with green tint */}
         <div style={{
           position: "absolute", inset: 0,
-          backgroundImage: "radial-gradient(circle at 20% 50%, rgba(79,189,145,0.15) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(79,189,145,0.10) 0%, transparent 50%)",
+          background: "linear-gradient(100deg, rgba(0,35,22,0.88) 0%, rgba(0,61,43,0.75) 50%, rgba(0,40,28,0.65) 100%)",
         }} />
+        {/* Subtle decorative circles */}
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "radial-gradient(circle at 75% 80%, rgba(79,189,145,0.12) 0%, transparent 45%)",
+        }} />
+
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 60, alignItems: "center" }}>
             <div>
               <div style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
-                background: "rgba(79,189,145,0.2)", borderRadius: 999,
+                background: "rgba(79,189,145,0.2)", backdropFilter: "blur(8px)",
+                border: "1px solid rgba(79,189,145,0.3)",
+                borderRadius: 999,
                 padding: "6px 16px", marginBottom: 24,
               }}>
                 <span style={{ display: "flex", alignItems: "center" }}>
@@ -71,7 +90,7 @@ const OwnerRegisterLanding: React.FC = () => {
                 <span style={{ color: "#4FBD91" }}>hàng tháng</span><br />
                 cùng GreenCar
               </h1>
-              <p style={{ fontSize: 17, color: "rgba(255,255,255,0.80)", lineHeight: 1.7, margin: "0 0 36px", maxWidth: 460 }}>
+              <p style={{ fontSize: 17, color: "rgba(255,255,255,0.82)", lineHeight: 1.7, margin: "0 0 36px", maxWidth: 460 }}>
                 Xe bạn đang đỗ là tài sản sinh lời. Chia sẻ xe cùng GreenCar — nền tảng thuê xe điện hàng đầu Việt Nam — và nhận thu nhập thụ động lên đến <strong style={{ color: "#4FBD91" }}>30 triệu/tháng</strong> mà không cần lo lắng về rủi ro.
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -91,11 +110,14 @@ const OwnerRegisterLanding: React.FC = () => {
                 <a
                   href="#how-it-works"
                   style={{
-                    background: "transparent", color: "#fff", border: "1.5px solid rgba(255,255,255,0.4)",
+                    background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)",
+                    color: "#fff", border: "1.5px solid rgba(255,255,255,0.35)",
                     borderRadius: 999, padding: "16px 32px", fontWeight: 700,
                     fontSize: 15, cursor: "pointer", transition: "all 0.2s", textDecoration: "none",
                     display: "inline-flex", alignItems: "center",
                   }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.18)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.10)"; }}
                 >
                   Tìm hiểu thêm
                 </a>
@@ -103,10 +125,11 @@ const OwnerRegisterLanding: React.FC = () => {
             </div>
             {/* Stats card */}
             <div style={{
-              background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: 32,
+              background: "rgba(0,20,14,0.55)", backdropFilter: "blur(24px)",
+              border: "1px solid rgba(79,189,145,0.25)", borderRadius: 20, padding: 32,
+              boxShadow: "0 8px 40px rgba(0,0,0,0.3)",
             }}>
-              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13, fontWeight: 600, marginBottom: 20, textTransform: "uppercase", letterSpacing: 1 }}>
+              <div style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, fontWeight: 700, marginBottom: 20, textTransform: "uppercase", letterSpacing: 1.5 }}>
                 Thu nhập trung bình / tháng
               </div>
               {[
@@ -118,15 +141,16 @@ const OwnerRegisterLanding: React.FC = () => {
                 <div key={i} style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   padding: "14px 0",
-                  borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                  borderBottom: i < 3 ? "1px solid rgba(255,255,255,0.08)" : "none",
                 }}>
                   <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 14 }}>{item.type}</span>
                   <span style={{ color: "#4FBD91", fontWeight: 800, fontSize: 16 }}>{item.amount}</span>
                 </div>
               ))}
               <div style={{
-                marginTop: 20, background: "rgba(79,189,145,0.2)", borderRadius: 10,
+                marginTop: 20, background: "rgba(79,189,145,0.15)", borderRadius: 10,
                 padding: "12px 16px", display: "flex", alignItems: "center", gap: 10,
+                border: "1px solid rgba(79,189,145,0.2)",
               }}>
                 <span style={{ color: "#4FBD91", display: "flex" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
