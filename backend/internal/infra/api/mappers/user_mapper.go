@@ -18,13 +18,17 @@ func ToUserResponse(u *entities.User) *dto.UserResponse {
 	}
 
 	return &dto.UserResponse{
-		ID:        u.UserID,
-		Name:      u.Name,
-		Email:     u.Email,
-		Phone:     u.Phone,
-		LicenseNo: u.LicenseNo,
-		RoleID:    u.RoleID,
-		CreatedAt: createdAt,
+		ID:                  u.UserID,
+		Name:                u.Name,
+		Email:               u.Email,
+		Phone:               u.Phone,
+		LicenseNo:           u.LicenseNo,
+		RoleID:              u.RoleID,
+		CreatedAt:           createdAt,
+		LicenseFrontURL:     u.LicenseFrontURL,
+		LicenseBackURL:      u.LicenseBackURL,
+		LicenseStatus:       u.LicenseStatus,
+		LicenseRejectReason: u.LicenseRejectReason,
 	}
 }
 

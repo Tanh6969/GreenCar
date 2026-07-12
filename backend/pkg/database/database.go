@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -29,6 +30,12 @@ func New(cfg Config) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+	
+	// Configure connection pool
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
@@ -41,8 +48,15 @@ func NewFromDSN(dsn string) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Configure connection pool
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 	return &DB{db}, nil
 }
+

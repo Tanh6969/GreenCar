@@ -8,10 +8,17 @@ type BlogCategoryResponse struct {
 	Slug       string `json:"slug"`
 }
 
+type BlogAuthorResponse struct {
+	UserID int    `json:"user_id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+}
+
 type BlogPostResponse struct {
 	PostID       int                   `json:"post_id"`
 	UserID       int                   `json:"user_id"`
 	Category     *BlogCategoryResponse `json:"category,omitempty"`
+	Author       *BlogAuthorResponse   `json:"author,omitempty"`
 	Title        string                `json:"title"`
 	Slug         string                `json:"slug"`
 	Excerpt      string                `json:"excerpt"`

@@ -16,11 +16,15 @@ import (
 
 func main() {
 	// Load .env if present (ignored in production where env vars are set externally)
-	_ = godotenv.Load()
-
 	log := logger.New()
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Error("godotenv load error: %v", err)
+	}
+
 	dsn := os.Getenv("DB_DSN")
+	log.Info("Loaded DSN: %s", dsn)
 	if dsn == "" {
 		dsn = "host=localhost port=5432 user=postgres password=postgres dbname=greencar sslmode=disable"
 	}
@@ -74,7 +78,12 @@ func main() {
 
 	addr := os.Getenv("HTTP_ADDR")
 	if addr == "" {
-		addr = ":8080"
+		port := os.Getenv("PORT")
+		if port != "" {
+			addr = ":" + port
+		} else {
+			addr = ":8080"
+		}
 	}
 	log.Info("API listening on %s", addr)
 	if err := http.ListenAndServe(addr, router); err != nil {

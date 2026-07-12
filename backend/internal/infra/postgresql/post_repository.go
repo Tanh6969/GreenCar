@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"time"
 
 	"greencar/internal/domain/adapters"
@@ -16,22 +17,48 @@ func NewPostRepository(db *database.DB) adapters.PostRepository {
 	return &postRepository{db: db}
 }
 
-const postCols = `post_id, user_id, category_id, title, slug, excerpt, content, cover_image,
-	status, COALESCE(reject_reason,''), published_at, created_at, updated_at`
+const postCols = `p.post_id, p.user_id, p.category_id, p.title, p.slug, p.excerpt, p.content, p.cover_image,
+	p.status, COALESCE(p.reject_reason,''), p.published_at, p.created_at, p.updated_at,
+	u.name, u.email,
+	COALESCE(c.name, ''), COALESCE(c.slug, '')`
 
 func scanPost(row interface {
 	Scan(...any) error
 }) (*entities.BlogPost, error) {
 	var p entities.BlogPost
-	return &p, row.Scan(
+	var authorName, authorEmail sql.NullString
+	var categoryName, categorySlug sql.NullString
+	err := row.Scan(
 		&p.PostID, &p.UserID, &p.CategoryID, &p.Title, &p.Slug, &p.Excerpt, &p.Content, &p.CoverImage,
 		&p.Status, &p.RejectReason, &p.PublishedAt, &p.CreatedAt, &p.UpdatedAt,
+		&authorName, &authorEmail, &categoryName, &categorySlug,
 	)
+	if err != nil {
+		return nil, err
+	}
+	if authorName.Valid {
+		p.Author = &entities.BlogAuthor{
+			UserID: p.UserID,
+			Name:   authorName.String,
+			Email:  authorEmail.String,
+		}
+	}
+	if categoryName.Valid && p.CategoryID != nil {
+		p.Category = &entities.BlogCategory{
+			CategoryID: *p.CategoryID,
+			Name:       categoryName.String,
+			Slug:       categorySlug.String,
+		}
+	}
+	return &p, nil
 }
 
 func (r *postRepository) ListPublished(limit, offset int) ([]*entities.BlogPost, error) {
 	rows, err := r.db.Query(
-		`SELECT `+postCols+` FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT $1 OFFSET $2`,
+		`SELECT `+postCols+` FROM blog_posts p
+		 LEFT JOIN users u ON p.user_id = u.user_id
+		 LEFT JOIN blog_categories c ON p.category_id = c.category_id
+		 WHERE p.status = 'published' ORDER BY p.published_at DESC LIMIT $1 OFFSET $2`,
 		limit, offset,
 	)
 	if err != nil {
@@ -51,7 +78,10 @@ func (r *postRepository) ListPublished(limit, offset int) ([]*entities.BlogPost,
 
 func (r *postRepository) GetBySlug(slug string) (*entities.BlogPost, error) {
 	return scanPost(r.db.QueryRow(
-		`SELECT `+postCols+` FROM blog_posts WHERE slug = $1 AND status = 'published'`, slug,
+		`SELECT `+postCols+` FROM blog_posts p
+		 LEFT JOIN users u ON p.user_id = u.user_id
+		 LEFT JOIN blog_categories c ON p.category_id = c.category_id
+		 WHERE p.slug = $1 AND p.status = 'published'`, slug,
 	))
 }
 
@@ -74,13 +104,19 @@ func (r *postRepository) ListCategories() ([]*entities.BlogCategory, error) {
 
 func (r *postRepository) GetByID(id int) (*entities.BlogPost, error) {
 	return scanPost(r.db.QueryRow(
-		`SELECT `+postCols+` FROM blog_posts WHERE post_id = $1`, id,
+		`SELECT `+postCols+` FROM blog_posts p
+		 LEFT JOIN users u ON p.user_id = u.user_id
+		 LEFT JOIN blog_categories c ON p.category_id = c.category_id
+		 WHERE p.post_id = $1`, id,
 	))
 }
 
 func (r *postRepository) ListByUser(userID, limit, offset int) ([]*entities.BlogPost, error) {
 	rows, err := r.db.Query(
-		`SELECT `+postCols+` FROM blog_posts WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
+		`SELECT `+postCols+` FROM blog_posts p
+		 LEFT JOIN users u ON p.user_id = u.user_id
+		 LEFT JOIN blog_categories c ON p.category_id = c.category_id
+		 WHERE p.user_id = $1 ORDER BY p.created_at DESC LIMIT $2 OFFSET $3`,
 		userID, limit, offset,
 	)
 	if err != nil {
@@ -126,7 +162,10 @@ func (r *postRepository) Delete(id int) error {
 
 func (r *postRepository) ListAll(limit, offset int) ([]*entities.BlogPost, error) {
 	rows, err := r.db.Query(
-		`SELECT `+postCols+` FROM blog_posts ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+		`SELECT `+postCols+` FROM blog_posts p
+		 LEFT JOIN users u ON p.user_id = u.user_id
+		 LEFT JOIN blog_categories c ON p.category_id = c.category_id
+		 ORDER BY p.created_at DESC LIMIT $1 OFFSET $2`,
 		limit, offset,
 	)
 	if err != nil {

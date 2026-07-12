@@ -154,6 +154,8 @@ func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, error)
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn xác nhận' WHERE status = 'pending' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
 	// Auto-cancel confirmed bookings that are past their start time (never picked up)
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn nhận xe' WHERE status = 'confirmed' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
+	// Auto-complete active bookings that are past their end time
+	_, _ = r.db.Exec(`UPDATE bookings SET status = 'completed', actual_end_time = COALESCE(actual_end_time, end_time) WHERE status = 'active' AND end_time < (NOW() AT TIME ZONE 'UTC')`)
 
 	rows, err := r.db.Query(selectBookingDetail+` ORDER BY b.booking_id DESC LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
@@ -168,6 +170,8 @@ func (r *bookingRepository) ListByUser(userID int, limit, offset int) ([]*entiti
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn xác nhận' WHERE status = 'pending' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
 	// Auto-cancel confirmed bookings that are past their start time (never picked up)
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn nhận xe' WHERE status = 'confirmed' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
+	// Auto-complete active bookings that are past their end time
+	_, _ = r.db.Exec(`UPDATE bookings SET status = 'completed', actual_end_time = COALESCE(actual_end_time, end_time) WHERE status = 'active' AND end_time < (NOW() AT TIME ZONE 'UTC')`)
 
 	// Filter out bookings where the user booked their own car
 	rows, err := r.db.Query(selectBookingDetail+` WHERE b.user_id=$1 AND (v.owner_id != $1 OR v.owner_id IS NULL) ORDER BY b.booking_id DESC LIMIT $2 OFFSET $3`, userID, limit, offset)
@@ -183,6 +187,8 @@ func (r *bookingRepository) ListByOwner(ownerID int, limit, offset int) ([]*enti
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn xác nhận' WHERE status = 'pending' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
 	// Auto-cancel confirmed bookings that are past their start time (never picked up)
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn nhận xe' WHERE status = 'confirmed' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
+	// Auto-complete active bookings that are past their end time
+	_, _ = r.db.Exec(`UPDATE bookings SET status = 'completed', actual_end_time = COALESCE(actual_end_time, end_time) WHERE status = 'active' AND end_time < (NOW() AT TIME ZONE 'UTC')`)
 
 	rows, err := r.db.Query(selectBookingDetail+` WHERE v.owner_id=$1 ORDER BY b.booking_id DESC LIMIT $2 OFFSET $3`, ownerID, limit, offset)
 	if err != nil {

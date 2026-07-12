@@ -23,9 +23,29 @@ func NewPostHandler(svc *service.PostService) *PostHandler {
 }
 
 func toPostResponse(p *entities.BlogPost) *dto.BlogPostResponse {
+	var cat *dto.BlogCategoryResponse
+	if p.Category != nil {
+		cat = &dto.BlogCategoryResponse{
+			CategoryID: p.Category.CategoryID,
+			Name:       p.Category.Name,
+			Slug:       p.Category.Slug,
+		}
+	}
+
+	var auth *dto.BlogAuthorResponse
+	if p.Author != nil {
+		auth = &dto.BlogAuthorResponse{
+			UserID: p.Author.UserID,
+			Name:   p.Author.Name,
+			Email:  p.Author.Email,
+		}
+	}
+
 	return &dto.BlogPostResponse{
 		PostID:       p.PostID,
 		UserID:       p.UserID,
+		Category:     cat,
+		Author:       auth,
 		Title:        p.Title,
 		Slug:         p.Slug,
 		Excerpt:      p.Excerpt,

@@ -150,3 +150,84 @@ func DeleteUserHandler(userSvc *service.UserService, log *logger.Logger) http.Ha
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+// SubmitLicenseHandler handles requests from user to submit their license photo URL for verification
+func SubmitLicenseHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		payload := middlewares.GetPayload(r)
+		if payload == nil {
+			response.WriteError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		var req dto.SubmitLicenseRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+
+		if req.LicenseFrontURL == "" || req.LicenseBackURL == "" || req.LicenseNo == "" {
+			response.WriteError(w, http.StatusBadRequest, "license_no, license_front_url and license_back_url are required")
+			return
+		}
+
+		err := userSvc.SubmitLicense(int(payload.UserId), req.LicenseNo, req.LicenseFrontURL, req.LicenseBackURL)
+		if err != nil {
+			log.Warn("submit license error for user %d: %v", payload.UserId, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to submit license")
+			return
+		}
+
+		updated, err := userSvc.GetUser(int(payload.UserId))
+		if err != nil {
+			response.WriteError(w, http.StatusInternalServerError, "failed to retrieve updated user")
+			return
+		}
+
+		response.WriteJSON(w, http.StatusOK, mappers.ToUserResponse(updated))
+	}
+}
+
+// AdminVerifyLicenseHandler handles driving license verification approvals/rejections by admin
+func AdminVerifyLicenseHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := chi.URLParam(r, "id")
+		userID, err := strconv.Atoi(idStr)
+		if err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid user id")
+			return
+		}
+
+		var req dto.VerifyLicenseRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			response.WriteError(w, http.StatusBadRequest, "invalid request body")
+			return
+		}
+
+		if req.Status != "verified" && req.Status != "rejected" {
+			response.WriteError(w, http.StatusBadRequest, "invalid status, must be verified or rejected")
+			return
+		}
+
+		if req.Status == "rejected" && req.RejectReason == "" {
+			response.WriteError(w, http.StatusBadRequest, "reject_reason is required when rejecting")
+			return
+		}
+
+		err = userSvc.AdminVerifyLicense(userID, req.Status, req.RejectReason)
+		if err != nil {
+			log.Warn("admin verify license %d: %v", userID, err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to verify license")
+			return
+		}
+
+		updated, err := userSvc.GetUser(userID)
+		if err != nil {
+			response.WriteError(w, http.StatusInternalServerError, "failed to retrieve updated user")
+			return
+		}
+
+		response.WriteJSON(w, http.StatusOK, mappers.ToUserResponse(updated))
+	}
+}
+

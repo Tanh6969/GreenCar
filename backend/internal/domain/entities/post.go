@@ -2,6 +2,12 @@ package entities
 
 import "time"
 
+type BlogAuthor struct {
+	UserID int    `json:"user_id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+}
+
 // BlogPost represents the blog_posts table.
 type BlogPost struct {
 	PostID       int        `json:"post_id"`
@@ -17,6 +23,9 @@ type BlogPost struct {
 	PublishedAt  *time.Time `json:"published_at"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
+
+	Author   *BlogAuthor   `json:"author,omitempty"`
+	Category *BlogCategory `json:"category,omitempty"`
 }
 
 // BlogCategory represents the blog_categories table.

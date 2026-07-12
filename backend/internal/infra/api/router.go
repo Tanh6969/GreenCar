@@ -84,6 +84,7 @@ func NewRouter(
 				r.Get("/", handlers.GetUserHandler(userSvc, log))
 				r.Put("/", handlers.UpdateUserHandler(userSvc, log))
 				r.Delete("/", handlers.DeleteUserHandler(userSvc, log))
+				r.Put("/license/status", handlers.AdminVerifyLicenseHandler(userSvc, log))
 			})
 		})
 
@@ -135,6 +136,7 @@ func NewRouter(
 	r.Route("/users", func(r chi.Router) {
 		r.Use(auth)
 		r.Get("/me", handlers.GetMeHandler(userSvc, log))
+		r.Put("/me/license", handlers.SubmitLicenseHandler(userSvc, log))
 		routes.RegisterUserRoutes(r, userSvc, log)
 	})
 

@@ -228,6 +228,10 @@ export async function mockApiCall<T>(
       license_no: p.license_no,
       role_id:    2,
       created_at: new Date().toISOString(),
+      license_front_url: "",
+      license_back_url: "",
+      license_status: "unverified" as const,
+      license_reject_reason: "",
     };
     _users.push(newUser);
     PASSWORDS[p.email] = p.password;
@@ -245,7 +249,43 @@ export async function mockApiCall<T>(
   if (method === "GET" && path === "/users/me") {
     const u = authedUser;
     if (!u) throw new MockApiError(401, "Chưa đăng nhập.");
-    return { id: u.user_id, name: u.name, email: u.email, phone: u.phone, license_no: u.license_no, role_id: u.role_id, created_at: u.created_at } as T;
+    return {
+      id: u.user_id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      license_no: u.license_no,
+      role_id: u.role_id,
+      created_at: u.created_at,
+      license_front_url: u.license_front_url,
+      license_back_url: u.license_back_url,
+      license_status: u.license_status || "unverified",
+      license_reject_reason: u.license_reject_reason,
+    } as T;
+  }
+
+  // PUT /users/me/license
+  if (method === "PUT" && path === "/users/me/license") {
+    const u = authedUser;
+    if (!u) throw new MockApiError(401, "Chưa đăng nhập.");
+    const d = body as any;
+    u.license_no = d.license_no;
+    u.license_front_url = d.license_front_url;
+    u.license_back_url = d.license_back_url;
+    u.license_status = "pending";
+    return {
+      id: u.user_id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      license_no: u.license_no,
+      role_id: u.role_id,
+      created_at: u.created_at,
+      license_front_url: u.license_front_url,
+      license_back_url: u.license_back_url,
+      license_status: u.license_status,
+      license_reject_reason: u.license_reject_reason,
+    } as T;
   }
 
   // GET /vehicles/cards

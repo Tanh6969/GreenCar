@@ -20,4 +20,10 @@ export interface BlogPost {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  author?: {
+    user_id: number;
+    name: string;
+    email: string;
+  };
+  category?: BlogCategory;
 }

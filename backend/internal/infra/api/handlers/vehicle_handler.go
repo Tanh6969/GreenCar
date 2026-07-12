@@ -45,12 +45,14 @@ func GetVehicleDetailHandler(vehicleSvc *service.VehicleService, log *logger.Log
 			response.WriteError(w, http.StatusBadRequest, "invalid vehicle id")
 			return
 		}
+		start := time.Now()
 		v, err := vehicleSvc.GetVehicleDetail(id)
 		if err != nil {
 			log.Warn("get vehicle detail %d: %v", id, err)
 			response.WriteError(w, http.StatusNotFound, "vehicle not found")
 			return
 		}
+		log.Info("GetVehicleDetail DB processing took: %v", time.Since(start))
 		response.WriteJSON(w, http.StatusOK, mappers.ToVehicleDetailResponse(v))
 	}
 }

@@ -4,11 +4,20 @@ import { BlogPost, BlogCategory, BlogStatus } from "../types/blog.type";
 // ── shapes returned by the backend ───────────────────────────
 
 interface ApiPost {
-  post_id: number; user_id: number;
+  post_id: number;
+  user_id: number;
   category?: { category_id: number; name: string; slug: string } | null;
-  title: string; slug: string; excerpt: string; content: string; cover_image: string;
-  status: string; reject_reason?: string;
-  published_at: string | null; created_at: string; updated_at: string;
+  author?: { user_id: number; name: string; email: string } | null;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  cover_image: string;
+  status: string;
+  reject_reason?: string;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ApiCategory {
@@ -30,6 +39,16 @@ function toPost(p: ApiPost): BlogPost {
     published_at: p.published_at,
     created_at:   p.created_at,
     updated_at:   p.updated_at,
+    author:       p.author ? {
+      user_id: p.author.user_id,
+      name:    p.author.name,
+      email:   p.author.email,
+    } : undefined,
+    category:     p.category ? {
+      category_id: p.category.category_id,
+      name:        p.category.name,
+      slug:        p.category.slug,
+    } : undefined,
   };
 }
 

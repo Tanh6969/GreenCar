@@ -4,7 +4,7 @@ import { blogService } from "../../../services/blog.service";
 import { BlogPost, BlogCategory, BlogStatus } from "../../../types/blog.type";
 import { User } from "../../../types/user.type";
 
-type PostRow = BlogPost & { author?: User; category?: BlogCategory };
+type PostRow = BlogPost;
 
 const STATUS_LABEL: Record<BlogStatus, { label: string; color: string; bg: string }> = {
   draft:     { label: "Nháp",       color: "#6E7A72", bg: "#f3f4f6" },
@@ -25,7 +25,7 @@ const BlogManagePage: React.FC = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<BlogStatus | "all">("pending");
+  const [filter, setFilter] = useState<BlogStatus | "all">("all");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");

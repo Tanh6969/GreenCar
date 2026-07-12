@@ -51,3 +51,33 @@ func (s *UserService) UpdateUser(u *entities.User) error {
 func (s *UserService) DeleteUser(id int) error {
 	return s.repo.Delete(id)
 }
+
+// SubmitLicense updates user's driving license information and sets status to verified directly.
+func (s *UserService) SubmitLicense(userID int, licenseNo, frontURL, backURL string) error {
+	u, err := s.repo.GetByID(userID)
+	if err != nil {
+		return err
+	}
+	u.LicenseNo = licenseNo
+	u.LicenseFrontURL = frontURL
+	u.LicenseBackURL = backURL
+	u.LicenseStatus = "verified"
+	u.LicenseRejectReason = ""
+	return s.repo.Update(u)
+}
+
+// AdminVerifyLicense updates a user's driving license status and reject reason.
+func (s *UserService) AdminVerifyLicense(userID int, status string, rejectReason string) error {
+	u, err := s.repo.GetByID(userID)
+	if err != nil {
+		return err
+	}
+	u.LicenseStatus = status
+	if status == "rejected" {
+		u.LicenseRejectReason = rejectReason
+	} else {
+		u.LicenseRejectReason = ""
+	}
+	return s.repo.Update(u)
+}
+

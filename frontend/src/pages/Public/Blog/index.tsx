@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { blogService } from "../../../services/blog.service";
 import { BlogPost } from "../../../types/blog.type";
-import { User } from "../../../types/user.type";
 import fb1 from "../../../assets/images/Lucid Air Dream.png";
 import fb2 from "../../../assets/images/Rivian R1S.png";
 import fb3 from "../../../assets/images/Audi e-tron GT.png";
@@ -10,10 +9,8 @@ import fb4 from "../../../assets/images/Electric SUV.png";
 
 const fallbacks = [fb1, fb2, fb3, fb4];
 
-type PostWithAuthor = BlogPost & { author?: User };
-
 const BlogListPage: React.FC = () => {
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
