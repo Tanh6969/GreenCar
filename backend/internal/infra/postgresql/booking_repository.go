@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	"greencar/internal/domain/adapters"
@@ -86,13 +87,50 @@ func (r *bookingRepository) GetByID(id int) (*entities.Booking, error) {
 }
 
 func (r *bookingRepository) Create(b *entities.Booking) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Lock the vehicle to prevent concurrent booking creation race conditions
+	var dummy int
+	err = tx.QueryRow(`SELECT 1 FROM vehicles WHERE vehicle_id = $1 FOR UPDATE`, b.VehicleID).Scan(&dummy)
+	if err != nil {
+		return err
+	}
+
+	// Double-check overlapping within the transaction
+	queryOverlap := `SELECT EXISTS(
+		SELECT 1 FROM bookings
+		WHERE vehicle_id = $1 AND status != 'cancelled'
+		AND NOT (end_time <= $2 OR start_time >= $3)
+	) OR EXISTS (
+		SELECT 1 FROM vehicle_unavailabilities
+		WHERE vehicle_id = $1
+		AND NOT (end_time <= $2 OR start_time >= $3)
+	)`
+	var exists bool
+	err = tx.QueryRow(queryOverlap, b.VehicleID, b.StartTime, b.EndTime).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return errors.New("booking overlaps existing booking")
+	}
+
 	query := `INSERT INTO bookings (user_id, vehicle_id, rental_plan_id, start_time, end_time, planned_km, deposit_amount, total_price, status, payment_method, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
 		RETURNING booking_id, created_at`
-	return r.db.QueryRow(query,
+	err = tx.QueryRow(query,
 		b.UserID, b.VehicleID, b.RentalPlanID, b.StartTime, b.EndTime,
 		b.PlannedKM, b.DepositAmount, b.TotalPrice, b.Status, b.PaymentMethod,
 	).Scan(&b.BookingID, &b.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (r *bookingRepository) Update(b *entities.Booking) error {

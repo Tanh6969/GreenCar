@@ -54,6 +54,7 @@ const PaymentPage: React.FC = () => {
   const { pendingBooking, setPendingBooking } = useContext(BookingContext);
   const [method, setMethod]   = useState("transfer");
   const [loading, setLoading] = useState(false);
+  const isSubmitting = React.useRef(false);
   const [error, setError]     = useState("");
 
   if (!pendingBooking) {
@@ -69,6 +70,8 @@ const PaymentPage: React.FC = () => {
   const { vehicleInfo, planName, startTime, endTime, totalPrice, depositAmount, contactInfo } = pendingBooking;
 
   const handleConfirm = async () => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
     setLoading(true);
     setError("");
     try {
@@ -112,6 +115,7 @@ const PaymentPage: React.FC = () => {
       setError(e.message ?? "Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setLoading(false);
+      isSubmitting.current = false;
     }
   };
 

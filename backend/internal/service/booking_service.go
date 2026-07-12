@@ -43,7 +43,11 @@ func (s *BookingService) CreateBooking(b *entities.Booking) error {
 		return ErrBookingOverlaps
 	}
 
-	return s.repo.Create(b)
+	err = s.repo.Create(b)
+	if err != nil && err.Error() == "booking overlaps existing booking" {
+		return ErrBookingOverlaps
+	}
+	return err
 }
 
 // ListBookings returns a list of bookings with pagination.
