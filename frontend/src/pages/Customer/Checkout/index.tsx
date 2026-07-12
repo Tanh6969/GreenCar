@@ -293,10 +293,10 @@ const CheckoutPage: React.FC = () => {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
         <StepBar step={1} />
 
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
+        <div className={`flex flex-col lg:flex-row gap-6 items-start ${!user ? "justify-center" : ""}`}>
 
           {/* ── LEFT: checkout logic & verification ──────────────── */}
-          <div className="flex-1 flex flex-col gap-5 w-full">
+          <div className={`flex flex-col gap-5 w-full ${!user ? "max-w-lg mx-auto" : "flex-1"}`}>
 
             {/* CASE 1: Guest (not logged in) */}
             {!user ? (
@@ -600,8 +600,8 @@ const CheckoutPage: React.FC = () => {
             )}
           </div>
 
-          {/* ── RIGHT: order summary ──────────────────────────────── */}
-          <div className="w-full lg:w-[320px] flex-shrink-0">
+          {/* ── RIGHT: order summary (only show when logged in) ────── */}
+          {user && <div className="w-full lg:w-[320px] flex-shrink-0">
             <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden sticky top-[84px]">
               {/* car image */}
               <div className="relative h-44 bg-gradient-to-br from-[#dcfce7] to-[#bbf7d0] overflow-hidden">
@@ -683,7 +683,7 @@ const CheckoutPage: React.FC = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
