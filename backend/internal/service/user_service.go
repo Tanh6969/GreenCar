@@ -38,7 +38,7 @@ func (s *UserService) CreateUser(u *entities.User) error {
 }
 
 // ListUsers returns a list of users with pagination.
-func (s *UserService) ListUsers(limit, offset int) ([]*entities.User, error) {
+func (s *UserService) ListUsers(limit, offset int) ([]*entities.User, int, error) {
 	return s.repo.List(limit, offset)
 }
 

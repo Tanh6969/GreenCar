@@ -51,7 +51,7 @@ func (s *BookingService) CreateBooking(b *entities.Booking) error {
 }
 
 // ListBookings returns a list of bookings with pagination.
-func (s *BookingService) ListBookings(limit, offset int) ([]*entities.Booking, error) {
+func (s *BookingService) ListBookings(limit, offset int) ([]*entities.Booking, int, error) {
 	return s.repo.List(limit, offset)
 }
 

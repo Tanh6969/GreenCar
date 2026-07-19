@@ -21,8 +21,8 @@ func (s *OwnerRegistrationService) GetMyRegistrations(userID int) ([]*entities.O
 	return s.repo.GetByUserID(userID)
 }
 
-func (s *OwnerRegistrationService) GetAll() ([]*entities.OwnerRegistration, error) {
-	return s.repo.GetAll()
+func (s *OwnerRegistrationService) GetAll(limit, offset int) ([]*entities.OwnerRegistration, int, error) {
+	return s.repo.List(limit, offset)
 }
 
 func (s *OwnerRegistrationService) UpdateStatus(id int, status, reason string) error {

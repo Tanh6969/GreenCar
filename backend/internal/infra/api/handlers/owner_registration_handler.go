@@ -63,14 +63,15 @@ func (h *OwnerRegistrationHandler) GetMyRegistrations(w http.ResponseWriter, r *
 }
 
 func (h *OwnerRegistrationHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	regs, err := h.svc.GetAll()
+	page, limit, offset := response.ParsePagination(r, 20)
+	regs, total, err := h.svc.GetAll(limit, offset)
 	if err != nil {
 		h.log.Error("failed to get all registrations: %v", err)
 		response.WriteError(w, http.StatusInternalServerError, "failed to get all registrations")
 		return
 	}
 
-	response.WriteJSON(w, http.StatusOK, regs)
+	response.WritePaginatedJSON(w, http.StatusOK, regs, page, limit, total)
 }
 
 func (h *OwnerRegistrationHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {

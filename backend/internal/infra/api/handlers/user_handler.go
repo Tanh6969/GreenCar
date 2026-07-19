@@ -56,27 +56,15 @@ func GetUserHandler(userSvc *service.UserService, log *logger.Logger) http.Handl
 // ListUsersHandler returns a handler for listing users with pagination.
 func ListUsersHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		q := r.URL.Query()
-		limit := 20
-		offset := 0
-		if l := q.Get("limit"); l != "" {
-			if v, err := strconv.Atoi(l); err == nil && v > 0 {
-				limit = v
-			}
-		}
-		if o := q.Get("offset"); o != "" {
-			if v, err := strconv.Atoi(o); err == nil && v >= 0 {
-				offset = v
-			}
-		}
+		page, limit, offset := response.ParsePagination(r, 20)
 
-		users, err := userSvc.ListUsers(limit, offset)
+		users, total, err := userSvc.ListUsers(limit, offset)
 		if err != nil {
 			log.Warn("list users: %v", err)
 			response.WriteError(w, http.StatusInternalServerError, "failed to list users")
 			return
 		}
-		response.WriteJSON(w, http.StatusOK, mappers.ToUserResponses(users))
+		response.WritePaginatedJSON(w, http.StatusOK, mappers.ToUserResponses(users), page, limit, total)
 	}
 }
 

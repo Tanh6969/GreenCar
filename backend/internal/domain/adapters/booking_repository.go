@@ -13,7 +13,7 @@ type BookingRepository interface {
 	Create(b *entities.Booking) error
 	Update(b *entities.Booking) error
 	Delete(id int) error
-	List(limit, offset int) ([]*entities.Booking, error)
+	List(limit, offset int) ([]*entities.Booking, int, error)
 	ListByUser(userID int, limit, offset int) ([]*entities.Booking, error)
 	ListByOwner(ownerID int, limit, offset int) ([]*entities.Booking, error)
 	// ExistsOverlapping returns true if there is an existing booking for the same vehicle

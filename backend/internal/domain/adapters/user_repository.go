@@ -9,6 +9,6 @@ type UserRepository interface {
 	Create(u *entities.User) error
 	Update(u *entities.User) error
 	Delete(id int) error
-	List(limit, offset int) ([]*entities.User, error)
+	List(limit, offset int) ([]*entities.User, int, error)
 	GetByEmail(email string) (*entities.User, error)
 }

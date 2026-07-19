@@ -13,7 +13,7 @@ type VehicleRepository interface {
 	Create(v *entities.Vehicle) error
 	Update(v *entities.Vehicle) error
 	Delete(id int) error
-	List(limit, offset int) ([]*entities.Vehicle, error)
+	List(limit, offset int) ([]*entities.Vehicle, int, error)
 	ListByLocation(locationID int, limit, offset int) ([]*entities.Vehicle, error)
 
 	// ListAvailable returns vehicles that are not booked in the given time window.

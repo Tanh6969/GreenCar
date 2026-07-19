@@ -58,14 +58,20 @@ func (r *userRepository) Delete(id int) error {
 	return err
 }
 
-func (r *userRepository) List(limit, offset int) ([]*entities.User, error) {
+func (r *userRepository) List(limit, offset int) ([]*entities.User, int, error) {
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM users").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	query := `SELECT user_id, name, email, password, phone, license_no, role_id, created_at,
 		COALESCE(license_front_url, ''), COALESCE(license_back_url, ''),
 		COALESCE(license_status, 'unverified'), COALESCE(license_reject_reason, '')
 		FROM users ORDER BY user_id LIMIT $1 OFFSET $2`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -77,11 +83,11 @@ func (r *userRepository) List(limit, offset int) ([]*entities.User, error) {
 			&u.LicenseFrontURL, &u.LicenseBackURL, &u.LicenseStatus, &u.LicenseRejectReason,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		users = append(users, &u)
 	}
-	return users, nil
+	return users, total, nil
 }
 
 func (r *userRepository) GetByEmail(email string) (*entities.User, error) {

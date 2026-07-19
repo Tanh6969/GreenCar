@@ -116,7 +116,7 @@ func (s *PostService) DeletePost(postID, userID int) error {
 
 // Admin
 
-func (s *PostService) AdminListAll(limit, offset int) ([]*entities.BlogPost, error) {
+func (s *PostService) AdminListAll(limit, offset int) ([]*entities.BlogPost, int, error) {
 	return s.repo.ListAll(limit, offset)
 }
 

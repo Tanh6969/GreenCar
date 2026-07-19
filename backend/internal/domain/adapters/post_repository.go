@@ -17,6 +17,6 @@ type PostRepository interface {
 	Delete(id int) error
 
 	// Admin
-	ListAll(limit, offset int) ([]*entities.BlogPost, error)
+	ListAll(limit, offset int) ([]*entities.BlogPost, int, error)
 	SetStatus(id int, status, rejectReason string) error
 }

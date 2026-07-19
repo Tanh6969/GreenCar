@@ -273,8 +273,8 @@ func (h *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 // ── Admin ─────────────────────────────────────────────────────
 
 func (h *PostHandler) AdminListPosts(w http.ResponseWriter, r *http.Request) {
-	limit, offset := paginationParams(r, 50)
-	posts, err := h.svc.AdminListAll(limit, offset)
+	page, limit, offset := response.ParsePagination(r, 50)
+	posts, total, err := h.svc.AdminListAll(limit, offset)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "failed to fetch posts")
 		return
@@ -283,7 +283,7 @@ func (h *PostHandler) AdminListPosts(w http.ResponseWriter, r *http.Request) {
 	for _, p := range posts {
 		out = append(out, toPostResponse(p))
 	}
-	response.WriteJSON(w, http.StatusOK, out)
+	response.WritePaginatedJSON(w, http.StatusOK, out, page, limit, total)
 }
 
 func (h *PostHandler) AdminSetStatus(w http.ResponseWriter, r *http.Request) {

@@ -60,12 +60,18 @@ func (r *vehicleRepository) AddImage(modelID int, url string) error {
 	return err
 }
 
-func (r *vehicleRepository) List(limit, offset int) ([]*entities.Vehicle, error) {
+func (r *vehicleRepository) List(limit, offset int) ([]*entities.Vehicle, int, error) {
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM vehicles").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id 
 		FROM vehicles ORDER BY vehicle_id LIMIT $1 OFFSET $2`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -74,11 +80,11 @@ func (r *vehicleRepository) List(limit, offset int) ([]*entities.Vehicle, error)
 		var v entities.Vehicle
 		err := rows.Scan(&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		vehicles = append(vehicles, &v)
 	}
-	return vehicles, nil
+	return vehicles, total, nil
 }
 
 func (r *vehicleRepository) ListByLocation(locationID int, limit, offset int) ([]*entities.Vehicle, error) {

@@ -29,7 +29,7 @@ func (s *VehicleService) CreateVehicle(v *entities.Vehicle) error {
 }
 
 // ListVehicles returns a list of vehicles with pagination.
-func (s *VehicleService) ListVehicles(limit, offset int) ([]*entities.Vehicle, error) {
+func (s *VehicleService) ListVehicles(limit, offset int) ([]*entities.Vehicle, int, error) {
 	return s.repo.List(limit, offset)
 }
 

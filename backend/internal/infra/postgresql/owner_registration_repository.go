@@ -91,12 +91,18 @@ func (r *ownerRegistrationRepository) GetByUserID(userID int) ([]*entities.Owner
 	return regs, nil
 }
 
-func (r *ownerRegistrationRepository) GetAll() ([]*entities.OwnerRegistration, error) {
-	query := `SELECT o.id, o.user_id, o.brand, o.model, o.year, o.license_plate, o.color, o.seats, o.transmission, o.fuel_type, o.city, o.address, o.price_per_day, o.description, o.images, o.status, o.reject_reason, o.created_at, u.name, u.phone, COALESCE(o.available_from, ''), COALESCE(o.available_to, '')
-		FROM owner_registrations o JOIN users u ON o.user_id = u.user_id ORDER BY o.created_at DESC`
-	rows, err := r.db.Query(query)
+func (r *ownerRegistrationRepository) List(limit, offset int) ([]*entities.OwnerRegistration, int, error) {
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM owner_registrations").Scan(&total)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	query := `SELECT o.id, o.user_id, o.brand, o.model, o.year, o.license_plate, o.color, o.seats, o.transmission, o.fuel_type, o.city, o.address, o.price_per_day, o.description, o.images, o.status, o.reject_reason, o.created_at, u.name, u.phone, COALESCE(o.available_from, ''), COALESCE(o.available_to, '')
+		FROM owner_registrations o JOIN users u ON o.user_id = u.user_id ORDER BY o.created_at DESC LIMIT $1 OFFSET $2`
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -112,7 +118,7 @@ func (r *ownerRegistrationRepository) GetAll() ([]*entities.OwnerRegistration, e
 			&reg.OwnerName, &reg.OwnerPhone, &reg.AvailableFrom, &reg.AvailableTo,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		json.Unmarshal([]byte(imagesJSON), &reg.Images)
 		if rejectReason != nil {
@@ -120,7 +126,7 @@ func (r *ownerRegistrationRepository) GetAll() ([]*entities.OwnerRegistration, e
 		}
 		regs = append(regs, &reg)
 	}
-	return regs, nil
+	return regs, total, nil
 }
 
 func (r *ownerRegistrationRepository) UpdateStatus(id int, status, reason string) error {

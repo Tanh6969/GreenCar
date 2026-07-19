@@ -160,7 +160,13 @@ func (r *postRepository) Delete(id int) error {
 	return err
 }
 
-func (r *postRepository) ListAll(limit, offset int) ([]*entities.BlogPost, error) {
+func (r *postRepository) ListAll(limit, offset int) ([]*entities.BlogPost, int, error) {
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM blog_posts").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(
 		`SELECT `+postCols+` FROM blog_posts p
 		 LEFT JOIN users u ON p.user_id = u.user_id
@@ -169,18 +175,18 @@ func (r *postRepository) ListAll(limit, offset int) ([]*entities.BlogPost, error
 		limit, offset,
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 	var posts []*entities.BlogPost
 	for rows.Next() {
 		p, err := scanPost(rows)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		posts = append(posts, p)
 	}
-	return posts, rows.Err()
+	return posts, total, rows.Err()
 }
 
 func (r *postRepository) SetStatus(id int, status, rejectReason string) error {

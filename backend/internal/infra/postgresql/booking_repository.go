@@ -149,7 +149,7 @@ func (r *bookingRepository) Delete(id int) error {
 	return err
 }
 
-func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, error) {
+func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, int, error) {
 	// Auto-cancel pending bookings that are past their start time
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'cancelled', owner_note = 'Tự động hủy do quá hạn xác nhận' WHERE status = 'pending' AND start_time < (NOW() AT TIME ZONE 'UTC')`)
 	// Auto-cancel confirmed bookings that are past their start time (never picked up)
@@ -157,12 +157,22 @@ func (r *bookingRepository) List(limit, offset int) ([]*entities.Booking, error)
 	// Auto-complete active bookings that are past their end time
 	_, _ = r.db.Exec(`UPDATE bookings SET status = 'completed', actual_end_time = COALESCE(actual_end_time, end_time) WHERE status = 'active' AND end_time < (NOW() AT TIME ZONE 'UTC')`)
 
+	var total int
+	err := r.db.QueryRow("SELECT COUNT(*) FROM bookings").Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(selectBookingDetail+` ORDER BY b.booking_id DESC LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
-	return scanBookings(rows)
+	bookings, err := scanBookings(rows)
+	if err != nil {
+		return nil, 0, err
+	}
+	return bookings, total, nil
 }
 
 func (r *bookingRepository) ListByUser(userID int, limit, offset int) ([]*entities.Booking, error) {

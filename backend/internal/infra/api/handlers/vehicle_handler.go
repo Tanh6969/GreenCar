@@ -90,20 +90,9 @@ func ListVehicleCardsHandler(vehicleSvc *service.VehicleService, log *logger.Log
 // ListVehiclesHandler returns a handler for listing vehicles with pagination.
 func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		q := r.URL.Query()
-		limit := 20
-		offset := 0
-		if l := q.Get("limit"); l != "" {
-			if v, err := strconv.Atoi(l); err == nil && v > 0 {
-				limit = v
-			}
-		}
-		if o := q.Get("offset"); o != "" {
-			if v, err := strconv.Atoi(o); err == nil && v >= 0 {
-				offset = v
-			}
-		}
+		page, limit, offset := response.ParsePagination(r, 20)
 
+		q := r.URL.Query()
 		// Optional availability filter (find free vehicles).
 		var start, end *time.Time
 		var locationID, modelID *int
@@ -138,11 +127,13 @@ func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger)
 		}
 
 		var vehicles []*entities.Vehicle
+		var total int
 		var err error
 		if start != nil && end != nil {
 			vehicles, err = vehicleSvc.ListAvailableVehicles(start, end, locationID, modelID, limit, offset)
+			total = len(vehicles)
 		} else {
-			vehicles, err = vehicleSvc.ListVehicles(limit, offset)
+			vehicles, total, err = vehicleSvc.ListVehicles(limit, offset)
 		}
 		vehicleResponses := mappers.ToVehicleResponses(vehicles)
 
@@ -151,7 +142,7 @@ func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger)
 			response.WriteError(w, http.StatusInternalServerError, "failed to list vehicles")
 			return
 		}
-		response.WriteJSON(w, http.StatusOK, vehicleResponses)
+		response.WritePaginatedJSON(w, http.StatusOK, vehicleResponses, page, limit, total)
 	}
 }
 
