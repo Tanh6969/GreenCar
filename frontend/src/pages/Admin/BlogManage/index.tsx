@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { blogService } from "../../../services/blog.service";
 import { BlogPost, BlogCategory, BlogStatus } from "../../../types/blog.type";
 import { User } from "../../../types/user.type";
+import { Pagination } from "../../../components/common/Pagination";
 
 type PostRow = BlogPost;
 
@@ -30,12 +31,25 @@ const BlogManagePage: React.FC = () => {
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [error, setError] = useState("");
+  const [page,     setPage]     = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total,    setTotal]    = useState(0);
 
-  const refresh = useCallback(() => {
-    blogService.adminGetAll().then(setPosts).finally(() => setLoading(false));
+  const refresh = useCallback((p: number) => {
+    setLoading(true);
+    blogService.adminGetAll(p, 10)
+      .then(res => {
+        setPosts(res.data);
+        setTotalPages(res.pagination.total_pages);
+        setTotal(res.pagination.total);
+      })
+      .catch(() => setError("Không tải được danh sách bài viết."))
+      .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    refresh(page);
+  }, [refresh, page]);
 
   const counts = posts.reduce<Record<string, number>>((acc, p) => {
     acc[p.status] = (acc[p.status] ?? 0) + 1;
@@ -47,7 +61,7 @@ const BlogManagePage: React.FC = () => {
   const approve = async (postId: number) => {
     setError("");
     setActionLoading(postId);
-    try { await blogService.adminSetStatus(postId, "published"); refresh(); }
+    try { await blogService.adminSetStatus(postId, "published"); refresh(page); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : "Lỗi."); }
     finally { setActionLoading(null); }
   };
@@ -60,7 +74,7 @@ const BlogManagePage: React.FC = () => {
       await blogService.adminSetStatus(rejectTarget, "rejected", rejectReason || undefined);
       setRejectTarget(null);
       setRejectReason("");
-      refresh();
+      refresh(page);
     } catch (e: unknown) { setError(e instanceof Error ? e.message : "Lỗi."); }
     finally { setActionLoading(null); }
   };
@@ -68,7 +82,7 @@ const BlogManagePage: React.FC = () => {
   const del = async (postId: number) => {
     if (!window.confirm("Xoá bài viết này?")) return;
     setActionLoading(postId);
-    try { await blogService.adminDeletePost(postId); refresh(); }
+    try { await blogService.adminDeletePost(postId); refresh(page); }
     catch (e: unknown) { setError(e instanceof Error ? e.message : "Lỗi."); }
     finally { setActionLoading(null); }
   };
@@ -95,7 +109,7 @@ const BlogManagePage: React.FC = () => {
         {[
           { label: "Chờ duyệt", count: counts.pending ?? 0, color: "#b45309", bg: "#fef3c7" },
           { label: "Đã đăng",   count: counts.published ?? 0, color: "#166534", bg: "#dcfce7" },
-          { label: "Tổng bài",  count: posts.length, color: "var(--green)", bg: "var(--green-light)" },
+          { label: "Tổng bài",  count: total, color: "var(--green)", bg: "var(--green-light)" },
         ].map(s => (
           <div key={s.label} className="panel" style={{ textAlign: "center", background: s.bg, border: `1px solid ${s.color}22` }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.count}</div>
@@ -206,6 +220,13 @@ const BlogManagePage: React.FC = () => {
             })}
           </tbody>
         </table>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, flexWrap: "wrap", gap: 12 }}>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+          Hiển thị {visible.length} / {posts.length} bài viết (Tổng số: {total})
+        </p>
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
   );

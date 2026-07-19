@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { bookingService } from "../../../services/booking.service";
 import { formatCurrency } from "../../../utils/formatters";
 import { Booking } from "../../../types/booking.type";
+import { Pagination } from "../../../components/common/Pagination";
 
 type Status = Booking["status"] | "all";
 
@@ -82,16 +83,31 @@ const BookingManagePage: React.FC = () => {
   const [loading,  setLoading]  = useState(true);
   const [filter,   setFilter]   = useState<Status>("all");
   const [error,    setError]    = useState("");
+  const [page,     setPage]     = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total,    setTotal]    = useState(0);
 
-  const refresh = useCallback(() => {
+  const refresh = useCallback((p: number) => {
     setLoading(true);
-    bookingService.getAllBookings()
-      .then(setBookings)
+    bookingService.getAllBookings(p, 10)
+      .then(res => {
+        if (res && "data" in res) {
+          setBookings(res.data);
+          setTotalPages(res.pagination.total_pages);
+          setTotal(res.pagination.total);
+        } else {
+          setBookings(res ?? []);
+          setTotalPages(1);
+          setTotal((res ?? []).length);
+        }
+      })
       .catch(() => setError("Không tải được danh sách đơn."))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => {
+    refresh(page);
+  }, [refresh, page]);
 
   const counts = bookings.reduce<Record<string, number>>((acc, b) => {
     let key = b.status;
@@ -126,7 +142,7 @@ const BookingManagePage: React.FC = () => {
         {[
           { label: "Đã xác nhận", count: counts.confirmed ?? 0, color: "#1d4ed8", bg: "#dbeafe" },
           { label: "Đang thuê",   count: counts.active    ?? 0, color: "#006C4C", bg: "#dcfce7" },
-          { label: "Tổng đơn",    count: bookings.length,       color: "#374151", bg: "#f3f4f6" },
+          { label: "Tổng đơn",    count: total,                 color: "#374151", bg: "#f3f4f6" },
         ].map(s => (
           <div key={s.label} className="panel" style={{ textAlign: "center", background: s.bg, border: `1px solid ${s.color}22` }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.count}</div>
@@ -161,7 +177,15 @@ const BookingManagePage: React.FC = () => {
           Không có đơn nào.
         </div>
       ) : (
-        visible.map(b => <BookingNotification key={b.booking_id} b={b} />)
+        <>
+          {visible.map(b => <BookingNotification key={b.booking_id} b={b} />)}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, flexWrap: "wrap", gap: 12 }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+              Hiển thị {visible.length} / {bookings.length} đơn (Tổng số: {total})
+            </p>
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        </>
       )}
     </div>
   );

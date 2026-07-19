@@ -121,7 +121,7 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     bookingService.getAllBookings()
-      .then(setBookings)
+      .then(res => setBookings(res as Booking[]))
       .finally(() => setLoading(false));
   }, []);
 

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { apiClient } from "../../../services/api";
+import { Pagination } from "../../../components/common/Pagination";
+import { PaginatedResponse } from "../../../types/pagination.type";
 
 interface OwnerRegistration {
   id: number;
@@ -39,19 +41,32 @@ const AdminOwnerRegistrations: React.FC = () => {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(page);
+  }, [page]);
 
-  const loadData = async () => {
+  const loadData = async (p: number) => {
     setLoading(true);
     try {
-      const data = await apiClient<OwnerRegistration[]>("/admin/owner-registrations");
-      setItems(data || []);
+      const res = await apiClient<PaginatedResponse<OwnerRegistration[]>>(`/admin/owner-registrations?page=${p}&limit=10`);
+      if (res && "data" in res) {
+        setItems(res.data || []);
+        setTotalPages(res.pagination.total_pages || 1);
+        setTotal(res.pagination.total || 0);
+      } else {
+        setItems((res as any) || []);
+        setTotalPages(1);
+        setTotal(((res as any) || []).length);
+      }
     } catch {
       // Use mock data
       setItems(MOCK_DATA);
+      setTotalPages(1);
+      setTotal(MOCK_DATA.length);
     } finally {
       setLoading(false);
     }
@@ -90,7 +105,7 @@ const AdminOwnerRegistrations: React.FC = () => {
 
   const safeItems = items || [];
   const filtered = filter === "all" ? safeItems : safeItems.filter(i => i.status === filter);
-  const counts = { all: safeItems.length, pending: safeItems.filter(i => i.status === "pending").length, reviewing: safeItems.filter(i => i.status === "reviewing").length, approved: safeItems.filter(i => i.status === "approved").length, rejected: safeItems.filter(i => i.status === "rejected").length };
+  const counts = { all: total, pending: safeItems.filter(i => i.status === "pending").length, reviewing: safeItems.filter(i => i.status === "reviewing").length, approved: safeItems.filter(i => i.status === "approved").length, rejected: safeItems.filter(i => i.status === "rejected").length };
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: selected ? "380px 1fr" : "1fr", gap: 24, minHeight: "calc(100vh - 120px)" }}>
@@ -117,27 +132,32 @@ const AdminOwnerRegistrations: React.FC = () => {
         ) : filtered.length === 0 ? (
           <div style={{ padding: 40, textAlign: "center", color: "#6E7A72" }}>Không có đơn nào.</div>
         ) : (
-          <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 260px)" }}>
-            {filtered.map(item => {
-              const s = STATUS_MAP[item.status];
-              const isSelected = selected?.id === item.id;
-              return (
-                <div key={item.id} onClick={() => setSelected(item)} style={{
-                  padding: "16px 20px", cursor: "pointer", borderBottom: "1px solid #F3F4F6",
-                  background: isSelected ? "#F0FAF5" : "transparent", transition: "background 0.15s",
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15, color: "#191C1E" }}>{item.brand} {item.model} {item.year}</div>
-                      <div style={{ fontSize: 13, color: "#6E7A72" }}>{item.license_plate} · {item.owner_name}</div>
+          <>
+            <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 325px)" }}>
+              {filtered.map(item => {
+                const s = STATUS_MAP[item.status];
+                const isSelected = selected?.id === item.id;
+                return (
+                  <div key={item.id} onClick={() => setSelected(item)} style={{
+                    padding: "16px 20px", cursor: "pointer", borderBottom: "1px solid #F3F4F6",
+                    background: isSelected ? "#F0FAF5" : "transparent", transition: "background 0.15s",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: "#191C1E" }}>{item.brand} {item.model} {item.year}</div>
+                        <div style={{ fontSize: 13, color: "#6E7A72" }}>{item.license_plate} · {item.owner_name}</div>
+                      </div>
+                      <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: s.bg, color: s.color, flexShrink: 0 }}>{s.label}</span>
                     </div>
-                    <span style={{ padding: "3px 10px", borderRadius: 999, fontSize: 11, fontWeight: 700, background: s.bg, color: s.color, flexShrink: 0 }}>{s.label}</span>
+                    <div style={{ fontSize: 12, color: "#BDCAC1" }}>{new Date(item.created_at).toLocaleDateString("vi-VN")}</div>
                   </div>
-                  <div style={{ fontSize: 12, color: "#BDCAC1" }}>{new Date(item.created_at).toLocaleDateString("vi-VN")}</div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+            <div style={{ padding: "12px 20px", borderTop: "1px solid #F3F4F6", background: "#FAFDFB" }}>
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+            </div>
+          </>
         )}
       </div>
 

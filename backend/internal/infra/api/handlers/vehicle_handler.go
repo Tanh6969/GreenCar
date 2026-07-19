@@ -92,57 +92,25 @@ func ListVehiclesHandler(vehicleSvc *service.VehicleService, log *logger.Logger)
 	return func(w http.ResponseWriter, r *http.Request) {
 		page, limit, offset := response.ParsePagination(r, 20)
 
-		q := r.URL.Query()
-		// Optional availability filter (find free vehicles).
-		var start, end *time.Time
-		var locationID, modelID *int
-		if s := q.Get("start"); s != "" || q.Get("end") != "" {
-			if s == "" || q.Get("end") == "" {
-				response.WriteError(w, http.StatusBadRequest, "both start and end are required for availability search")
-				return
-			}
-			parsedStart, err := time.Parse(time.RFC3339, s)
-			if err != nil {
-				response.WriteError(w, http.StatusBadRequest, "invalid start time format")
-				return
-			}
-			parsedEnd, err := time.Parse(time.RFC3339, q.Get("end"))
-			if err != nil {
-				response.WriteError(w, http.StatusBadRequest, "invalid end time format")
-				return
-			}
-			start = &parsedStart
-			end = &parsedEnd
-		}
-
-		if loc := q.Get("location_id"); loc != "" {
-			if v, err := strconv.Atoi(loc); err == nil {
-				locationID = &v
-			}
-		}
-		if mid := q.Get("model_id"); mid != "" {
-			if v, err := strconv.Atoi(mid); err == nil {
-				modelID = &v
-			}
-		}
-
-		var vehicles []*entities.Vehicle
-		var total int
-		var err error
-		if start != nil && end != nil {
-			vehicles, err = vehicleSvc.ListAvailableVehicles(start, end, locationID, modelID, limit, offset)
-			total = len(vehicles)
-		} else {
-			vehicles, total, err = vehicleSvc.ListVehicles(limit, offset)
-		}
-		vehicleResponses := mappers.ToVehicleResponses(vehicles)
-
+		cards, err := vehicleSvc.ListVehicleCards(limit, offset)
 		if err != nil {
-			log.Warn("list vehicles: %v", err)
+			log.Warn("list vehicle cards: %v", err)
 			response.WriteError(w, http.StatusInternalServerError, "failed to list vehicles")
 			return
 		}
-		response.WritePaginatedJSON(w, http.StatusOK, vehicleResponses, page, limit, total)
+
+		_, total, err := vehicleSvc.ListVehicles(1, 0)
+		if err != nil {
+			log.Warn("get total vehicles count: %v", err)
+			response.WriteError(w, http.StatusInternalServerError, "failed to list vehicles")
+			return
+		}
+
+		out := make([]*dto.VehicleCardResponse, 0, len(cards))
+		for _, c := range cards {
+			out = append(out, mappers.ToVehicleCardResponse(c))
+		}
+		response.WritePaginatedJSON(w, http.StatusOK, out, page, limit, total)
 	}
 }
 

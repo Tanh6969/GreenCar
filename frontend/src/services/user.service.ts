@@ -1,5 +1,6 @@
 import { apiClient } from "./api";
 import { User } from "../types/user.type";
+import { PaginatedResponse } from "../types/pagination.type";
 
 interface ApiUser {
   id: number;
@@ -32,9 +33,12 @@ function toUser(u: ApiUser): User {
 }
 
 export const userService = {
-  async getAll(): Promise<User[]> {
-    const data = await apiClient<ApiUser[]>("/admin/users");
-    return (data ?? []).map(toUser);
+  async getAll(page = 1, limit = 20): Promise<PaginatedResponse<User[]>> {
+    const res = await apiClient<PaginatedResponse<ApiUser[]>>(`/admin/users?page=${page}&limit=${limit}`);
+    return {
+      data: (res?.data ?? []).map(toUser),
+      pagination: res?.pagination || { page, limit, total: 0, total_pages: 0 }
+    };
   },
 
   async getMe(): Promise<User> {

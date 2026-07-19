@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { roles } from "../../../data/mockData";
 import { User } from "../../../types/user.type";
 import { userService } from "../../../services/user.service";
+import { Pagination } from "../../../components/common/Pagination";
 
 const ROLE_MAP: Record<number, { label: string; color: string; bg: string }> = {
   1: { label: "Admin",    color: "#7c3aed", bg: "#ede9fe" },
@@ -26,18 +27,25 @@ const UserManagePage: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectInput, setShowRejectInput] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const fetchUsers = useCallback(() => {
+  const fetchUsers = useCallback((p: number) => {
     setLoading(true);
-    userService.getAll()
-      .then(setUsers)
+    userService.getAll(p, 10)
+      .then(res => {
+        setUsers(res.data);
+        setTotalPages(res.pagination.total_pages);
+        setTotal(res.pagination.total);
+      })
       .catch(err => setError(err.message || "Lỗi tải danh sách người dùng"))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchUsers(page);
+  }, [fetchUsers, page]);
 
   const visible = users.filter(u => {
     const matchSearch = search === "" || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
@@ -62,7 +70,7 @@ const UserManagePage: React.FC = () => {
       setSelected(updated);
       setRejectReason("");
       setShowRejectInput(false);
-      fetchUsers();
+      fetchUsers(page);
     } catch (err: any) {
       setError(err.message || "Lỗi cập nhật trạng thái");
     } finally {
@@ -88,7 +96,7 @@ const UserManagePage: React.FC = () => {
       {/* Stats */}
       <div className="cards-3" style={{ marginBottom: 24 }}>
         {[
-          { label: "Tổng người dùng", count: users.length, color: "var(--green)", bg: "var(--green-light)" },
+          { label: "Tổng người dùng", count: total, color: "var(--green)", bg: "var(--green-light)" },
           { label: "Khách hàng",      count: roleCounts[2] ?? 0, color: "#166534", bg: "#dcfce7" },
           { label: "Chủ xe",         count: roleCounts[3] ?? 0, color: "#b45309", bg: "#fef3c7" },
         ].map(s => (
@@ -188,9 +196,12 @@ const UserManagePage: React.FC = () => {
         </table>
       </div>
 
-      <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 12 }}>
-        Hiển thị {visible.length} / {users.length} người dùng
-      </p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, flexWrap: "wrap", gap: 12 }}>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+          Hiển thị {visible.length} / {users.length} người dùng (Tổng số: {total})
+        </p>
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
 
       {/* Detail modal */}
       {selected && (

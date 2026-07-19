@@ -1,5 +1,6 @@
 import { apiClient } from "./api";
 import { VehicleCardData } from "../types/vehicle.type";
+import { PaginatedResponse } from "../types/pagination.type";
 
 // ── shapes returned by the backend ───────────────────────────
 
@@ -91,6 +92,14 @@ export const vehicleService = {
   async getVehicleCards(): Promise<VehicleCardData[]> {
     const data = await apiClient<VehicleCardApiResponse[]>("/vehicles/cards");
     return (data ?? []).map(mapCard);
+  },
+
+  async adminGetVehicles(page = 1, limit = 20): Promise<PaginatedResponse<VehicleCardData[]>> {
+    const res = await apiClient<PaginatedResponse<VehicleCardApiResponse[]>>(`/admin/vehicles?page=${page}&limit=${limit}`);
+    return {
+      data: (res?.data ?? []).map(mapCard),
+      pagination: res?.pagination || { page, limit, total: 0, total_pages: 0 }
+    };
   },
 
   async getVehicleDetail(vehicleId: number) {

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { vehicleService } from "../../../services/vehicle.service";
 import { VehicleCardData } from "../../../types/vehicle.type";
+import { Pagination } from "../../../components/common/Pagination";
 
 // ── icons ─────────────────────────────────────────────────────
 const IcPlus = () => (
@@ -59,6 +60,8 @@ const inputStyle: React.CSSProperties = {
 // ── page ──────────────────────────────────────────────────────
 const VehicleManagePage: React.FC = () => {
   const [cards,    setCards]    = useState<VehicleCardData[]>([]);
+  const [models,   setModels]   = useState<any[]>([]);
+  const [locations,setLocations]= useState<any[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState("");
   const [open,     setOpen]     = useState(false);
@@ -68,25 +71,40 @@ const VehicleManagePage: React.FC = () => {
   const [deleting, setDeleting] = useState<number | null>(null);
   const [formErr,  setFormErr]  = useState("");
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [page,     setPage]     = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total,    setTotal]    = useState(0);
 
-  const refresh = useCallback(() => {
+  // Load static models/locations once
+  useEffect(() => {
+    vehicleService.getVehicleCards().then(allCards => {
+      const uniqueModels = Array.from(
+        new Map(allCards.map(c => [c.model.vehicle_model_id, c.model])).values()
+      ).sort((a, b) => a.vehicle_model_id - b.vehicle_model_id);
+      setModels(uniqueModels);
+
+      const uniqueLocations = Array.from(
+        new Map(allCards.map(c => [c.location.location_id, c.location])).values()
+      ).sort((a, b) => a.location_id - b.location_id);
+      setLocations(uniqueLocations);
+    }).catch(console.error);
+  }, []);
+
+  const refresh = useCallback((p: number) => {
     setLoading(true);
-    vehicleService.getVehicleCards()
-      .then(setCards)
+    vehicleService.adminGetVehicles(p, 10)
+      .then(res => {
+        setCards(res.data);
+        setTotalPages(res.pagination.total_pages);
+        setTotal(res.pagination.total);
+      })
       .catch(() => setError("Không tải được danh sách xe."))
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { refresh(); }, [refresh]);
-
-  // extract unique models & locations for dropdowns
-  const models = Array.from(
-    new Map(cards.map(c => [c.model.vehicle_model_id, c.model])).values()
-  ).sort((a, b) => a.vehicle_model_id - b.vehicle_model_id);
-
-  const locations = Array.from(
-    new Map(cards.map(c => [c.location.location_id, c.location])).values()
-  ).sort((a, b) => a.location_id - b.location_id);
+  useEffect(() => {
+    refresh(page);
+  }, [refresh, page]);
 
   const openAdd = () => {
     setEditId(null);
@@ -124,7 +142,7 @@ const VehicleManagePage: React.FC = () => {
         await vehicleService.adminCreateVehicle(form);
       }
       closeModal();
-      refresh();
+      refresh(page);
     } catch (e: unknown) {
       setFormErr(e instanceof Error ? e.message : "Lỗi lưu dữ liệu.");
     } finally {
@@ -137,7 +155,7 @@ const VehicleManagePage: React.FC = () => {
     setDeleting(id);
     try {
       await vehicleService.adminDeleteVehicle(id);
-      refresh();
+      refresh(page);
     } catch {
       setError("Không thể xoá xe này.");
     } finally {
@@ -239,6 +257,13 @@ const VehicleManagePage: React.FC = () => {
           </table>
         </div>
       )}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, flexWrap: "wrap", gap: 12 }}>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+          Hiển thị {cards.length} xe (Tổng số: {total})
+        </p>
+        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+      </div>
 
       {/* ── Modal ──────────────────────────────────────────────── */}
       {open && (

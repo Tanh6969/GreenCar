@@ -1,5 +1,6 @@
 import { apiClient } from "./api";
 import { BlogPost, BlogCategory, BlogStatus } from "../types/blog.type";
+import { PaginatedResponse } from "../types/pagination.type";
 
 // ── shapes returned by the backend ───────────────────────────
 
@@ -117,9 +118,12 @@ export const blogService = {
 
   // ── Admin ─────────────────────────────────────────────────────────────────
 
-  async adminGetAll(): Promise<BlogPost[]> {
-    const data = await apiClient<ApiPost[]>("/admin/posts");
-    return (data ?? []).map(toPost);
+  async adminGetAll(page = 1, limit = 20): Promise<PaginatedResponse<BlogPost[]>> {
+    const res = await apiClient<PaginatedResponse<ApiPost[]>>(`/admin/posts?page=${page}&limit=${limit}`);
+    return {
+      data: (res?.data ?? []).map(toPost),
+      pagination: res?.pagination || { page, limit, total: 0, total_pages: 0 }
+    };
   },
 
   async adminSetStatus(

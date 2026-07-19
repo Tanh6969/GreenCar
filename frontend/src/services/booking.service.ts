@@ -1,5 +1,6 @@
 import { apiClient } from "./api";
 import { Booking } from "../types/booking.type";
+import { PaginatedResponse } from "../types/pagination.type";
 
 interface ApiBooking {
   id: number; user_id: number; vehicle_id: number; rental_plan_id: number;
@@ -58,9 +59,17 @@ export const bookingService = {
     return (data ?? []).map(toBooking);
   },
 
-  async getAllBookings(): Promise<Booking[]> {
-    const data = await apiClient<ApiBooking[]>("/admin/bookings");
-    return (data ?? []).map(toBooking);
+  async getAllBookings(page?: number, limit?: number): Promise<Booking[] | PaginatedResponse<Booking[]>> {
+    if (page !== undefined) {
+      const res = await apiClient<PaginatedResponse<ApiBooking[]>>(`/admin/bookings?page=${page}&limit=${limit ?? 20}`);
+      return {
+        data: (res?.data ?? []).map(toBooking),
+        pagination: res?.pagination || { page, limit: limit ?? 20, total: 0, total_pages: 0 }
+      } as PaginatedResponse<Booking[]>;
+    } else {
+      const res = await apiClient<PaginatedResponse<ApiBooking[]>>(`/admin/bookings?page=1&limit=10000`);
+      return (res?.data ?? []).map(toBooking);
+    }
   },
 
   async createBooking(payload: Omit<Booking, "booking_id" | "created_at">): Promise<Booking> {
