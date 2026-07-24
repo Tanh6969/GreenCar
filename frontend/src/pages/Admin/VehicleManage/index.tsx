@@ -74,6 +74,19 @@ const VehicleManagePage: React.FC = () => {
   const [page,     setPage]     = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total,    setTotal]    = useState(0);
+  const [search,   setSearch]   = useState("");
+
+  const visible = cards.filter(c => {
+    const s = search.toLowerCase().trim();
+    if (!s) return true;
+    return (
+      c.model.brand.toLowerCase().includes(s) ||
+      c.model.name.toLowerCase().includes(s) ||
+      c.vehicle.license_plate.toLowerCase().includes(s) ||
+      c.location.name.toLowerCase().includes(s) ||
+      c.location.city.toLowerCase().includes(s)
+    );
+  });
 
   // Load static models/locations once
   useEffect(() => {
@@ -180,6 +193,15 @@ const VehicleManagePage: React.FC = () => {
         </button>
       </div>
 
+      {/* Toolbar / Search */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Tìm kiếm theo dòng xe, biển số hoặc địa điểm..."
+          style={{ flex: 1, minWidth: 200, height: 40, border: "1px solid var(--border)", borderRadius: 8, padding: "0 14px", fontSize: 14, outline: "none" }}
+        />
+      </div>
+
       {error && (
         <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#dc2626", marginBottom: 16 }}>
           {error}
@@ -206,9 +228,9 @@ const VehicleManagePage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {cards.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: "center", padding: 32, color: "var(--text-muted)" }}>Chưa có xe nào.</td></tr>
-              ) : cards.map(c => {
+              {visible.length === 0 ? (
+                <tr><td colSpan={7} style={{ textAlign: "center", padding: 32, color: "var(--text-muted)" }}>Không tìm thấy xe phù hợp.</td></tr>
+              ) : visible.map(c => {
                 const st = STATUS[c.vehicle.status] ?? STATUS.available;
                 const busy = deleting === c.vehicle.vehicle_id;
                 return (
@@ -260,7 +282,7 @@ const VehicleManagePage: React.FC = () => {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, flexWrap: "wrap", gap: 12 }}>
         <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-          Hiển thị {cards.length} xe (Tổng số: {total})
+          Hiển thị {visible.length} / {cards.length} xe (Tổng số: {total})
         </p>
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
       </div>

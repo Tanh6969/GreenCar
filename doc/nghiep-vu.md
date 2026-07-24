@@ -210,37 +210,21 @@ Trang chi tiết hiển thị:
 
 ---
 
-### 3.6 Nhận xe & Trả xe
+### 3.6 Nhận xe & Sử dụng xe (2.4)
 
-**Quy trình nhận xe:**
-1. Khách mang theo CCCD hoặc hộ chiếu và GPLX gốc
-2. Nhân viên GreenCar xác nhận danh tính khớp với tài khoản
-3. Kiểm tra xe cùng nhau: ngoại thất, mức pin, số km hiện tại, các vết xước có sẵn (chụp ảnh)
-4. Ký biên bản giao nhận xe (bản điện tử qua app)
-5. Hệ thống cập nhật `actual_start_time`, booking chuyển sang `status = 'active'`
+Sau khi đơn thuê xe được xác nhận, khách hàng bước vào giai đoạn thực hiện chuyến đi. Trước khi nhận xe, khách hàng cần mang theo CCCD hoặc hộ chiếu và bằng lái xe bản gốc để đối chiếu với thông tin đã đăng ký trong hệ thống. Khi đến điểm nhận xe, nhân viên GreenCar hoặc đại diện vận hành sẽ kiểm tra thông tin khách hàng, xác nhận khớp với booking và tài khoản, sau đó cùng khách hàng tiến hành kiểm tra tình trạng xe. Quá trình này bao gồm việc xem xét ngoại thất, mức pin hiện tại, số km đã đi, tình trạng nội thất và các vết xước có sẵn trên xe. Để đảm bảo tính minh bạch, các thông tin này sẽ được ghi nhận bằng ảnh hoặc video làm bằng chứng trước khi giao xe. Sau khi cả hai bên thống nhất, biên bản giao nhận xe sẽ được ký kết và hệ thống sẽ ghi nhận thời điểm bắt đầu thực tế của chuyến đi, đồng thời chuyển booking sang trạng thái đang hoạt động.
 
-**Quy trình trả xe:**
-1. Khách trả xe tại địa điểm đã thỏa thuận
-2. Nhân viên kiểm tra: số km thực tế, tình trạng xe, mức pin còn lại
-3. Hệ thống tính phí phát sinh:
-   - `overtime_fee` nếu trả muộn (tính theo phút, làm tròn lên 30 phút)
-   - `over_km_fee` nếu vượt km (= km vượt × over_km_price)
-4. Khách thanh toán phần còn lại = `total_price − deposit_amount`
-5. Hệ thống cập nhật `actual_end_time`, `actual_km`, booking → `status = 'completed'`
+Trong suốt thời gian sử dụng xe, khách hàng cần tuân thủ đúng các điều khoản thuê xe đã thỏa thuận, bao gồm thời gian sử dụng, phạm vi di chuyển, giới hạn số km và các quy định liên quan đến việc vận hành xe. Nếu có thay đổi về thời gian trả xe hoặc địa điểm trả xe, khách hàng phải báo trước để GreenCar có thể phối hợp điều chỉnh kịp thời. Trong trường hợp phát sinh như hư hỏng nhẹ, tai nạn nhỏ, hết pin trước hạn hoặc mất mát, khách hàng cần thông báo ngay cho hệ thống để được ghi nhận và xử lý phù hợp. Khi đến thời điểm kết thúc chuyến, khách hàng sẽ trả xe đúng thời điểm và địa điểm đã thỏa thuận. Tại thời điểm này, nhân viên GreenCar sẽ kiểm tra lại số km thực tế, mức pin còn lại, tình trạng xe và các dấu hiệu mới xuất hiện trong suốt quá trình thuê. Nếu khách hàng trả xe muộn hoặc vượt quá giới hạn của gói thuê, hệ thống sẽ tự động tính các khoản phí phát sinh như phí trả muộn, phí vượt km hoặc các chi phí phát sinh khác. Những thông tin này sẽ được ghi nhận làm cơ sở để hoàn tất thanh toán cuối chuyến.
 
-**Quy tắc nghiệp vụ:**
-- Mức pin khi trả phải ≥ **20%**. Nếu < 20% → phí phạt pin thấp = 100.000đ.
-- Nếu xe bị hư hỏng → khách chịu chi phí sửa chữa, trừ vào tiền cọc bổ sung.
+Về mặt nghiệp vụ, mức pin khi trả xe phải đạt tối thiểu 20% trở lên. Nếu mức pin thấp hơn ngưỡng này, khách hàng sẽ bị áp dụng phí phạt pin thấp. Nếu xe bị hư hỏng hoặc mất mát trong thời gian thuê, khách hàng sẽ chịu trách nhiệm chi phí sửa chữa hoặc bồi thường tương ứng. Ngược lại, nếu xe được trả đúng hạn và trong tình trạng nguyên vẹn, phần cọc sẽ được xử lý theo đúng quy định đã thống nhất trước đó.
 
 ---
 
-### 3.7 Đánh giá xe
+### 3.7 Hoàn tất & Đánh giá (2.5)
 
-- Khách chỉ được đánh giá sau khi booking chuyển sang `completed`.
-- Mỗi booking chỉ được **1 lượt đánh giá** (unique constraint trên `booking_id`).
-- Đánh giá gồm: rating sao (1–5) + bình luận văn bản (tối thiểu 20 ký tự).
-- Đánh giá hiển thị công khai trên trang chi tiết xe.
-- Admin có thể ẩn đánh giá vi phạm chính sách.
+Sau khi quá trình kiểm tra xe và tính toán các khoản phát sinh kết thúc, hệ thống sẽ tổng hợp toàn bộ chi phí cuối chuyến để khách hàng thực hiện bước thanh toán phần còn lại. Khách hàng sẽ thanh toán các khoản phí phát sinh nếu có, bao gồm phí trả muộn, phí vượt km, phí phạt pin hoặc các chi phí hư hỏng phát sinh trong thời gian sử dụng. Nếu xe được trả đúng hạn và không có phát sinh, phần cọc sẽ được giải phóng hoặc điều chỉnh theo chính sách của GreenCar. Trong trường hợp có hư hỏng, vi phạm quy định hoặc trả xe muộn, số tiền tương ứng sẽ được khấu trừ khỏi tiền cọc hoặc cộng vào hóa đơn cuối chuyến. Khi toàn bộ quá trình thanh toán hoàn tất, booking sẽ được cập nhật sang trạng thái hoàn thành, đồng thời hệ thống sẽ lưu lại toàn bộ dữ liệu chuyến đi để phục vụ cho việc theo dõi và quản lý sau này.
+
+Sau khi chuyến đi kết thúc, khách hàng có thể thực hiện đánh giá về trải nghiệm thuê xe. Khách chỉ được đánh giá sau khi booking chuyển sang trạng thái completed. Mỗi booking chỉ được phép gửi một lượt đánh giá duy nhất, nhằm đảm bảo tính trung thực và tránh việc lặp lại ý kiến. Nội dung đánh giá gồm điểm số từ 1 đến 5 cùng với bình luận văn bản có độ dài tối thiểu 20 ký tự. Những đánh giá này sẽ được hiển thị công khai trên trang chi tiết xe để giúp khách hàng khác có thêm căn cứ khi lựa chọn. Nếu đánh giá vi phạm chính sách hoặc chứa nội dung không phù hợp, quản trị viên có thể ẩn đánh giá đó khỏi hệ thống.
 
 ---
 
@@ -420,25 +404,54 @@ Admin có thể:
 
 > Chủ xe ký gửi là cá nhân hoặc doanh nghiệp sở hữu xe điện muốn cho GreenCar vận hành và cho thuê thay, thu tiền theo doanh thu.
 
-### 5.1 Đăng ký làm chủ xe ký gửi
+### 5.1 Đăng ký xe cho chủ xe ký gửi
 
-**Điều kiện:**
-- Đã có tài khoản GreenCar (đã xác minh GPLX)
-- Xe điện phải ≤ **5 năm** tuổi
-- Còn đăng kiểm ít nhất **1 năm**
-- Có bảo hiểm xe còn hiệu lực
+Khi chủ xe muốn đưa xe vào hệ thống GreenCar để cho thuê, chủ xe sẽ bắt đầu bằng bước đăng ký xe trên portal dành riêng cho chủ xe. Đây là bước đầu tiên để hệ thống xác nhận xe có đủ điều kiện, hồ sơ đầy đủ và phù hợp với mô hình cho thuê của GreenCar trước khi xe được đưa lên danh sách cho khách thuê.
 
-**Quy trình đăng ký:**
+**Điều kiện đăng ký:**
+- Chủ xe đã có tài khoản GreenCar và tài khoản này đã được xác minh GPLX.
+- Xe điện phải có tuổi đời tối đa **5 năm** tính từ năm sản xuất.
+- Xe còn hiệu lực đăng kiểm tối thiểu **1 năm** kể từ ngày đăng ký.
+- Xe có bảo hiểm còn hiệu lực và phù hợp với quy định thuê xe.
+- Chủ xe đồng ý với các quy định về giá thuê, điều khoản bồi thường và quyền quản lý xe của GreenCar.
 
-```
-Chủ xe gửi yêu cầu ký gửi
-  → Điền thông tin xe (biển số, model, năm SX, km đã đi)
-  → Upload: ảnh xe 360°, đăng ký xe, bảo hiểm, đăng kiểm
-  → GreenCar kiểm định xe thực tế tại địa điểm chủ xe (trong 5 ngày làm việc)
-  → Kiểm định viên ghi nhận: tình trạng ngoại thất, nội thất, pin, phần mềm
-  → Admin duyệt hồ sơ và ký hợp đồng điện tử
-  → Xe được thêm vào hệ thống với status = 'available'
-```
+**Thông tin cần cung cấp khi đăng ký:**
+- Thông tin chủ xe: họ tên, số điện thoại, địa chỉ liên hệ và tài khoản GreenCar.
+- Thông tin xe: hãng xe, model, năm sản xuất, biển số, màu sắc và số km hiện tại.
+- Hồ sơ pháp lý: giấy đăng ký xe, giấy đăng kiểm và bản sao bảo hiểm xe.
+- Hồ sơ kỹ thuật: ảnh xe 360°, ảnh nội thất, ảnh pin, ảnh biển số và các giấy tờ liên quan khác.
+- Thông tin cho thuê: địa điểm nhận/trả xe, thời gian xe sẵn sàng, mức giá đề xuất và điều kiện sử dụng.
+
+**Quy trình đăng ký xe:**
+1. Chủ xe đăng nhập vào portal chủ xe và chọn chức năng “Đăng ký xe cho thuê”.
+2. Hệ thống yêu cầu chủ xe nhập đầy đủ thông tin cơ bản về xe, bao gồm biển số, model, năm sản xuất, số km hiện tại, địa điểm xe đang lưu trữ và các thông tin liên hệ.
+3. Chủ xe tải lên hồ sơ cần thiết như ảnh xe toàn cảnh, ảnh nội thất, ảnh biển số, giấy đăng ký xe, giấy đăng kiểm và bản sao bảo hiểm.
+4. Hệ thống sẽ kiểm tra tính đầy đủ của hồ sơ. Nếu hồ sơ chưa đủ, hệ thống sẽ lưu ở trạng thái nháp và yêu cầu chủ xe bổ sung trước khi gửi.
+5. Khi hồ sơ đã đầy đủ, chủ xe bấm gửi yêu cầu đăng ký. Hệ thống sẽ chuyển hồ sơ sang trạng thái “đang xét duyệt”.
+6. GreenCar sẽ phân công kiểm định viên hoặc nhân viên vận hành tiếp nhận hồ sơ và tiến hành kiểm định thực tế tại địa điểm xe đang đặt.
+7. Trong buổi kiểm định, đơn vị kiểm định sẽ ghi nhận tình trạng ngoại thất, nội thất, mức pin hiện tại, tình trạng pin, phần mềm vận hành và các hạng mục liên quan khác.
+8. Sau khi kiểm định xong, hồ sơ sẽ được chuyển cho admin xem xét và phê duyệt. Nếu đạt yêu cầu, hệ thống sẽ ký hợp đồng điện tử và kích hoạt xe để đưa vào danh sách cho thuê.
+9. Nếu hồ sơ không đạt yêu cầu, hệ thống sẽ gửi thông báo cho chủ xe, kèm lý do từ chối và hướng dẫn chỉnh sửa hoặc nộp lại hồ sơ.
+
+**Trạng thái hồ sơ đăng ký xe:**
+- `draft`: chủ xe đang nhập hồ sơ nhưng chưa gửi.
+- `submitted`: chủ xe đã gửi hồ sơ và chờ xử lý.
+- `reviewing`: GreenCar đang kiểm tra và kiểm định xe.
+- `approved`: hồ sơ hợp lệ, xe được kích hoạt cho thuê.
+- `rejected`: hồ sơ bị từ chối vì không đủ điều kiện hoặc không đạt tiêu chuẩn.
+- `suspended`: xe đã được kích hoạt nhưng tạm thời bị khóa do vi phạm, hư hỏng hoặc chờ kiểm tra lại.
+
+**Quy tắc nghiệp vụ:**
+- Xe chỉ được hiển thị cho khách thuê sau khi trạng thái hồ sơ chuyển sang `approved`.
+- Nếu chủ xe chỉnh sửa thông tin sau khi hồ sơ đã gửi, trạng thái hồ sơ sẽ quay lại `reviewing` để được kiểm tra lại.
+- Nếu xe bị phát hiện không đúng với hồ sơ đã nộp, GreenCar có quyền tạm ngừng cho thuê cho đến khi giải quyết xong.
+- Hồ sơ đăng ký xe là căn cứ để xác định tính hợp lệ của xe trong toàn bộ vòng đời cho thuê.
+
+**Vai trò liên quan trong quy trình:**
+- Chủ xe: cung cấp thông tin và hồ sơ, phản hồi khi có yêu cầu bổ sung.
+- Admin: duyệt hồ sơ, xác nhận trạng thái và cấp quyền cho xe hoạt động.
+- Kiểm định viên/nhân viên vận hành: kiểm tra xe thực tế và ghi nhận kết quả kiểm định.
+- Hệ thống: lưu trữ hồ sơ, cập nhật trạng thái và điều phối workflow đăng ký xe.
 
 ---
 

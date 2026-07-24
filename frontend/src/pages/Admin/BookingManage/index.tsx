@@ -86,6 +86,7 @@ const BookingManagePage: React.FC = () => {
   const [page,     setPage]     = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total,    setTotal]    = useState(0);
+  const [search,   setSearch]   = useState("");
 
   const refresh = useCallback((p: number) => {
     setLoading(true);
@@ -117,12 +118,22 @@ const BookingManagePage: React.FC = () => {
     return acc;
   }, {});
 
-  const visible = filter === "all"
-    ? bookings
-    : bookings.filter(b => {
-        const status = b.status === "paid" ? "completed" : b.status;
-        return status === filter || (filter === "active" && status === "running");
-      });
+  const visible = bookings.filter(b => {
+    const status = b.status === "paid" ? "completed" : b.status;
+    const matchFilter = filter === "all" || status === filter || (filter === "active" && status === "running");
+    if (!matchFilter) return false;
+
+    const s = search.toLowerCase().trim();
+    if (!s) return true;
+    return (
+      (b.vehicle_brand && b.vehicle_brand.toLowerCase().includes(s)) ||
+      (b.vehicle_name && b.vehicle_name.toLowerCase().includes(s)) ||
+      (b.customer_name && b.customer_name.toLowerCase().includes(s)) ||
+      (b.customer_phone && b.customer_phone.toLowerCase().includes(s)) ||
+      (b.license_plate && b.license_plate.toLowerCase().includes(s)) ||
+      String(b.booking_id).includes(s)
+    );
+  });
 
   if (loading) return (
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: 240 }}>
@@ -156,6 +167,15 @@ const BookingManagePage: React.FC = () => {
           {error}
         </div>
       )}
+
+      {/* Search Bar */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Tìm kiếm theo mã đơn, dòng xe, tên khách hàng hoặc điện thoại..."
+          style={{ flex: 1, minWidth: 200, height: 40, border: "1px solid var(--border)", borderRadius: 8, padding: "0 14px", fontSize: 14, outline: "none" }}
+        />
+      </div>
 
       {/* Filter tabs */}
       <div className="brand-filter" style={{ marginBottom: 20 }}>

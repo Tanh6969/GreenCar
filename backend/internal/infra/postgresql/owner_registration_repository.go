@@ -49,6 +49,9 @@ func NewOwnerRegistrationRepository(db *database.DB) adapters.OwnerRegistrationR
 }
 
 func (r *ownerRegistrationRepository) Create(reg *entities.OwnerRegistration) error {
+	// Xóa các đơn đăng ký cũ bị từ chối hoặc đang chờ duyệt của cùng 1 xe (biển số) để tránh rác dữ liệu
+	_, _ = r.db.Exec(`DELETE FROM owner_registrations WHERE user_id = $1 AND license_plate = $2 AND status != 'approved'`, reg.UserID, reg.LicensePlate)
+
 	imagesJSON, _ := json.Marshal(reg.Images)
 	query := `INSERT INTO owner_registrations 
 		(user_id, brand, model, year, license_plate, color, seats, transmission, fuel_type, city, address, price_per_day, description, images, status, available_from, available_to)

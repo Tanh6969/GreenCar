@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { apiClient } from "../../../services/api";
 
 // ── Step indicator ────────────────────────────────────────────
@@ -291,16 +291,27 @@ const Step3: React.FC<{ carInfo: CarInfo; imageCount: number; agreed: boolean; o
 // ── Main component ────────────────────────────────────────────
 const OwnerRegisterSteps: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill = location.state?.prefill;
+
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const [carInfo, setCarInfo] = useState<CarInfo>({
-    brand: "", model: "", year: "", licensePlate: "", color: "",
-    seats: "", transmission: "", fuelType: "", address: "", city: "",
-    description: "", pricePerDay: "",
+    brand: prefill?.brand || "", model: prefill?.model || "", year: prefill?.year || "", licensePlate: prefill?.license_plate || "", color: prefill?.color || "",
+    seats: prefill?.seats || "", transmission: prefill?.transmission || "", fuelType: prefill?.fuel_type || "", address: prefill?.address || "", city: prefill?.city || "",
+    description: prefill?.description || "", pricePerDay: prefill?.price_per_day || "",
   });
-  const [images, setImages] = useState<Record<string, string>>({});
+  
+  // Convert prefill images array to Record<string, string> if prefill exists
+  const initialImages: Record<string, string> = {};
+  if (prefill?.images) {
+    prefill.images.forEach((img: any) => {
+      if (img.type && img.url) initialImages[img.type] = img.url;
+    });
+  }
+  const [images, setImages] = useState<Record<string, string>>(initialImages);
   const [agreed, setAgreed] = useState(false);
 
   const imageCount = Object.keys(images).length;
@@ -316,13 +327,23 @@ const OwnerRegisterSteps: React.FC = () => {
     setSubmitting(true);
     try {
       await apiClient("/owner/registrations", "POST", {
-        ...carInfo,
+        brand: carInfo.brand,
+        model: carInfo.model,
+        year: carInfo.year,
+        license_plate: carInfo.licensePlate,
+        color: carInfo.color,
+        seats: carInfo.seats,
+        transmission: carInfo.transmission,
+        fuel_type: carInfo.fuelType,
+        city: carInfo.city,
+        address: carInfo.address,
+        price_per_day: Number(carInfo.pricePerDay),
+        description: carInfo.description,
         images: Object.entries(images).map(([type, url]) => ({ type, url })),
       });
       setSubmitted(true);
-    } catch {
-      await new Promise(r => setTimeout(r, 1200));
-      setSubmitted(true);
+    } catch (e: any) {
+      alert("Đã xảy ra lỗi khi gửi đơn đăng ký: " + (e.message || "Vui lòng thử lại sau."));
     } finally {
       setSubmitting(false);
     }

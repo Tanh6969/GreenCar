@@ -148,13 +148,13 @@ const Header: React.FC = () => {
 
               {open && (
                 <div style={{
-                  position: "absolute", right: 0, top: "calc(100% + 8px)", width: 220,
+                  position: "absolute", right: 0, top: "calc(100% + 8px)", width: 240,
                   background: "#fff", border: "1px solid var(--border)", borderRadius: 12,
                   boxShadow: "var(--shadow-lg)", zIndex: 200, overflow: "hidden"
                 }}>
                   <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--border)" }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text)", marginBottom: 2 }}>{user.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{user.email}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text)", marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={user.email}>{user.email}</div>
                   </div>
 
                   {menuItems.map(item => (

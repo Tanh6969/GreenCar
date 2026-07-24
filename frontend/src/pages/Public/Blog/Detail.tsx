@@ -8,6 +8,8 @@ import fb2 from "../../../assets/images/Rivian R1S.png";
 import fb3 from "../../../assets/images/Audi e-tron GT.png";
 import fb4 from "../../../assets/images/Electric SUV.png";
 
+type PostDetail = BlogPost;
+
 const fallbacks = [fb1, fb2, fb3, fb4];
 
 const BlogDetailPage: React.FC = () => {

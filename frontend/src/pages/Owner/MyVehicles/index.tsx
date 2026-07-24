@@ -837,7 +837,7 @@ const MyVehiclesPage: React.FC = () => {
                         <span style={{ fontSize: 13, color: "#B91C1C" }}>
                           <strong>Lý do từ chối:</strong> {item.reject_reason}
                         </span>
-                        <button onClick={() => navigate("/owner/register/steps")} style={{
+                        <button onClick={() => navigate("/owner/register/steps", { state: { prefill: item } })} style={{
                           marginLeft: 12, fontSize: 13, color: "var(--green)", fontWeight: 700,
                           background: "none", border: "none", cursor: "pointer", textDecoration: "underline",
                         }}>
