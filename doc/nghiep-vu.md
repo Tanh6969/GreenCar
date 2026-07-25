@@ -654,5 +654,3 @@ COMPLETED → REFUNDED  (hoàn tiền khi hủy)
 ```
 
 ---
-
-*Tài liệu này được duy trì bởi team GreenCar. Mọi thay đổi nghiệp vụ cần cập nhật tài liệu trước khi triển khai code.*
