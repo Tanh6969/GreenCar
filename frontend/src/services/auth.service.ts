@@ -31,7 +31,7 @@ function toUser(r: UserResponse): User {
   };
 }
 
-type RegisterPayload = Pick<User, "name" | "email" | "phone" | "license_no"> & { password: string };
+type RegisterPayload = Pick<User, "name" | "email" | "phone"> & { password: string };
 
 export const authService = {
   async login(email: string, password: string): Promise<{ token: string; user: User }> {
@@ -48,7 +48,6 @@ export const authService = {
       email: payload.email,
       password: payload.password,
       phone: payload.phone,
-      license_no: payload.license_no,
     });
     sessionStorage.setItem("gc_token", res.access_token);
     const userRes = await apiClient<UserResponse>(`/users/me`);

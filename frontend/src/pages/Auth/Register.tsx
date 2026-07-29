@@ -8,12 +8,11 @@ interface FormState {
   name: string;
   email: string;
   phone: string;
-  license_no: string;
   password: string;
   confirmPassword: string;
 }
 
-const INIT: FormState = { name: "", email: "", phone: "", license_no: "", password: "", confirmPassword: "" };
+const INIT: FormState = { name: "", email: "", phone: "", password: "", confirmPassword: "" };
 
 const RegisterPage: React.FC = () => {
   const [form, setForm] = useState<FormState>(INIT);
@@ -31,7 +30,6 @@ const RegisterPage: React.FC = () => {
     if (!form.name.trim()) return "Vui lòng nhập họ tên.";
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return "Email không hợp lệ.";
     if (!form.phone.trim() || !/^(0|\+84)\d{9}$/.test(form.phone.replace(/\s/g, ""))) return "Số điện thoại không hợp lệ (10 chữ số, bắt đầu 0 hoặc +84).";
-    if (!form.license_no.trim()) return "Vui lòng nhập số GPLX.";
     if (form.password.length < 6) return "Mật khẩu tối thiểu 6 ký tự.";
     if (form.password !== form.confirmPassword) return "Mật khẩu xác nhận không khớp.";
     return "";
@@ -49,7 +47,6 @@ const RegisterPage: React.FC = () => {
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
-        license_no: form.license_no.trim(),
         password: form.password,
       });
       login(result.token, result.user);
@@ -102,16 +99,7 @@ const RegisterPage: React.FC = () => {
               placeholder="0912 345 678" autoComplete="tel" disabled={loading} />
           </div>
 
-          <div className="search-field">
-            <label htmlFor="license_no">
-              Số GPLX <span style={{ color: "#dc2626" }}>*</span>
-              <span style={{ fontWeight: 400, fontSize: 11, color: "var(--text-muted)", marginLeft: 6 }}>
-                (Giấy phép lái xe)
-              </span>
-            </label>
-            <input id="license_no" type="text" value={form.license_no} onChange={set("license_no")}
-              placeholder="012345678910" disabled={loading} />
-          </div>
+
 
           <div className="search-field">
             <label htmlFor="reg-password">Mật khẩu <span style={{ color: "#dc2626" }}>*</span></label>
