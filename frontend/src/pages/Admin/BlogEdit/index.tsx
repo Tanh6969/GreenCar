@@ -61,21 +61,25 @@ const AdminBlogEditPage: React.FC = () => {
     setUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            const simulatedUrl = URL.createObjectURL(file);
-            setCoverImage(simulatedUrl);
-            setUploading(false);
-          }, 300);
-          return 100;
-        }
-        return prev + 25;
-      });
-    }, 150);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const base64 = ev.target?.result as string;
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setCoverImage(base64);
+              setUploading(false);
+            }, 300);
+            return 100;
+          }
+          return prev + 25;
+        });
+      }, 150);
+    };
+    reader.readAsDataURL(file);
   };
 
   const removeCoverImage = () => {
