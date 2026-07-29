@@ -68,6 +68,7 @@ const CarDetailPage: React.FC = () => {
   const { user } = useAuth();
   const [data, setData] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(3);
   const [imgIdx, setImgIdx] = useState(0);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -108,14 +109,18 @@ const CarDetailPage: React.FC = () => {
     if (s) setStartDate(`${s}T09:00`);
   }, [searchParams]);
 
-  const [deliveryFee, setDeliveryFee] = useState(0);
-
   useEffect(() => {
     if (!id) return;
-    vehicleService.getVehicleDetail(Number(id)).then((d) => {
-      setData(d as unknown as DetailData);
-      setLoading(false);
-    });
+    vehicleService.getVehicleDetail(Number(id))
+      .then((d) => {
+        setData(d as unknown as DetailData);
+      })
+      .catch((err) => {
+        setError(err.message || "Lỗi kết nối API");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id]);
 
   if (loading) {
@@ -126,11 +131,11 @@ const CarDetailPage: React.FC = () => {
     );
   }
 
-  if (!data) {
+  if (error || !data) {
     return (
       <div className="text-center py-24 text-[#6E7A72]">
         <div className="flex justify-center mb-3"><IcCarLg /></div>
-        <p className="font-semibold text-lg">Không tìm thấy xe.</p>
+        <p className="font-semibold text-lg">{error || "Không tìm thấy xe."}</p>
         <Link to="/cars" className="mt-4 inline-block text-[#006C4C] font-semibold hover:underline">
           ← Quay lại danh sách xe
         </Link>
