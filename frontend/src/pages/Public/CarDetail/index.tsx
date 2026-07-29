@@ -336,7 +336,13 @@ const CarDetailPage: React.FC = () => {
               <h3 className="font-bold text-[#191C1E] text-lg mb-4">Địa điểm giao nhận xe</h3>
               
               <div className="flex flex-col gap-3 mb-4">
-                <label className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryOption === "self" ? "border-[#006C4C]" : "border-[#E5EBE8]"}`}>
+                <label 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setDeliveryOption("self");
+                  }}
+                  className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-colors ${deliveryOption === "self" ? "border-[#006C4C]" : "border-[#E5EBE8]"}`}
+                >
                   <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${deliveryOption === "self" ? "border-[#006C4C]" : "border-[#9CA3AF]"}`}>
                     {deliveryOption === "self" && <div className="w-2.5 h-2.5 rounded-full bg-[#006C4C]"></div>}
                   </div>
@@ -925,6 +931,10 @@ const CarDetailPage: React.FC = () => {
             <div className="p-4 border-t border-[#E5EBE8]">
               <button
                 onClick={() => {
+                  if (modalDeliveryType === "custom" && !customAddress.trim()) {
+                    alert("Vui lòng nhập địa chỉ nhận xe.");
+                    return;
+                  }
                   setDeliveryOption(modalDeliveryType === "airport" ? "airport" : "custom");
                   setShowDeliveryModal(false);
                 }}

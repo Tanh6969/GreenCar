@@ -207,6 +207,12 @@ const CheckoutPage: React.FC = () => {
     const e: Record<string, string> = {};
     if (!form.name.trim())  e.name  = "Vui lòng nhập họ tên";
     if (!form.phone.trim()) e.phone = "Vui lòng nhập số điện thoại";
+    
+    if (queryDelivery === "custom" && (!deliveryAddress || !deliveryAddress.trim())) {
+      alert("Vui lòng nhập hoặc chọn địa chỉ nhận xe trên bản đồ!");
+      return false;
+    }
+    
     setErrors(e);
     return Object.keys(e).length === 0;
   };
