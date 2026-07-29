@@ -28,35 +28,45 @@ const UserManagePage: React.FC = () => {
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
 
-  const fetchUsers = useCallback((p: number) => {
+  const fetchUsers = useCallback(() => {
     setLoading(true);
-    userService.getAll(p, 10)
+    userService.getAll(1, 1000)
       .then(res => {
-        setUsers(res.data);
-        setTotalPages(res.pagination.total_pages);
-        setTotal(res.pagination.total);
+        // Filter out admin users (role_id === 1)
+        const nonAdmins = res.data.filter((u: User) => u.role_id !== 1);
+        setUsers(nonAdmins);
       })
       .catch(err => setError(err.message || "Lỗi tải danh sách người dùng"))
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    fetchUsers(page);
-  }, [fetchUsers, page]);
+    fetchUsers();
+  }, [fetchUsers]);
 
-  const visible = users.filter(u => {
+  const filtered = users.filter(u => {
     const matchSearch = search === "" || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "all" || u.role_id === roleFilter;
     return matchSearch && matchRole;
   });
 
+  // Calculate local pagination
+  const computedTotalPages = Math.max(1, Math.ceil(filtered.length / 10));
+  const visible = filtered.slice((page - 1) * 10, page * 10);
+  const displayTotal = filtered.length;
+
   const roleCounts = users.reduce<Record<number, number>>((acc, u) => {
     acc[u.role_id] = (acc[u.role_id] ?? 0) + 1;
     return acc;
   }, {});
+
+  useEffect(() => {
+    // Reset page to 1 if we search or filter and current page exceeds total
+    if (page > computedTotalPages) {
+      setPage(1);
+    }
+  }, [computedTotalPages, page]);
 
   const handleVerify = async (userId: number, status: "verified" | "rejected") => {
     if (status === "rejected" && !rejectReason.trim()) {
@@ -70,7 +80,7 @@ const UserManagePage: React.FC = () => {
       setSelected(updated);
       setRejectReason("");
       setShowRejectInput(false);
-      fetchUsers(page);
+      fetchUsers();
     } catch (err: any) {
       setError(err.message || "Lỗi cập nhật trạng thái");
     } finally {
@@ -96,7 +106,7 @@ const UserManagePage: React.FC = () => {
       {/* Stats */}
       <div className="cards-3" style={{ marginBottom: 24 }}>
         {[
-          { label: "Tổng người dùng", count: total, color: "var(--green)", bg: "var(--green-light)" },
+          { label: "Tổng người dùng", count: users.length, color: "var(--green)", bg: "var(--green-light)" },
           { label: "Khách hàng",      count: roleCounts[2] ?? 0, color: "#166534", bg: "#dcfce7" },
           { label: "Chủ xe",         count: roleCounts[3] ?? 0, color: "#b45309", bg: "#fef3c7" },
         ].map(s => (
@@ -116,7 +126,7 @@ const UserManagePage: React.FC = () => {
         />
         <div className="brand-filter" style={{ margin: 0 }}>
           <button onClick={() => setRoleFilter("all")} className={roleFilter === "all" ? "active" : ""}>Tất cả</button>
-          {roles.map(r => (
+          {roles.filter(r => r.role_id !== 1).map(r => (
             <button key={r.role_id} onClick={() => setRoleFilter(r.role_id)} className={roleFilter === r.role_id ? "active" : ""}>
               {ROLE_MAP[r.role_id]?.label ?? r.role_name}
             </button>
@@ -198,9 +208,9 @@ const UserManagePage: React.FC = () => {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12, flexWrap: "wrap", gap: 12 }}>
         <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
-          Hiển thị {visible.length} / {users.length} người dùng (Tổng số: {total})
+          Hiển thị {visible.length} / {displayTotal} người dùng (Tổng số: {users.length})
         </p>
-        <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        <Pagination currentPage={page} totalPages={computedTotalPages} onPageChange={setPage} />
       </div>
 
       {/* Detail modal */}
