@@ -84,14 +84,7 @@ const CheckoutPage: React.FC = () => {
   const [loading, setLoading]   = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
-  // License verification states
-  const [licenseNo, setLicenseNo] = useState("");
-  const [licenseFrontUrl, setLicenseFrontUrl] = useState("");
-  const [licenseBackUrl, setLicenseBackUrl] = useState("");
-  const [uploadingFront, setUploadingFront] = useState(false);
-  const [uploadingBack, setUploadingBack] = useState(false);
-  const [verifySubmitLoading, setVerifySubmitLoading] = useState(false);
-  const [verifyError, setVerifyError] = useState("");
+
 
   const defaultStart = () => {
     if (queryStartDate) return toLocal(queryStartDate);
@@ -146,7 +139,6 @@ const CheckoutPage: React.FC = () => {
       userService.getMe()
         .then(u => {
           setCurrentUser(u);
-          setLicenseNo(u.license_no || "");
           setForm({
             name: u.name || "",
             phone: u.phone || "",
@@ -244,53 +236,7 @@ const CheckoutPage: React.FC = () => {
     navigate("/customer/payment");
   };
 
-  const handleFileUpload = (side: "front" | "back", e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    if (side === "front") setUploadingFront(true);
-    else setUploadingBack(true);
-
-    // Simulated secure upload. Create object URL for client preview.
-    setTimeout(() => {
-      const url = URL.createObjectURL(file);
-      if (side === "front") {
-        setLicenseFrontUrl(url);
-        setUploadingFront(false);
-      } else {
-        setLicenseBackUrl(url);
-        setUploadingBack(false);
-      }
-    }, 1200);
-  };
-
-  const handleVerifySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setVerifyError("");
-
-    if (!licenseNo.trim()) {
-      setVerifyError("Vui lòng nhập số GPLX!");
-      return;
-    }
-    if (!licenseFrontUrl || !licenseBackUrl) {
-      setVerifyError("Vui lòng tải lên đầy đủ ảnh mặt trước và mặt sau!");
-      return;
-    }
-
-    setVerifySubmitLoading(true);
-    try {
-      await userService.submitLicense({
-        license_no: licenseNo,
-        license_front_url: licenseFrontUrl,
-        license_back_url: licenseBackUrl,
-      });
-      fetchFreshUser();
-    } catch (err: any) {
-      setVerifyError(err.error || err.message || "Không thể gửi hồ sơ xác thực.");
-    } finally {
-      setVerifySubmitLoading(false);
-    }
-  };
 
   const licenseStatus = currentUser?.license_status || "unverified";
 
@@ -324,136 +270,46 @@ const CheckoutPage: React.FC = () => {
               <>
                 {/* CASE 2: Logged in but driving license not verified */}
                 {licenseStatus !== "verified" && (
-                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 shadow-sm">
-                    {/* Header */}
-                    <div className="flex items-start gap-4 mb-6 pb-5 border-b border-gray-100">
-                      <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-xl flex-shrink-0">🪪</div>
-                      <div>
-                        <h2 className="font-bold text-[#191C1E] text-lg">Xác thực Giấy phép lái xe (GPLX)</h2>
-                        <p className="text-xs text-[#6E7A72] mt-0.5">GreenCar yêu cầu xác thực bằng lái xe hợp lệ để có quyền vận hành xe tự lái.</p>
-                      </div>
-                    </div>
-
-                    {/* Pending state details */}
-                    {licenseStatus === "pending" ? (
-                      <div className="text-center py-6 px-4 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-2xl animate-pulse">⏳</div>
-                        <h3 className="font-bold text-[#b45309] text-base">Hồ sơ đang chờ phê duyệt</h3>
-                        <p className="text-sm text-[#78350F] max-w-md">
-                          Thông tin bằng lái xe của bạn đã được gửi thành công. Ban quản trị GreenCar sẽ kiểm tra và duyệt hồ sơ của bạn trong vòng 5-10 phút. Vui lòng tải lại trang sau khi được phê duyệt để hoàn tất checkout.
+                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-8 shadow-sm text-center flex flex-col items-center gap-5">
+                    <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center text-3xl">🪪</div>
+                    <div>
+                      <h2 className="font-bold text-[#191C1E] text-lg mb-2">Yêu cầu xác thực Giấy phép lái xe</h2>
+                      {licenseStatus === "pending" ? (
+                        <p className="text-sm text-[#6E7A72] max-w-md mx-auto">
+                          Hồ sơ xác thực GPLX của bạn đang được Ban quản trị GreenCar xử lý. Quy trình phê duyệt thường mất khoảng 5-10 phút. Vui lòng kiểm tra lại sau hoặc bấm nút bên dưới để cập nhật trạng thái.
                         </p>
-                        <button onClick={fetchFreshUser} className="mt-2 bg-[#b45309] hover:bg-[#92400E] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+                      ) : licenseStatus === "rejected" ? (
+                        <div className="max-w-md mx-auto">
+                          <p className="text-sm text-red-600 mb-2 font-semibold">
+                            Yêu cầu xác thực GPLX trước đó của bạn đã bị từ chối.
+                          </p>
+                          <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-3 text-xs text-[#DC2626] text-left mb-2">
+                            <strong>Lý do:</strong> {currentUser?.license_reject_reason || "Thông tin hình ảnh không khớp hoặc bị mờ."}
+                          </div>
+                          <p className="text-xs text-[#6E7A72]">
+                            Vui lòng cập nhật lại thông tin mới để tiếp tục đặt xe.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[#6E7A72] max-w-md mx-auto">
+                          Để tiếp tục đặt xe tự lái, bạn cần thực hiện xác thực Giấy phép lái xe (GPLX) hợp lệ để đảm bảo quyền lợi vận hành xe.
+                        </p>
+                      )}
+                    </div>
+                    
+                    {licenseStatus === "pending" ? (
+                      <div className="flex gap-3">
+                        <button onClick={fetchFreshUser} className="bg-white border border-[#E5E7EB] text-[#191C1E] font-bold px-6 py-2.5 rounded-xl hover:bg-[#F9FAFB] transition-colors text-sm shadow-sm">
                           Tải lại trạng thái ↻
                         </button>
+                        <Link to="/customer/profile" className="bg-[#006C4C] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#004832] transition-colors text-sm shadow-md">
+                          Xem hồ sơ cá nhân
+                        </Link>
                       </div>
                     ) : (
-                      /* Unverified or Rejected state: Show Upload Form */
-                      <form onSubmit={handleVerifySubmit} className="flex flex-col gap-5">
-                        {licenseStatus === "rejected" && (
-                          <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-4 text-sm text-[#DC2626]">
-                            <strong className="block mb-1">❌ GPLX bị từ chối phê duyệt trước đó:</strong>
-                            {currentUser?.license_reject_reason || "Thông tin bằng lái hoặc hình ảnh không khớp / mờ."}
-                            <span className="block mt-1.5 text-xs text-[#7F1D1D]">Vui lòng kiểm tra lại thông tin và chụp lại ảnh sắc nét hơn để gửi duyệt lại.</span>
-                          </div>
-                        )}
-
-                        {verifyError && (
-                          <div className="bg-red-50 border border-red-200 text-red-600 text-xs p-3 rounded-lg">
-                            {verifyError}
-                          </div>
-                        )}
-
-                        {/* License Number Input */}
-                        <div>
-                          <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
-                            Số giấy phép lái xe (GPLX) *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={licenseNo}
-                            onChange={e => setLicenseNo(e.target.value)}
-                            placeholder="Nhập 12 số trên bằng lái xe của bạn"
-                            className="w-full h-11 border border-[#E5E7EB] rounded-xl px-3.5 text-sm text-[#191C1E] bg-white transition-colors focus:outline-none focus:border-[#006C4C]"
-                          />
-                        </div>
-
-                        {/* Front & Back uploads */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {/* Front */}
-                          <div>
-                            <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
-                              Ảnh mặt trước bằng lái *
-                            </label>
-                            <div className="border-2 border-dashed border-[#E5E7EB] hover:border-[#006C4C] rounded-xl p-4 bg-[#F8F9FB] transition-colors relative min-h-[140px] flex flex-col items-center justify-center text-center cursor-pointer">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={e => handleFileUpload("front", e)}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                              />
-                              {uploadingFront ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <div className="w-6 h-6 border-2 border-green-200 border-t-[#006C4C] rounded-full animate-spin" />
-                                  <span className="text-xs text-[#6E7A72]">Đang tải lên...</span>
-                                </div>
-                              ) : licenseFrontUrl ? (
-                                <div className="w-full h-full">
-                                  <img src={licenseFrontUrl} alt="Mặt trước" className="w-full h-24 object-cover rounded-lg" />
-                                  <span className="text-[10px] text-[#006C4C] font-semibold mt-1.5 block">✓ Thay đổi ảnh</span>
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className="text-2xl">📸</span>
-                                  <span className="text-xs font-semibold text-[#191C1E]">Tải ảnh mặt trước</span>
-                                  <span className="text-[10px] text-[#6E7A72]">Hỗ trợ file PNG, JPG</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Back */}
-                          <div>
-                            <label className="block text-xs font-bold text-[#6E7A72] uppercase tracking-wide mb-1.5">
-                              Ảnh mặt sau bằng lái *
-                            </label>
-                            <div className="border-2 border-dashed border-[#E5E7EB] hover:border-[#006C4C] rounded-xl p-4 bg-[#F8F9FB] transition-colors relative min-h-[140px] flex flex-col items-center justify-center text-center cursor-pointer">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={e => handleFileUpload("back", e)}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                              />
-                              {uploadingBack ? (
-                                <div className="flex flex-col items-center gap-2">
-                                  <div className="w-6 h-6 border-2 border-green-200 border-t-[#006C4C] rounded-full animate-spin" />
-                                  <span className="text-xs text-[#6E7A72]">Đang tải lên...</span>
-                                </div>
-                              ) : licenseBackUrl ? (
-                                <div className="w-full h-full">
-                                  <img src={licenseBackUrl} alt="Mặt sau" className="w-full h-24 object-cover rounded-lg" />
-                                  <span className="text-[10px] text-[#006C4C] font-semibold mt-1.5 block">✓ Thay đổi ảnh</span>
-                                </div>
-                              ) : (
-                                <div className="flex flex-col items-center gap-1">
-                                  <span className="text-2xl">📸</span>
-                                  <span className="text-xs font-semibold text-[#191C1E]">Tải ảnh mặt sau</span>
-                                  <span className="text-[10px] text-[#6E7A72]">Hỗ trợ file PNG, JPG</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <button
-                          type="submit"
-                          disabled={verifySubmitLoading || uploadingFront || uploadingBack}
-                          className="w-full bg-[#006C4C] hover:bg-[#004832] disabled:bg-gray-300 text-white font-bold py-3 rounded-xl transition-all shadow"
-                        >
-                          {verifySubmitLoading ? "Đang gửi hồ sơ..." : "Gửi yêu cầu xác thực GPLX"}
-                        </button>
-                      </form>
+                      <Link to="/customer/profile?verify=true" className="bg-[#006C4C] text-white font-bold px-8 py-3 rounded-xl hover:bg-[#004832] transition-colors shadow-md text-sm">
+                        Xác thực ngay
+                      </Link>
                     )}
                   </div>
                 )}

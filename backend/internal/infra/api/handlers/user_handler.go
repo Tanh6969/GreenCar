@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -177,7 +178,7 @@ func SubmitLicenseHandler(userSvc *service.UserService, log *logger.Logger) http
 }
 
 // AdminVerifyLicenseHandler handles driving license verification approvals/rejections by admin
-func AdminVerifyLicenseHandler(userSvc *service.UserService, log *logger.Logger) http.HandlerFunc {
+func AdminVerifyLicenseHandler(userSvc *service.UserService, notifSvc service.NotificationService, log *logger.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		idStr := chi.URLParam(r, "id")
 		userID, err := strconv.Atoi(idStr)
@@ -208,6 +209,16 @@ func AdminVerifyLicenseHandler(userSvc *service.UserService, log *logger.Logger)
 			response.WriteError(w, http.StatusInternalServerError, "failed to verify license")
 			return
 		}
+
+		// Create notification for user
+		title := "Xác thực Giấy phép lái xe"
+		var content string
+		if req.Status == "verified" {
+			content = "Giấy phép lái xe của bạn đã được phê duyệt thành công! Bây giờ bạn đã có thể bắt đầu đặt xe tự lái."
+		} else {
+			content = fmt.Sprintf("Yêu cầu xác thực GPLX của bạn đã bị từ chối. Lý do: %s. Vui lòng gửi lại yêu cầu.", req.RejectReason)
+		}
+		_ = notifSvc.CreateNotification(userID, "system", title, content, "/customer/profile")
 
 		updated, err := userSvc.GetUser(userID)
 		if err != nil {

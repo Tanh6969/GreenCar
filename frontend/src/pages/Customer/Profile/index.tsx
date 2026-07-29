@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { userService } from "../../../services/user.service";
 import { User } from "../../../types/user.type";
@@ -187,25 +188,33 @@ const ProfilePage: React.FC = () => {
   const [verifyError, setVerifyError] = useState("");
   const [verifySuccess, setVerifySuccess] = useState(false);
 
-  const fetchFreshUser = useCallback(() => {
-    if (user) {
-      userService.getMe()
-        .then(u => {
-          setCurrentUser(u);
-          setLicenseNo(u.license_no || "");
-          setLicenseFrontUrl(u.license_front_url || "");
-          setLicenseBackUrl(u.license_back_url || "");
-          if (token) {
-            login(token, u);
-          }
-        })
-        .catch(console.error);
+  const fetchFreshUser = () => {
+    userService.getMe()
+      .then(u => {
+        setCurrentUser(u);
+        setLicenseNo(u.license_no || "");
+        setLicenseFrontUrl(u.license_front_url || "");
+        setLicenseBackUrl(u.license_back_url || "");
+        if (token) {
+          login(token, u);
+        }
+      })
+      .catch(console.error);
+  };
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("verify") === "true") {
+      setShowModal(true);
     }
-  }, [user, token, login]);
+  }, [location]);
 
   useEffect(() => {
     fetchFreshUser();
-  }, [fetchFreshUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initials = currentUser
     ? currentUser.name.split(" ").slice(-2).map(w => w[0]).join("").toUpperCase()

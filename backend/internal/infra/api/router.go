@@ -84,7 +84,7 @@ func NewRouter(
 				r.Get("/", handlers.GetUserHandler(userSvc, log))
 				r.Put("/", handlers.UpdateUserHandler(userSvc, log))
 				r.Delete("/", handlers.DeleteUserHandler(userSvc, log))
-				r.Put("/license/status", handlers.AdminVerifyLicenseHandler(userSvc, log))
+				r.Put("/license/status", handlers.AdminVerifyLicenseHandler(userSvc, notifSvc, log))
 			})
 		})
 

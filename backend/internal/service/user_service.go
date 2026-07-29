@@ -61,7 +61,7 @@ func (s *UserService) SubmitLicense(userID int, licenseNo, frontURL, backURL str
 	u.LicenseNo = licenseNo
 	u.LicenseFrontURL = frontURL
 	u.LicenseBackURL = backURL
-	u.LicenseStatus = "verified"
+	u.LicenseStatus = "pending"
 	u.LicenseRejectReason = ""
 	return s.repo.Update(u)
 }

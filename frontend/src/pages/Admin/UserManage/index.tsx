@@ -22,6 +22,7 @@ const UserManagePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<number | "all">("all");
+  const [licenseFilter, setLicenseFilter] = useState<string | "all">("all");
   const [selected, setSelected] = useState<User | null>(null);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -35,6 +36,8 @@ const UserManagePage: React.FC = () => {
       .then(res => {
         // Filter out admin users (role_id === 1)
         const nonAdmins = res.data.filter((u: User) => u.role_id !== 1);
+        // Sort by created_at descending (newest first)
+        nonAdmins.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setUsers(nonAdmins);
       })
       .catch(err => setError(err.message || "Lỗi tải danh sách người dùng"))
@@ -48,7 +51,8 @@ const UserManagePage: React.FC = () => {
   const filtered = users.filter(u => {
     const matchSearch = search === "" || u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "all" || u.role_id === roleFilter;
-    return matchSearch && matchRole;
+    const matchLicense = licenseFilter === "all" || u.license_status === licenseFilter;
+    return matchSearch && matchRole && matchLicense;
   });
 
   // Calculate local pagination
@@ -60,6 +64,24 @@ const UserManagePage: React.FC = () => {
     acc[u.role_id] = (acc[u.role_id] ?? 0) + 1;
     return acc;
   }, {});
+
+  const pendingCount = users.filter(u => u.license_status === "pending").length;
+
+  const handleStatClick = (type: "all" | "customer" | "owner" | "pending") => {
+    if (type === "all") {
+      setRoleFilter("all");
+      setLicenseFilter("all");
+    } else if (type === "customer") {
+      setRoleFilter(2);
+      setLicenseFilter("all");
+    } else if (type === "owner") {
+      setRoleFilter(3);
+      setLicenseFilter("all");
+    } else if (type === "pending") {
+      setRoleFilter("all");
+      setLicenseFilter("pending");
+    }
+  };
 
   useEffect(() => {
     // Reset page to 1 if we search or filter and current page exceeds total
@@ -104,33 +126,58 @@ const UserManagePage: React.FC = () => {
       )}
 
       {/* Stats */}
-      <div className="cards-3" style={{ marginBottom: 24 }}>
+      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", marginBottom: 24 }}>
         {[
-          { label: "Tổng người dùng", count: users.length, color: "var(--green)", bg: "var(--green-light)" },
-          { label: "Khách hàng",      count: roleCounts[2] ?? 0, color: "#166534", bg: "#dcfce7" },
-          { label: "Chủ xe",         count: roleCounts[3] ?? 0, color: "#b45309", bg: "#fef3c7" },
+          { type: "all", label: "Tổng người dùng", count: users.length, color: "var(--green)", bg: "var(--green-light)", active: roleFilter === "all" && licenseFilter === "all" },
+          { type: "customer", label: "Khách hàng",      count: roleCounts[2] ?? 0, color: "#166534", bg: "#dcfce7", active: roleFilter === 2 && licenseFilter === "all" },
+          { type: "owner", label: "Chủ xe",         count: roleCounts[3] ?? 0, color: "#b45309", bg: "#fef3c7", active: roleFilter === 3 && licenseFilter === "all" },
+          { type: "pending", label: "Chờ duyệt GPLX", count: pendingCount, color: "#ea580c", bg: "#fff7ed", active: licenseFilter === "pending" },
         ].map(s => (
-          <div key={s.label} className="panel" style={{ textAlign: "center", background: s.bg, border: `1px solid ${s.color}33` }}>
+          <div key={s.label} onClick={() => handleStatClick(s.type as any)} className="panel" 
+            style={{ 
+              textAlign: "center", 
+              background: s.bg, 
+              border: s.active ? `2px solid ${s.color}` : `1px solid ${s.color}33`,
+              cursor: "pointer",
+              transform: s.active ? "scale(1.02)" : "none",
+              transition: "all 0.2s ease-in-out",
+              position: "relative"
+            }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.count}</div>
             <div style={{ fontSize: 13, color: s.color, fontWeight: 600 }}>{s.label}</div>
+            {s.type === "pending" && s.count > 0 && (
+              <span style={{
+                position: "absolute", top: 8, right: 8, width: 8, height: 8,
+                borderRadius: "50%", background: "#dc2626", animation: "ping 1.5s infinite"
+              }} />
+            )}
           </div>
         ))}
       </div>
 
       {/* Toolbar */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
         <input
           type="text" value={search} onChange={e => setSearch(e.target.value)}
           placeholder="Tìm theo tên hoặc email..."
           style={{ flex: 1, minWidth: 200, height: 40, border: "1px solid var(--border)", borderRadius: 8, padding: "0 14px", fontSize: 14, outline: "none" }}
         />
-        <div className="brand-filter" style={{ margin: 0 }}>
-          <button onClick={() => setRoleFilter("all")} className={roleFilter === "all" ? "active" : ""}>Tất cả</button>
-          {roles.filter(r => r.role_id !== 1).map(r => (
-            <button key={r.role_id} onClick={() => setRoleFilter(r.role_id)} className={roleFilter === r.role_id ? "active" : ""}>
-              {ROLE_MAP[r.role_id]?.label ?? r.role_name}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <div className="brand-filter" style={{ margin: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginRight: 8, textTransform: "uppercase" }}>GPLX:</span>
+            <button onClick={() => setLicenseFilter("all")} className={licenseFilter === "all" ? "active" : ""}>Tất cả</button>
+            <button onClick={() => setLicenseFilter("pending")} className={licenseFilter === "pending" ? "active" : ""} style={{ position: "relative" }}>
+              Chờ duyệt
+              {pendingCount > 0 && (
+                <span style={{
+                  position: "absolute", top: -5, right: -5, background: "#dc2626", color: "#fff",
+                  fontSize: 9, fontWeight: 900, padding: "2px 5px", borderRadius: 999, lineHeight: 1
+                }}>{pendingCount}</span>
+              )}
             </button>
-          ))}
+            <button onClick={() => setLicenseFilter("verified")} className={licenseFilter === "verified" ? "active" : ""}>Đã duyệt</button>
+            <button onClick={() => setLicenseFilter("rejected")} className={licenseFilter === "rejected" ? "active" : ""}>Từ chối</button>
+          </div>
         </div>
       </div>
 
