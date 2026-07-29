@@ -136,8 +136,8 @@ const CarDetailPage: React.FC = () => {
       <div className="text-center py-24 text-[#6E7A72]">
         <div className="flex justify-center mb-3"><IcCarLg /></div>
         <p className="font-semibold text-lg">{error || "Không tìm thấy xe."}</p>
-        <Link to="/cars" className="mt-4 inline-block text-[#006C4C] font-semibold hover:underline">
-          ← Quay lại danh sách xe
+        <Link to={user?.role_id === 1 ? "/admin/vehicles" : "/cars"} className="mt-4 inline-block text-[#006C4C] font-semibold hover:underline">
+          {user?.role_id === 1 ? "← Quay lại Quản lý xe" : "← Quay lại danh sách xe"}
         </Link>
       </div>
     );
@@ -180,7 +180,7 @@ const CarDetailPage: React.FC = () => {
   }
 
   const isStatusAllowed = vehicle?.status === "available" || vehicle?.status === "booked";
-  const isOwner = user?.user_id && vehicle?.owner_id === user.user_id;
+  const isOwner = (user?.user_id && vehicle?.owner_id === user.user_id) || user?.role_id === 1;
   const available = isStatusAllowed && !isOverlapping && !isOutsideAvailability && !isOwner;
   
   // Calculate pricing based on selected plan
@@ -201,9 +201,19 @@ const CarDetailPage: React.FC = () => {
       {/* breadcrumb */}
       <div className="bg-white border-b border-[#BDCAC1]">
         <div className="max-w-[1440px] mx-auto px-6 py-3 flex items-center gap-2 text-sm text-[#6E7A72]">
-          <Link to="/" className="hover:text-[#006C4C]">Trang chủ</Link>
-          <span>/</span>
-          <Link to="/cars" className="hover:text-[#006C4C]">Danh sách xe</Link>
+          {user?.role_id === 1 ? (
+            <>
+              <Link to="/admin/dashboard" className="hover:text-[#006C4C]">Bảng điều khiển</Link>
+              <span>/</span>
+              <Link to="/admin/vehicles" className="hover:text-[#006C4C]">Quản lý xe</Link>
+            </>
+          ) : (
+            <>
+              <Link to="/" className="hover:text-[#006C4C]">Trang chủ</Link>
+              <span>/</span>
+              <Link to="/cars" className="hover:text-[#006C4C]">Danh sách xe</Link>
+            </>
+          )}
           <span>/</span>
           <span className="text-[#006C4C] font-semibold">{model.brand} {model.name}</span>
         </div>
@@ -729,7 +739,7 @@ const CarDetailPage: React.FC = () => {
                     ? "bg-[#4FBD91] hover:bg-[#006C4C] text-[#004832] hover:text-white shadow-md hover:shadow-lg"
                     : "bg-[#E5E7EB] text-[#9CA3AF] cursor-not-allowed"}`}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                {isOwner ? "Đây là xe của bạn" : (available ? "Chọn thuê" : "Không thể đặt")}
+                {user?.role_id === 1 ? "Xem dưới vai trò Admin" : isOwner ? "Đây là xe của bạn" : (available ? "Chọn thuê" : "Không thể đặt")}
               </button>
 
               <p className="text-center text-xs text-[#6E7A72]">
@@ -739,9 +749,9 @@ const CarDetailPage: React.FC = () => {
           </div>
 
           {/* back link */}
-          <Link to="/cars"
+          <Link to={user?.role_id === 1 ? "/admin/vehicles" : "/cars"}
             className="mt-3 flex items-center justify-center gap-1.5 text-sm text-[#6E7A72] hover:text-[#006C4C] transition-colors">
-            ← Xem thêm xe khác
+            {user?.role_id === 1 ? "← Quay lại Quản lý xe" : "← Xem thêm xe khác"}
           </Link>
         </div>
         )}

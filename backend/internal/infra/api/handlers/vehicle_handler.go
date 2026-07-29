@@ -186,7 +186,9 @@ func DeleteVehicleHandler(vehicleSvc *service.VehicleService, log *logger.Logger
 			return
 		}
 
-		if err := vehicleSvc.DeleteVehicle(id); err != nil {
+		reason := r.URL.Query().Get("reason")
+
+		if err := vehicleSvc.DeleteVehicle(id, reason); err != nil {
 			log.Warn("delete vehicle %d: %v", id, err)
 			response.WriteError(w, http.StatusInternalServerError, "failed to delete vehicle")
 			return

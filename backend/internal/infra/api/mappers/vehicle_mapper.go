@@ -20,6 +20,7 @@ func ToVehicleResponse(v *entities.Vehicle) *dto.VehicleResponse {
 		OwnerID:       v.OwnerID,
 		AvailableFrom: v.AvailableFrom,
 		AvailableTo:   v.AvailableTo,
+		StatusReason:  v.StatusReason,
 	}
 }
 

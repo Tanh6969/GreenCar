@@ -21,7 +21,7 @@ func NewVehicleDetailRepository(db *database.DB) adapters.VehicleDetailRepositor
 
 func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.VehicleCard, error) {
 	query := `
-		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
+		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to, COALESCE(v.status_reason, ''),
 		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
@@ -55,7 +55,7 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 		var revenue, avgRating, promoDiscount float64
 		var promoEndDate *time.Time
 		err := rows.Scan(
-			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
+			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo, &v.StatusReason,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
 			&imageURL, &price24h, &price4h, &tripCount, &revenue, &avgRating, &promoDiscount, &promoEndDate,
@@ -82,7 +82,7 @@ func (r *vehicleDetailRepository) ListCards(limit, offset int) ([]*entities.Vehi
 
 func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.VehicleCard, error) {
 	query := `
-		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to,
+		SELECT v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, COALESCE(v.owner_id, 0), v.available_from, v.available_to, COALESCE(v.status_reason, ''),
 		       m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 		       l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 		       COALESCE((SELECT image_url FROM vehicle_images WHERE vehicle_model_id = v.vehicle_model_id ORDER BY image_id LIMIT 1), '') AS image_url,
@@ -116,7 +116,7 @@ func (r *vehicleDetailRepository) ListByOwnerID(ownerID int) ([]*entities.Vehicl
 		var revenue, avgRating, promoDiscount float64
 		var promoEndDate *time.Time
 		err := rows.Scan(
-			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
+			&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo, &v.StatusReason,
 			&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 			&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
 			&imageURL, &price24h, &price4h, &tripCount, &revenue, &avgRating, &promoDiscount, &promoEndDate,
@@ -151,7 +151,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 
 	query := `
 		SELECT 
-			v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, v.owner_id, v.available_from, v.available_to,
+			v.vehicle_id, v.vehicle_model_id, v.license_plate, v.status, v.battery_level, v.battery_health, v.location_id, v.owner_id, v.available_from, v.available_to, COALESCE(v.status_reason, ''),
 			m.vehicle_model_id, m.name, m.brand, m.seats, m.horsepower, m.range_km, m.trunk_capacity, m.airbags, m.vehicle_type, m.transmission,
 			l.location_id, l.name, l.address, l.city, l.latitude, l.longitude,
 			COALESCE(u.name, ''), COALESCE(u.phone, '')
@@ -162,7 +162,7 @@ func (r *vehicleDetailRepository) GetByVehicleID(id int) (*entities.VehicleDetai
 		WHERE v.vehicle_id = $1`
 
 	err := r.db.QueryRow(query, id).Scan(
-		&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &ownerIDVal, &v.AvailableFrom, &v.AvailableTo,
+		&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status, &v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &ownerIDVal, &v.AvailableFrom, &v.AvailableTo, &v.StatusReason,
 		&m.VehicleModelID, &m.Name, &m.Brand, &m.Seats, &m.Horsepower, &m.RangeKM, &m.TrunkCapacity, &m.Airbags, &m.VehicleType, &m.Transmission,
 		&loc.LocationID, &loc.Name, &loc.Address, &loc.City, &loc.Latitude, &loc.Longitude,
 		&ownerName, &ownerPhone,

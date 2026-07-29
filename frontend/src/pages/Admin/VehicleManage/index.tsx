@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { vehicleService } from "../../../services/vehicle.service";
 import { VehicleCardData } from "../../../types/vehicle.type";
 import { Pagination } from "../../../components/common/Pagination";
@@ -9,10 +10,10 @@ const IcPlus = () => (
     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
   </svg>
 );
-const IcEdit = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+const IcEye = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
   </svg>
 );
 const IcTrash = () => (
@@ -27,6 +28,7 @@ const STATUS: Record<string, { label: string; color: string; bg: string }> = {
   available:   { label: "Sẵn sàng",   color: "#006C4C", bg: "#dcfce7" },
   booked:      { label: "Đang thuê",  color: "#1d4ed8", bg: "#dbeafe" },
   maintenance: { label: "Bảo dưỡng",  color: "#b45309", bg: "#fef3c7" },
+  archived:    { label: "Ngừng hoạt động", color: "#6B7280", bg: "#F3F4F6" },
 };
 
 // ── form default ───────────────────────────────────────────────
@@ -38,10 +40,12 @@ interface VehicleForm {
   battery_health: number;
   location_id: number;
   image_url: string;
+  status_reason?: string;
 }
 const EMPTY_FORM: VehicleForm = {
   model_id: 0, license_plate: "", status: "available",
   battery_level: 100, battery_health: 100, location_id: 1, image_url: "",
+  status_reason: "",
 };
 
 // ── field helper ───────────────────────────────────────────────
@@ -59,7 +63,10 @@ const inputStyle: React.CSSProperties = {
 
 // ── page ──────────────────────────────────────────────────────
 const VehicleManagePage: React.FC = () => {
+  const navigate = useNavigate();
   const [cards,    setCards]    = useState<VehicleCardData[]>([]);
+  const [archiveId, setArchiveId] = useState<number | null>(null);
+  const [archiveReason, setArchiveReason] = useState("");
   const [models,   setModels]   = useState<any[]>([]);
   const [locations,setLocations]= useState<any[]>([]);
   const [loading,  setLoading]  = useState(true);
@@ -136,6 +143,7 @@ const VehicleManagePage: React.FC = () => {
       battery_health: c.vehicle.battery_health,
       location_id:   c.vehicle.location_id,
       image_url:     c.image_url ?? "",
+      status_reason: c.vehicle.status_reason ?? "",
     });
     setFormErr("");
     setOpen(true);
@@ -262,14 +270,20 @@ const VehicleManagePage: React.FC = () => {
                     </td>
                     <td style={{ textAlign: "right" }}>
                       <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                        <button onClick={() => openEdit(c)} disabled={busy} className="btn btn-sm"
+                        <button onClick={() => navigate(`/cars/${c.vehicle.vehicle_id}`)} disabled={busy} className="btn btn-sm"
                           style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--green)", borderColor: "var(--green-border)" }}>
-                          <IcEdit /> Sửa
+                          <IcEye /> Xem
                         </button>
-                        <button onClick={() => handleDelete(c.vehicle.vehicle_id)} disabled={busy} className="btn btn-sm"
-                          style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}>
-                          <IcTrash /> Xoá
-                        </button>
+                        {c.vehicle.status !== "archived" ? (
+                          <button onClick={() => { setArchiveId(c.vehicle.vehicle_id); setArchiveReason(""); }} disabled={busy} className="btn btn-sm"
+                            style={{ display: "flex", alignItems: "center", gap: 4, background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}>
+                            <IcTrash /> Ngừng HĐ
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", paddingRight: 8 }}>
+                            Đã ngừng HĐ
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -334,6 +348,7 @@ const VehicleManagePage: React.FC = () => {
                     <option value="available">Sẵn sàng</option>
                     <option value="booked">Đang thuê</option>
                     <option value="maintenance">Bảo dưỡng</option>
+                    <option value="archived">Ngừng hoạt động</option>
                   </select>
                 </Field>
                 <Field label="Địa điểm">
@@ -346,6 +361,22 @@ const VehicleManagePage: React.FC = () => {
                   </select>
                 </Field>
               </div>
+
+              {form.status === "archived" && (
+                <Field label="Lý do ngừng hoạt động">
+                  <textarea
+                    rows={2}
+                    value={form.status_reason || ""}
+                    onChange={e => set("status_reason", e.target.value)}
+                    placeholder="Nhập lý do xe ngừng hoạt động..."
+                    style={{
+                      width: "100%", border: "1px solid var(--border)", borderRadius: 8,
+                      padding: "9px 12px", fontSize: 14, boxSizing: "border-box", outline: "none",
+                      background: "#fff", fontFamily: "inherit", resize: "none"
+                    }}
+                  />
+                </Field>
+              )}
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label={`Pin hiện tại: ${form.battery_level}%`}>
@@ -372,6 +403,63 @@ const VehicleManagePage: React.FC = () => {
               </button>
               <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: "11px 0", borderRadius: 10, border: "none", background: saving ? "var(--green-border)" : "var(--green)", color: "#fff", fontWeight: 700, fontSize: 14, cursor: saving ? "wait" : "pointer" }}>
                 {saving ? "Đang lưu..." : editId !== null ? "Cập nhật xe" : "Thêm xe"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Archive Reason Modal ───────────────────────────────── */}
+      {archiveId !== null && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+          }}
+        >
+          <div style={{ background: "#fff", borderRadius: 16, padding: 28, width: "100%", maxWidth: 440, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, color: "var(--text)", margin: "0 0 8px" }}>
+              Ngừng hoạt động xe #{archiveId}
+            </h2>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 16 }}>
+              Hành động này sẽ ẩn phương tiện khỏi danh sách tìm kiếm và thuê xe của khách hàng. Vui lòng cung cấp lý do ngừng hoạt động:
+            </p>
+            <textarea
+              rows={3}
+              value={archiveReason}
+              onChange={e => setArchiveReason(e.target.value)}
+              placeholder="Nhập lý do ngừng hoạt động (ví dụ: Xe đang bảo dưỡng lớn, Vi phạm điều khoản,..."
+              style={{
+                width: "100%", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "10px 12px", fontSize: 14, boxSizing: "border-box", outline: "none",
+                fontFamily: "inherit", resize: "none", marginBottom: 20
+              }}
+            />
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setArchiveId(null)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "1.5px solid var(--border)", background: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", color: "var(--text-mid)" }}>
+                Huỷ
+              </button>
+              <button
+                onClick={async () => {
+                  if (!archiveReason.trim()) {
+                    alert("Vui lòng nhập lý do ngừng hoạt động.");
+                    return;
+                  }
+                  setDeleting(archiveId);
+                  try {
+                    await vehicleService.adminDeleteVehicle(archiveId, archiveReason);
+                    setArchiveId(null);
+                    refresh(page);
+                  } catch {
+                    setError("Không thể ngừng hoạt động xe này.");
+                  } finally {
+                    setDeleting(null);
+                  }
+                }}
+                disabled={deleting !== null}
+                style={{ flex: 2, padding: "10px 0", borderRadius: 10, border: "none", background: "#dc2626", color: "#fff", fontWeight: 700, fontSize: 14, cursor: deleting !== null ? "wait" : "pointer" }}
+              >
+                {deleting !== null ? "Đang xử lý..." : "Xác nhận ngừng HĐ"}
               </button>
             </div>
           </div>

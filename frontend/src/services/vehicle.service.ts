@@ -7,6 +7,7 @@ import { PaginatedResponse } from "../types/pagination.type";
 interface ApiVehicle {
   id: number; model_id: number; license_plate: string; status: string;
   battery_level: number; battery_health: number; location_id: number; owner_id?: number;
+  status_reason?: string;
 }
 interface ApiModel {
   id: number; name: string; brand: string; seats: number; horsepower: number;
@@ -66,9 +67,10 @@ function mapCard(r: VehicleCardApiResponse): VehicleCardData {
     vehicle: {
       vehicle_id: r.vehicle.id, vehicle_model_id: r.vehicle.model_id,
       license_plate: r.vehicle.license_plate,
-      status: r.vehicle.status as "available" | "booked" | "maintenance",
+      status: r.vehicle.status as "available" | "booked" | "maintenance" | "archived",
       battery_level: r.vehicle.battery_level, battery_health: r.vehicle.battery_health,
       location_id: r.vehicle.location_id, owner_id: r.vehicle.owner_id,
+      status_reason: r.vehicle.status_reason,
     },
     model: {
       vehicle_model_id: r.model.id, name: r.model.name, brand: r.model.brand,
@@ -109,9 +111,10 @@ export const vehicleService = {
       vehicle: {
         vehicle_id: r.vehicle.id, vehicle_model_id: r.vehicle.model_id,
         license_plate: r.vehicle.license_plate,
-        status: r.vehicle.status as "available" | "booked" | "maintenance",
+        status: r.vehicle.status as "available" | "booked" | "maintenance" | "archived",
         battery_level: r.vehicle.battery_level, battery_health: r.vehicle.battery_health,
         location_id: r.vehicle.location_id, owner_id: r.vehicle.owner_id,
+        status_reason: r.vehicle.status_reason,
       },
       model: {
         vehicle_model_id: r.model.id, name: r.model.name, brand: r.model.brand,
@@ -167,7 +170,8 @@ export const vehicleService = {
     await apiClient(`/admin/vehicles/${id}`, "PUT", data);
   },
 
-  async adminDeleteVehicle(id: number): Promise<void> {
-    await apiClient(`/admin/vehicles/${id}`, "DELETE");
+  async adminDeleteVehicle(id: number, reason?: string): Promise<void> {
+    const url = reason ? `/admin/vehicles/${id}?reason=${encodeURIComponent(reason)}` : `/admin/vehicles/${id}`;
+    await apiClient(url, "DELETE");
   },
 };

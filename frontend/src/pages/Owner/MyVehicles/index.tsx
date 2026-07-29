@@ -20,7 +20,7 @@ interface MyRegistration {
 }
 
 interface VehicleCardResponse {
-  vehicle: { id: number; status: string; license_plate: string; available_from?: string; available_to?: string };
+  vehicle: { id: number; status: string; license_plate: string; available_from?: string; available_to?: string; status_reason?: string };
   model: { vehicle_model_id: number; name: string; brand: string };
   location: { city: string; address: string };
   image_url: string;
@@ -449,12 +449,24 @@ const MyVehiclesPage: React.FC = () => {
                     </div>
                     <span style={{ 
                       padding: "5px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
-                      background: v.vehicle.status === "available" ? "#ECFDF5" : "#FEF2F2", 
-                      color: v.vehicle.status === "available" ? "#10B981" : "#EF4444" 
+                      background: v.vehicle.status === "available" ? "#ECFDF5" : (v.vehicle.status === "archived" ? "#F3F4F6" : "#FEF2F2"), 
+                      color: v.vehicle.status === "available" ? "#10B981" : (v.vehicle.status === "archived" ? "#6B7280" : "#EF4444") 
                     }}>
-                      {v.vehicle.status === "available" ? "Đang hoạt động" : "Tạm ngưng"}
+                      {v.vehicle.status === "available" ? "Đang hoạt động" : (v.vehicle.status === "archived" ? "Ngừng hoạt động" : "Tạm ngưng")}
                     </span>
                   </div>
+
+                  {v.vehicle.status === "archived" && (
+                    <div style={{ 
+                      marginTop: 8, background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 8, 
+                      padding: "8px 12px", fontSize: 13, color: "#991B1B", fontWeight: 500, display: "flex", alignItems: "flex-start", gap: 6 
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01"/></svg>
+                      <div>
+                        <strong>Xe bị ngừng hoạt động:</strong> {v.vehicle.status_reason || "Không có lý do cụ thể."}
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Statistics block to mimic Mioto */}
                   <div style={{ display: "flex", gap: 32, marginTop: 16, paddingBottom: 16, borderBottom: "1px dashed #E5EBE8" }}>
@@ -474,21 +486,28 @@ const MyVehiclesPage: React.FC = () => {
 
                   <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
                       <button 
+                        disabled={v.vehicle.status === "archived"}
                         onClick={() => {
                           setSettingVehicleId(v.vehicle.id);
                           loadUnavailabilities(v.vehicle.id);
                         }}
                         style={{ 
                           padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "none",
-                          background: "#006C4C", color: "#fff", cursor: "pointer"
+                          background: v.vehicle.status === "archived" ? "#E5EBE8" : "#006C4C", 
+                          color: v.vehicle.status === "archived" ? "#BDCAC1" : "#fff", 
+                          cursor: v.vehicle.status === "archived" ? "not-allowed" : "pointer"
                         }}>
                         Quản lý Lịch bận
                       </button>
                       <button
+                        disabled={v.vehicle.status === "archived"}
                         onClick={() => setPricingVehicleId(v.vehicle.id)}
                         style={{ 
                           padding: "8px 16px", borderRadius: 8, fontSize: 13, fontWeight: 700, border: "1px solid #E5EBE8",
-                          background: "#fff", color: "#191C1E", cursor: "pointer", display: "flex", alignItems: "center", gap: 6
+                          background: "#fff", 
+                          color: v.vehicle.status === "archived" ? "#BDCAC1" : "#191C1E", 
+                          cursor: v.vehicle.status === "archived" ? "not-allowed" : "pointer", 
+                          display: "flex", alignItems: "center", gap: 6
                         }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         Chiến lược giá

@@ -24,13 +24,14 @@ export interface Vehicle {
   vehicle_id: number;
   vehicle_model_id: number;
   license_plate: string;
-  status: "available" | "booked" | "maintenance";
+  status: "available" | "booked" | "maintenance" | "archived";
   battery_level: number;
   battery_health: number;
   location_id: number;
   owner_id?: number;
   available_from?: string;
   available_to?: string;
+  status_reason?: string;
 }
 
 export interface VehicleImage {

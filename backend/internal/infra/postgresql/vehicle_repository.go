@@ -20,11 +20,11 @@ func NewVehicleRepository(db *database.DB) adapters.VehicleRepository {
 
 func (r *vehicleRepository) GetByID(id int) (*entities.Vehicle, error) {
 	var v entities.Vehicle
-	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, owner_id, available_from, available_to 
+	query := `SELECT vehicle_id, vehicle_model_id, license_plate, status, battery_level, battery_health, location_id, owner_id, available_from, available_to, COALESCE(status_reason, '') 
 		FROM vehicles WHERE vehicle_id = $1`
 	err := r.db.QueryRow(query, id).Scan(
 		&v.VehicleID, &v.VehicleModelID, &v.LicensePlate, &v.Status,
-		&v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo,
+		&v.BatteryLevel, &v.BatteryHealth, &v.LocationID, &v.OwnerID, &v.AvailableFrom, &v.AvailableTo, &v.StatusReason,
 	)
 	if err != nil {
 		return nil, err
@@ -40,15 +40,15 @@ func (r *vehicleRepository) Create(v *entities.Vehicle) error {
 }
 
 func (r *vehicleRepository) Update(v *entities.Vehicle) error {
-	query := `UPDATE vehicles SET vehicle_model_id = $1, license_plate = $2, status = $3, battery_level = $4, battery_health = $5, location_id = $6, available_from = $7, available_to = $8
-		WHERE vehicle_id = $9`
-	_, err := r.db.Exec(query, v.VehicleModelID, v.LicensePlate, v.Status, v.BatteryLevel, v.BatteryHealth, v.LocationID, v.AvailableFrom, v.AvailableTo, v.VehicleID)
+	query := `UPDATE vehicles SET vehicle_model_id = $1, license_plate = $2, status = $3, battery_level = $4, battery_health = $5, location_id = $6, available_from = $7, available_to = $8, status_reason = $9
+		WHERE vehicle_id = $10`
+	_, err := r.db.Exec(query, v.VehicleModelID, v.LicensePlate, v.Status, v.BatteryLevel, v.BatteryHealth, v.LocationID, v.AvailableFrom, v.AvailableTo, v.StatusReason, v.VehicleID)
 	return err
 }
 
-func (r *vehicleRepository) Delete(id int) error {
-	query := `DELETE FROM vehicles WHERE vehicle_id = $1`
-	_, err := r.db.Exec(query, id)
+func (r *vehicleRepository) Delete(id int, reason string) error {
+	query := `UPDATE vehicles SET status = 'archived', status_reason = $1 WHERE vehicle_id = $2`
+	_, err := r.db.Exec(query, reason, id)
 	return err
 }
 

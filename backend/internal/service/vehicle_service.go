@@ -44,9 +44,9 @@ func (s *VehicleService) UpdateVehicle(v *entities.Vehicle) error {
 	return s.repo.Update(v)
 }
 
-// DeleteVehicle deletes a vehicle by ID.
-func (s *VehicleService) DeleteVehicle(id int) error {
-	return s.repo.Delete(id)
+// DeleteVehicle deletes a vehicle by ID (archives it with a reason).
+func (s *VehicleService) DeleteVehicle(id int, reason string) error {
+	return s.repo.Delete(id, reason)
 }
 
 // AddVehicleImage adds an image URL for the given vehicle model.

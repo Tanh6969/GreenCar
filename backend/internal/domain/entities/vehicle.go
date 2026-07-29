@@ -12,4 +12,5 @@ type Vehicle struct {
 	OwnerID        int     `json:"owner_id"`
 	AvailableFrom  *string `json:"available_from,omitempty"`
 	AvailableTo    *string `json:"available_to,omitempty"`
+	StatusReason   string  `json:"status_reason"`
 }

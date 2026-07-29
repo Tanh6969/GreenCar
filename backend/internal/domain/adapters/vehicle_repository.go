@@ -12,7 +12,7 @@ type VehicleRepository interface {
 	GetByID(id int) (*entities.Vehicle, error)
 	Create(v *entities.Vehicle) error
 	Update(v *entities.Vehicle) error
-	Delete(id int) error
+	Delete(id int, reason string) error
 	List(limit, offset int) ([]*entities.Vehicle, int, error)
 	ListByLocation(locationID int, limit, offset int) ([]*entities.Vehicle, error)
 
