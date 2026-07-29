@@ -74,27 +74,67 @@ function BookingCard({ booking, onReview }: { booking: Booking; onReview: (b: Bo
         </div>
       </div>
 
-      {/* Pricing row */}
-      <div className="flex items-end justify-between mt-2">
-        <div>
-          <p className={`text-xs font-medium ${effectiveStatus === "cancelled" ? "text-blue-600" : "text-gray-500"}`}>
-            {effectiveStatus === "cancelled" ? "Tiền cọc đã hoàn trả" : "Đặt cọc đã thanh toán"}
-          </p>
-          <p className={`text-base font-bold ${effectiveStatus === "cancelled" ? "text-blue-600" : "text-[#006C4C]"}`}>
-            {effectiveStatus === "cancelled" ? "+" : ""}{formatCurrency(booking.deposit_amount)}
-          </p>
-        </div>
-        {effectiveStatus !== "cancelled" && (
-          <div className="text-right">
-            <p className="text-xs text-gray-500">
-              {["completed", "pending_payment"].includes(effectiveStatus) ? "Tổng giá trị đơn" : "Tổng tạm tính (dự kiến)"}
-            </p>
-            <p className="text-base font-bold text-gray-800">
-              {formatCurrency(booking.total_price)}
-            </p>
+      {/* Detailed Pricing Block */}
+      {effectiveStatus !== "cancelled" ? (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="space-y-2 mb-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Giá thuê xe</span>
+              <span className="font-medium text-gray-800">
+                {formatCurrency(booking.total_price - booking.over_km_fee - booking.overtime_fee - (booking.extra_fee || 0))}
+              </span>
+            </div>
+            {booking.over_km_fee > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Phí vượt giới hạn KM</span>
+                <span className="font-medium text-gray-800">{formatCurrency(booking.over_km_fee)}</span>
+              </div>
+            )}
+            {booking.overtime_fee > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Phí thêm giờ</span>
+                <span className="font-medium text-gray-800">{formatCurrency(booking.overtime_fee)}</span>
+              </div>
+            )}
+            {(booking.extra_fee && booking.extra_fee > 0) ? (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Phụ phí khác{booking.extra_fee_desc ? `: ${booking.extra_fee_desc}` : ""}</span>
+                <span className="font-medium text-gray-800">{formatCurrency(booking.extra_fee)}</span>
+              </div>
+            ) : null}
+            <div className="flex justify-between text-sm border-t border-dashed border-gray-200 pt-2 mt-2">
+              <span className="text-gray-600 font-medium">Tổng giá trị đơn</span>
+              <span className="font-bold text-gray-900">{formatCurrency(booking.total_price)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Đã cọc (trừ vào tổng)</span>
+              <span className="font-medium text-[#006C4C]">- {formatCurrency(booking.deposit_amount)}</span>
+            </div>
           </div>
-        )}
-      </div>
+
+          {["pending_payment", "completed"].includes(effectiveStatus) && (
+            <div className={`flex justify-between items-center p-3 rounded-lg border mt-2 ${
+              effectiveStatus === "pending_payment" 
+                ? "bg-red-50 border-red-100 text-red-700" 
+                : "bg-gray-50 border-gray-200 text-gray-800"
+            }`}>
+              <span className="text-sm font-bold">
+                {effectiveStatus === "pending_payment" ? "CẦN THANH TOÁN THÊM:" : "Đã thanh toán (ngoài cọc):"}
+              </span>
+              <span className="text-lg font-black">
+                {formatCurrency(Math.max(0, booking.total_price - booking.deposit_amount))}
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-100">
+          <div>
+            <p className="text-xs font-medium text-blue-600">Tiền cọc đã hoàn trả</p>
+            <p className="text-base font-bold text-blue-600">+{formatCurrency(booking.deposit_amount)}</p>
+          </div>
+        </div>
+      )}
 
       {effectiveStatus === "cancelled" && (
         <div className="mt-4 pt-3 border-t border-red-100">

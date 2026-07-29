@@ -7,7 +7,9 @@ interface ApiBooking {
   start_time: string; end_time: string;
   actual_start_time?: string; actual_end_time?: string;
   planned_km: number; actual_km: number;
-  deposit_amount: number; overtime_fee: number; over_km_fee: number; total_price: number;
+  deposit_amount: number; overtime_fee: number; over_km_fee: number;
+  extra_fee?: number; extra_fee_desc?: string;
+  total_price: number;
   status: string; payment_method?: string; created_at: string;
   vehicle_model_id?: number; vehicle_brand?: string; vehicle_name?: string; license_plate?: string;
   customer_name?: string; customer_phone?: string; has_reviewed?: boolean;
@@ -30,6 +32,8 @@ function toBooking(b: ApiBooking): Booking {
     deposit_amount: b.deposit_amount,
     overtime_fee:   b.overtime_fee,
     over_km_fee:    b.over_km_fee,
+    extra_fee:      b.extra_fee,
+    extra_fee_desc: b.extra_fee_desc,
     total_price:    b.total_price,
     status:         b.status as Booking["status"],
     payment_method: b.payment_method ?? "",

@@ -28,6 +28,8 @@ export interface Booking {
   deposit_amount: number;
   overtime_fee: number;
   over_km_fee: number;
+  extra_fee?: number;
+  extra_fee_desc?: string;
   total_price: number;
   status: "pending" | "confirmed" | "active" | "running" | "completed" | "cancelled" | "paid" | "pending_payment";
   payment_method: string;
