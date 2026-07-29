@@ -336,12 +336,17 @@ const HomePage: React.FC = () => {
     ? vehicles.filter(v => v.vehicle.owner_id !== user.user_id)
     : vehicles;
 
-  const availableUnsorted = dedupeByModelAndOwner(filteredVehicles.filter(v => v.vehicle.status === "available"));
-  // Prioritize discounted cars
-  const available = [...availableUnsorted].sort((a, b) => (b.promo_discount || 0) - (a.promo_discount || 0));
+  const availableUnsorted = filteredVehicles.filter(v => v.vehicle.status === "available");
+  const availableSorted = [...availableUnsorted].sort((a, b) => (b.promo_discount || 0) - (a.promo_discount || 0));
+  const available = dedupeByModelAndOwner(availableSorted);
 
-  const luxury = dedupeByModelAndOwner(filteredVehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
-  const recommended = dedupeByModelAndOwner(filteredVehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id)));
+  const luxuryUnsorted = filteredVehicles.filter(v => LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id));
+  const luxurySorted = [...luxuryUnsorted].sort((a, b) => (b.promo_discount || 0) - (a.promo_discount || 0));
+  const luxury = dedupeByModelAndOwner(luxurySorted);
+
+  const recommendedUnsorted = filteredVehicles.filter(v => v.model.range_km >= 420 && !LUXURY_MODEL_IDS.includes(v.model.vehicle_model_id));
+  const recommendedSorted = [...recommendedUnsorted].sort((a, b) => (b.promo_discount || 0) - (a.promo_discount || 0));
+  const recommended = dedupeByModelAndOwner(recommendedSorted);
 
   return (
     <div className="w-full">

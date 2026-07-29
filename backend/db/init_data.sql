@@ -502,6 +502,16 @@ INSERT INTO owner_registrations (user_id, brand, model, year, license_plate, col
   (19, 'Mitsubishi', 'Xpander', '2022', '30H-99000', 'Bạc', '7', 'auto', 'gasoline', 'Hà Nội', '128 Đội Cấn', 700000, 'Giá bình dân, siêu tiết kiệm.', '[{"type":"front","url":"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 09:00:00'),
   (20, 'VinFast', 'VF 9', '2024', '30L-11111', 'Xám', '7', 'auto', 'electric', 'Hà Nội', '45 Nguyễn Lương Bằng', 2000000, 'Chủ tịch, cực êm và xịn xò.', '[{"type":"front","url":"https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop"}]', 'pending', '2026-06-11 12:00:00');
 
+-- =============================================================
+-- 15. VEHICLE PRICING RULES (Khuyến mãi)
+-- =============================================================
+INSERT INTO vehicle_pricing_rules (vehicle_id, rule_type, discount_percent, is_active, promo_start_date, promo_end_date) VALUES
+  (22, 'promo', 10, true, '2026-01-01', '2027-12-31'), -- VF 9 (10%)
+  (20, 'promo', 15, true, '2026-01-01', '2027-12-31'), -- Lucid Air Pure (15%)
+  (19, 'promo', 12, true, '2026-01-01', '2027-12-31'), -- Audi e-tron GT (12%)
+  (18, 'promo', 8,  true, '2026-01-01', '2027-12-31'), -- Polestar 2 (8%)
+  (16, 'promo', 5,  true, '2026-01-01', '2027-12-31'); -- Tesla Model S (5%)
+
 COMMIT;
 
 -- =============================================================
